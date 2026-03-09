@@ -2,7 +2,7 @@ window.onload = function(){
 
 let campos=""
 
-for(let i=1;i<=18;i++){
+for(let i=2;i<=18;i++){
 
 campos += "<label>"+i+"x (%)</label>"
 campos += "<input id='mp"+i+"' type='number'>"
@@ -10,6 +10,8 @@ campos += "<input id='mp"+i+"' type='number'>"
 }
 
 document.getElementById("camposMP").innerHTML = campos
+
+document.getElementById("imagemTabela").addEventListener("change",lerImagem)
 
 }
 
@@ -31,30 +33,31 @@ document.getElementById("taxas-outras").style.display="block"
 
 }
 
-function preencherTabela(){
+async function lerImagem(event){
 
-let texto = document.getElementById("colarTabela").value
+let arquivo = event.target.files[0]
 
-let linhas = texto.split("\n")
+if(!arquivo) return
 
-linhas.forEach(linha =>{
+let resultado = await Tesseract.recognize(
+arquivo,
+'por'
+)
 
-linha = linha.trim()
+let texto = resultado.data.text
 
-let partes = linha.split(" ")
+let regex = /(\d+)[xX]\s*([\d.,]+)/g
 
-let parcela = partes[0]
-let taxa = partes[1]
+let match
 
-if(parcela && taxa){
+while((match = regex.exec(texto)) !== null){
 
-let numero = parcela.replace("x","")
+let parcela = parseInt(match[1])
+let taxa = match[2].replace(",", ".")
 
-numero = parseInt(numero)
+if(parcela >= 2 && parcela <= 18){
 
-if(numero >= 2 && numero <= 18){
-
-let campo = document.getElementById("mp"+numero)
+let campo = document.getElementById("mp"+parcela)
 
 if(campo){
 
@@ -66,7 +69,7 @@ campo.value = taxa
 
 }
 
-})
+alert("Tabela do Mercado Pago carregada!")
 
 }
 
@@ -92,7 +95,7 @@ html+="<div style='background:black;color:white;padding:15px;border-radius:10px'
 html+="<h2>Resumo</h2>"
 html+="Valor simulado: R$ "+valor.toFixed(2)+"<br><br>"
 
-html+="<table border='1' style='width:100%;background:white;color:black'>"
+html+="<table style='width:100%;background:white;color:black'>"
 
 html+="<tr><th>Tipo</th><th>Taxa</th><th>Valor Final</th></tr>"
 
@@ -102,7 +105,10 @@ html+="<tr><td>Pix</td><td>"+pix+"%</td><td>R$ "+valorPix.toFixed(2)+"</td></tr>
 let valorDeb=valor-(valor*debito/100)
 html+="<tr><td>Débito</td><td>"+debito+"%</td><td>R$ "+valorDeb.toFixed(2)+"</td></tr>"
 
-for(let i=1;i<=21;i++){
+let valor1x=valor-(valor*mdr/100)
+html+="<tr><td>Crédito 1x</td><td>"+mdr+"%</td><td>R$ "+valor1x.toFixed(2)+"</td></tr>"
+
+for(let i=2;i<=21;i++){
 
 let taxa=mdr
 
@@ -130,7 +136,7 @@ html+="<div style='background:gold;padding:15px;border-radius:10px'>"
 html+="<h2>Resumo</h2>"
 html+="Valor simulado: R$ "+valor.toFixed(2)+"<br><br>"
 
-html+="<table border='1' style='width:100%;background:white'>"
+html+="<table style='width:100%;background:white'>"
 
 html+="<tr><th>Tipo</th><th>Taxa</th><th>Valor Final</th></tr>"
 
@@ -163,10 +169,8 @@ function compartilhar(){
 let texto=document.getElementById("resultado").innerText
 
 navigator.share({
-
 title:"Simulação XIBUNGÃO TAXAS",
 text:texto
-
 })
 
 }
