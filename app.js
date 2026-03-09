@@ -1,36 +1,35 @@
-window.onload = function(){
-
-  // Campos Mercado Pago 2x–18x
-  let campos="";
-  for(let i=2;i<=18;i++){
-    campos += `<label>${i}x (%)</label><input id="mp${i}" type="number">`;
+window.onload = function() {
+  // Gerar inputs do Mercado Pago 2x–18x
+  let camposMP = "";
+  for (let i = 2; i <= 18; i++) {
+    camposMP += `<label>${i}x (%)</label><input id="mp${i}" type="number">`;
   }
-  document.getElementById("camposMP").innerHTML = campos;
+  document.getElementById("camposMP").innerHTML = camposMP;
 
   document.getElementById("img").addEventListener("change", lerImagem);
 }
 
-function trocarTipo(){
+function trocarTipo() {
   let tipo = document.getElementById("tipo").value;
-  document.getElementById("taxas-mp").style.display = (tipo=="mp") ? "block" : "none";
-  document.getElementById("taxas-outras").style.display = (tipo=="outras") ? "block" : "none";
+  document.getElementById("taxas-mp").style.display = (tipo == "mp") ? "block" : "none";
+  document.getElementById("taxas-outras").style.display = (tipo == "outras") ? "block" : "none";
 }
 
-async function lerImagem(e){
+async function lerImagem(e) {
   let arquivo = e.target.files[0];
-  if(!arquivo) return;
+  if (!arquivo) return;
 
-  let resultado = await Tesseract.recognize(arquivo,'por');
+  let resultado = await Tesseract.recognize(arquivo, 'por');
   let texto = resultado.data.text;
   let numeros = texto.match(/[\d]+[.,][\d]+/g);
 
-  if(!numeros) return alert("Não consegui identificar as taxas");
+  if (!numeros) return alert("Não consegui identificar as taxas");
 
-  let parcela=2;
-  numeros.forEach(n=>{
-    if(parcela<=18){
-      let campo=document.getElementById("mp"+parcela);
-      if(campo) campo.value = n.replace(",",".");
+  let parcela = 2;
+  numeros.forEach(n => {
+    if (parcela <= 18) {
+      let campo = document.getElementById("mp" + parcela);
+      if (campo) campo.value = n.replace(",", ".");
       parcela++;
     }
   });
@@ -38,31 +37,31 @@ async function lerImagem(e){
   alert("Taxas preenchidas automaticamente");
 }
 
-function calcular(){
+function calcular() {
 
   let valor = parseFloat(document.getElementById("valor").value);
-  if(!valor) return alert("Digite o valor");
+  if (!valor) return alert("Digite o valor");
 
   let tipo = document.getElementById("tipo").value;
   let html = `<table>
-    <tr>
-      <th>Parcela</th>
-      <th>Taxa Total</th>
-      <th>Valor Líquido</th>
-    </tr>`;
+      <tr>
+        <th>Parcela</th>
+        <th>Taxa Total</th>
+        <th>Valor Líquido</th>
+      </tr>`;
 
-  if(tipo=="outras"){
+  if (tipo == "outras") {
 
-    let pix = parseFloat(document.getElementById("pix").value)||0;
-    let debito = parseFloat(document.getElementById("debito").value)||0;
-    let credito1x = parseFloat(document.getElementById("credito1x").value)||0;
-    let antecipacao = parseFloat(document.getElementById("antecipacao").value)||0;
-    let taxa1 = parseFloat(document.getElementById("taxa1").value)||0;
-    let taxa2 = parseFloat(document.getElementById("taxa2").value)||0;
-    let taxa3 = parseFloat(document.getElementById("taxa3").value)||0;
+    let pix = parseFloat(document.getElementById("pix").value) || 0;
+    let debito = parseFloat(document.getElementById("debito").value) || 0;
+    let credito1x = parseFloat(document.getElementById("credito1x").value) || 0;
+    let antecipacao = parseFloat(document.getElementById("antecipacao").value) || 0;
+    let taxa1 = parseFloat(document.getElementById("taxa1").value) || 0;
+    let taxa2 = parseFloat(document.getElementById("taxa2").value) || 0;
+    let taxa3 = parseFloat(document.getElementById("taxa3").value) || 0;
 
-    function linha(nome, taxa){
-      let liquido = valor * (1 - taxa/100);
+    function linha(nome, taxa) {
+      let liquido = valor * (1 - taxa / 100);
       html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
     }
 
@@ -70,37 +69,36 @@ function calcular(){
     linha("Pix", pix);
     linha("Débito", debito);
 
-    // 1x aparece **aqui, antes das parcelas**
+    // Crédito 1x (apenas uma linha, antes das parcelas)
     linha("1x", credito1x);
 
-    // Parcelas 2x a 6x
-    for(let i=2;i<=6;i++){
-      let taxaTotal = taxa1 + antecipacao*((i-1)/2);
-      linha(i+"x", taxaTotal);
+    // Parcelas 2x–6x
+    for (let i = 2; i <= 6; i++) {
+      let taxaTotal = taxa1 + antecipacao * ((i - 1) / 2);
+      linha(i + "x", taxaTotal);
     }
 
-    // Parcelas 7x a 12x
-    for(let i=7;i<=12;i++){
-      let taxaTotal = taxa2 + antecipacao*((i-1)/2);
-      linha(i+"x", taxaTotal);
+    // Parcelas 7x–12x
+    for (let i = 7; i <= 12; i++) {
+      let taxaTotal = taxa2 + antecipacao * ((i - 1) / 2);
+      linha(i + "x", taxaTotal);
     }
 
-    // Parcelas 13x a 21x
-    for(let i=13;i<=21;i++){
-      let taxaTotal = taxa3 + antecipacao*((i-1)/2);
-      linha(i+"x", taxaTotal);
+    // Parcelas 13x–21x
+    for (let i = 13; i <= 21; i++) {
+      let taxaTotal = taxa3 + antecipacao * ((i - 1) / 2);
+      linha(i + "x", taxaTotal);
     }
-
   }
 
-  if(tipo=="mp"){
+  if (tipo == "mp") {
 
-    let pix = parseFloat(document.getElementById("mp_pix").value)||0;
-    let debito = parseFloat(document.getElementById("mp_debito").value)||0;
-    let taxa1x = parseFloat(document.getElementById("mp1").value)||0;
+    let pix = parseFloat(document.getElementById("mp_pix").value) || 0;
+    let debito = parseFloat(document.getElementById("mp_debito").value) || 0;
+    let taxa1x = parseFloat(document.getElementById("mp1").value) || 0;
 
-    function linha(nome,taxa){
-      let liquido = valor * (1 - taxa/100);
+    function linha(nome, taxa) {
+      let liquido = valor * (1 - taxa / 100);
       html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
     }
 
@@ -110,11 +108,10 @@ function calcular(){
     linha("1x", taxa1x);
 
     // Parcelas 2x–18x
-    for(let i=2;i<=18;i++){
-      let taxa = parseFloat(document.getElementById("mp"+i).value)||0;
-      linha(i+"x", taxa);
+    for (let i = 2; i <= 18; i++) {
+      let taxa = parseFloat(document.getElementById("mp" + i).value) || 0;
+      linha(i + "x", taxa);
     }
-
   }
 
   html += "</table>";
@@ -122,10 +119,10 @@ function calcular(){
 }
 
 // Exportar para WhatsApp
-function compartilhar(){
+function compartilhar() {
   let texto = document.getElementById("resultado").innerText;
-  if(navigator.share){
-    navigator.share({title:"Simulação XIBUNGÃO TAXAS", text:texto});
+  if (navigator.share) {
+    navigator.share({ title: "Simulação XIBUNGÃO TAXAS", text: texto });
   } else {
     navigator.clipboard.writeText(texto);
     alert("Texto copiado para WhatsApp ou outro app.");
