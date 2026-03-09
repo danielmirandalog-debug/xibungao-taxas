@@ -70,7 +70,7 @@ function calcular(){
     linha("Pix", pix);
     linha("Débito", debito);
 
-    // Crédito 1x (não sofre antecipação)
+    // 1x
     linha("1x", credito1x);
 
     // Parcelas 2x a 6x
