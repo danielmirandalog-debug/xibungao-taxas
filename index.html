@@ -13,22 +13,19 @@
 body{
 font-family:Arial;
 text-align:center;
-background:linear-gradient(135deg,#ffcc00,#ff6600);
-padding:20px;
+margin:0;
 }
 
-h1{
+header{
+padding:20px;
 color:white;
-font-size:40px;
+font-size:30px;
 }
 
 .container{
-background:white;
 padding:20px;
-border-radius:15px;
-max-width:350px;
+max-width:400px;
 margin:auto;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
 
 input,select{
@@ -39,29 +36,25 @@ font-size:16px;
 }
 
 button{
-background:#ff6600;
-color:white;
-border:none;
 padding:12px;
 width:95%;
 font-size:18px;
+background:#333;
+color:white;
+border:none;
 border-radius:8px;
 cursor:pointer;
 }
 
-button:hover{
-background:#ff4500;
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
 }
 
-.resultado{
-margin-top:15px;
-font-size:20px;
-font-weight:bold;
-color:#333;
-}
-
-.menu{
-margin-bottom:15px;
+td{
+border:1px solid #ccc;
+padding:8px;
 }
 
 </style>
@@ -70,70 +63,66 @@ margin-bottom:15px;
 
 <body>
 
-<h1>💸 XIBUNGÃO TAXAS</h1>
+<header id="topo">💸 XIBUNGÃO TAXAS</header>
 
 <div class="container">
 
-<div class="menu">
-
 <select id="modo" onchange="mudarModo()">
 
-<option value="mdr">MDR + Antecipação</option>
-<option value="final">Taxa Final</option>
+<option value="mp">Mercado Pago</option>
+<option value="outros">Outras adquirências</option>
 
 </select>
 
-</div>
+<div id="mercadopago">
 
-<div id="simuladorMDR">
+<h3>Taxas Mercado Pago</h3>
 
-<input id="valor" placeholder="Valor da venda">
+<input id="valorMP" placeholder="Valor da venda">
 
-<input id="mdr" placeholder="Taxa MDR (%)">
+<div id="taxasMP"></div>
 
-<input id="antecipacao" placeholder="Antecipação (% a.m)">
-
-<select id="parcelasMDR"></select>
-
-<button onclick="calcularMDR()">Calcular</button>
+<button onclick="calcularMP()">Calcular</button>
 
 </div>
 
-<div id="simuladorFinal" style="display:none">
+<div id="outros" style="display:none">
 
-<input id="valor2" placeholder="Valor da venda">
+<h3>Outras adquirências</h3>
 
-<input id="taxafinal" placeholder="Taxa final (%)">
+<input id="valorOUT" placeholder="Valor da venda">
 
-<select id="parcelasFinal"></select>
+<input id="taxa1" placeholder="Taxa 1x (%)">
 
-<button onclick="calcularFinal()">Calcular</button>
+<input id="taxa2a6" placeholder="Taxa 2x a 6x (%)">
+
+<input id="taxa7a12" placeholder="Taxa 7x a 12x (%)">
+
+<input id="taxa13a18" placeholder="Taxa 13x a 18x (%)">
+
+<input id="taxa19a21" placeholder="Taxa 19x a 21x (%)">
+
+<button onclick="calcularOUT()">Calcular</button>
 
 </div>
 
-<div class="resultado" id="resultado"></div>
+<table id="tabela"></table>
+
+<button onclick="compartilhar()">📤 Compartilhar</button>
 
 </div>
 
 <script>
 
-for(let i=1;i<=21;i++){
-
-let option=document.createElement("option");
-option.value=i;
-option.text=i+"x";
-
-document.getElementById("parcelasMDR").appendChild(option);
-
-}
-
 for(let i=1;i<=18;i++){
 
-let option=document.createElement("option");
-option.value=i;
-option.text=i+"x";
+let campo=document.createElement("input");
 
-document.getElementById("parcelasFinal").appendChild(option);
+campo.placeholder="Taxa "+i+"x (%)";
+
+campo.id="mp"+i;
+
+document.getElementById("taxasMP").appendChild(campo);
 
 }
 
@@ -141,49 +130,89 @@ function mudarModo(){
 
 let modo=document.getElementById("modo").value;
 
-if(modo=="mdr"){
+if(modo=="mp"){
 
-document.getElementById("simuladorMDR").style.display="block";
-document.getElementById("simuladorFinal").style.display="none";
+document.getElementById("mercadopago").style.display="block";
+document.getElementById("outros").style.display="none";
+document.body.style.background="#ffd100";
 
 }else{
 
-document.getElementById("simuladorMDR").style.display="none";
-document.getElementById("simuladorFinal").style.display="block";
+document.getElementById("mercadopago").style.display="none";
+document.getElementById("outros").style.display="block";
+document.body.style.background="#000";
+document.body.style.color="white";
 
 }
 
 }
 
-function calcularMDR(){
+function calcularMP(){
 
-let valor=parseFloat(document.getElementById("valor").value);
+let valor=parseFloat(document.getElementById("valorMP").value);
 
-let mdr=parseFloat(document.getElementById("mdr").value)/100;
+let tabela="";
 
-let ant=parseFloat(document.getElementById("antecipacao").value)/100;
+for(let i=1;i<=18;i++){
 
-let parcelas=parseInt(document.getElementById("parcelasMDR").value);
+let taxa=parseFloat(document.getElementById("mp"+i).value)/100;
 
-let liquido=valor*(1-mdr)*Math.pow((1-ant),(parcelas-1));
-
-document.getElementById("resultado").innerHTML=
-
-"Você recebe: R$ "+liquido.toFixed(2);
-
-}
-
-function calcularFinal(){
-
-let valor=parseFloat(document.getElementById("valor2").value);
-
-let taxa=parseFloat(document.getElementById("taxafinal").value)/100;
+if(!isNaN(taxa)){
 
 let liquido=valor*(1-taxa);
 
-document.getElementById("resultado").innerHTML=
+tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>";
 
-"Você recebe: R$ "+liquido.toFixed(2);
+}
+
+}
+
+document.getElementById("tabela").innerHTML=tabela;
+
+}
+
+function calcularOUT(){
+
+let valor=parseFloat(document.getElementById("valorOUT").value);
+
+let taxa1=document.getElementById("taxa1").value/100;
+let taxa2a6=document.getElementById("taxa2a6").value/100;
+let taxa7a12=document.getElementById("taxa7a12").value/100;
+let taxa13a18=document.getElementById("taxa13a18").value/100;
+let taxa19a21=document.getElementById("taxa19a21").value/100;
+
+let tabela="";
+
+for(let i=1;i<=21;i++){
+
+let taxa;
+
+if(i==1) taxa=taxa1;
+else if(i<=6) taxa=taxa2a6;
+else if(i<=12) taxa=taxa7a12;
+else if(i<=18) taxa=taxa13a18;
+else taxa=taxa19a21;
+
+let liquido=valor*(1-taxa);
+
+tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>";
+
+}
+
+document.getElementById("tabela").innerHTML=tabela;
+
+}
+
+function compartilhar(){
+
+let texto=document.getElementById("tabela").innerText;
+
+navigator.share({
+
+title:"Simulação XIBUNGÃO TAXAS",
+text:texto
+
+});
 
 }
 
