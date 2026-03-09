@@ -23,24 +23,31 @@
 
 </select>
 
+
 <div id="adquirencia">
 
 <h2>⚫ Outras adquirências</h2>
 
-<label>MDR %</label>
-<input id="mdr" type="number">
+<label>Taxa PIX %</label>
+<input id="pix" type="number" placeholder="Ex: 0.99">
+
+<label>Taxa Débito %</label>
+<input id="debito" type="number" placeholder="Ex: 1.99">
+
+<label>MDR crédito %</label>
+<input id="mdr" type="number" placeholder="Ex: 3.19">
 
 <label>Antecipação mensal %</label>
-<input id="antecipacao" type="number">
+<input id="antecipacao" type="number" placeholder="Ex: 2.99">
 
-<label>Taxa 2x a 6x %</label>
-<input id="t26" type="number">
+<label>Taxa crédito 2x a 6x %</label>
+<input id="t26" type="number" placeholder="Ex: 4.59">
 
-<label>Taxa 7x a 12x %</label>
-<input id="t712" type="number">
+<label>Taxa crédito 7x a 12x %</label>
+<input id="t712" type="number" placeholder="Ex: 5.89">
 
-<label>Taxa 13x a 21x %</label>
-<input id="t1321" type="number">
+<label>Taxa crédito 13x a 21x %</label>
+<input id="t1321" type="number" placeholder="Ex: 6.99">
 
 </div>
 
@@ -49,18 +56,34 @@
 
 <h2>🟡 Mercado Pago</h2>
 
+<p>Informe a taxa de cada parcela</p>
+
 <div id="mpInputs"></div>
 
 </div>
 
+
 <label>Valor da venda</label>
-<input id="valor" type="number">
+<input id="valor" type="number" placeholder="Ex: 1000">
 
 <button onclick="calcular()">CALCULAR</button>
 
+
 <div id="resumo"></div>
 
-<table id="resultado"></table>
+
+<table id="resultado">
+
+<tr>
+
+<th>Tipo</th>
+<th>Valor parcela</th>
+<th>Recebe</th>
+
+</tr>
+
+</table>
+
 
 <script src="app.js"></script>
 
