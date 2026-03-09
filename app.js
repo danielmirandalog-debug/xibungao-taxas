@@ -1,151 +1,89 @@
-window.onload = function(){
-  // Cria campos automáticos para 2x a 18x do Mercado Pago
-  let campos="";
-  for(let i=2;i<=18;i++){
-    campos+=`<label>${i}x (%)</label><input id="mp${i}" type="number">`;
-  }
-  document.getElementById("camposMP").innerHTML=campos;
-  document.getElementById("img").addEventListener("change",lerImagem);
-}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XIBUNGÃO TAXAS</title>
 
-function trocarTipo(){
-  let tipo=document.getElementById("tipo").value;
-  document.getElementById("taxas-mp").style.display = (tipo=="mp") ? "block" : "none";
-  document.getElementById("taxas-outras").style.display = (tipo=="outras") ? "block" : "none";
-}
+<!-- Ícone do app -->
+<link rel="icon" type="image/png" href="icon.png">
 
-async function lerImagem(e){
-  let arquivo = e.target.files[0];
-  if(!arquivo) return;
-  let resultado = await Tesseract.recognize(arquivo,'por');
-  let texto = resultado.data.text;
-  let numeros = texto.match(/[\d]+[.,][\d]+/g);
-  if(!numeros) return alert("Não consegui identificar as taxas");
-  let parcela=2;
-  numeros.forEach(n=>{
-    if(parcela<=18){
-      let campo=document.getElementById("mp"+parcela);
-      if(campo) campo.value = n.replace(",",".");
-      parcela++;
-    }
-  });
-  alert("Taxas preenchidas automaticamente");
-}
+<!-- OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
-// Função para calcular valor líquido com MDR multiplicativo
-function linha(nome, taxaParcela, valor, mdr){
-  let liquido = valor * (1 - mdr/100) * (1 - taxaParcela/100);
-  return `<tr><td>${nome}</td><td>${taxaParcela.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
-}
+<!-- Estilo -->
+<style>
+body{font-family:Arial;background:#f2f2f2;padding:20px;}
+h1{text-align:center;margin-bottom:20px;}
+.container{background:white;padding:20px;border-radius:10px;max-width:500px;margin:auto;}
+input,select{width:100%;padding:10px;margin:5px 0 15px 0;border-radius:6px;border:1px solid #ccc;}
+button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
+.simular{background:#27ae60;color:white;}
+.share{background:#3498db;color:white;}
+.upload{background:#f39c12;color:white;}
+#taxas-outras{background:black;color:white;padding:15px;border-radius:10px;margin-bottom:20px;}
+#taxas-mp{background:#ffe066;padding:15px;border-radius:10px;margin-bottom:20px;}
+table{width:100%;border-collapse:collapse;margin-top:20px;background:white;}
+td,th{border:1px solid #ccc;padding:8px;text-align:center;}
+</style>
+</head>
+<body>
 
-// Função principal de cálculo
-function calcular(){
-  let valor=parseFloat(document.getElementById("valor").value);
-  if(!valor) return alert("Digite um valor");
-  let tipo=document.getElementById("tipo").value;
-  let html="<table><tr><th>Tipo</th><th>Taxa</th><th>Valor Final</th></tr>";
+<h1>XIBUNGÃO TAXAS</h1>
 
-  if(tipo=="outras"){
-    let pix=parseFloat(document.getElementById("pix").value)||0;
-    let debito=parseFloat(document.getElementById("debito").value)||0;
-    let mdr=parseFloat(document.getElementById("mdr").value)||0;
-    let credito1x=parseFloat(document.getElementById("credito1x").value)||mdr;
-    let taxa1=parseFloat(document.getElementById("taxa1").value)||0;
-    let taxa2=parseFloat(document.getElementById("taxa2").value)||0;
-    let taxa3=parseFloat(document.getElementById("taxa3").value)||0;
+<div class="container">
 
-    html += linha("Pix",pix,valor,0);
-    html += linha("Débito",debito,valor,0);
-    html += linha("Crédito 1x",credito1x,valor,mdr);
+<label>Valor da venda</label>
+<input id="valor" type="number" placeholder="Digite o valor">
 
-    for(let i=2;i<=6;i++) html += linha(i+"x", taxa1, valor, mdr);
-    for(let i=7;i<=12;i++) html += linha(i+"x", taxa2, valor, mdr);
-    for(let i=13;i<=21;i++) html += linha(i+"x", taxa3, valor, mdr);
-  }
+<label>Tipo de simulação</label>
+<select id="tipo" onchange="trocarTipo()">
+  <option value="outras">Outras adquirências</option>
+  <option value="mp">Mercado Pago</option>
+</select>
 
-  if(tipo=="mp"){
-    let pix=parseFloat(document.getElementById("mp_pix").value)||0;
-    let debito=parseFloat(document.getElementById("mp_debito").value)||0;
-    let taxa1x=parseFloat(document.getElementById("mp1").value)||0;
+<!-- Outras adquirências -->
+<div id="taxas-outras">
+<h3>Outras adquirências</h3>
+<label>Pix (%)</label>
+<input id="pix" type="number">
+<label>Débito (%)</label>
+<input id="debito" type="number">
+<label>Taxa de Antecipação (%)</label>
+<input id="antecipacao" type="number">
+<label>Crédito 1x (%)</label>
+<input id="credito1x" type="number">
+<label>2x a 6x (%)</label>
+<input id="taxa1" type="number">
+<label>7x a 12x (%)</label>
+<input id="taxa2" type="number">
+<label>13x a 21x (%)</label>
+<input id="taxa3" type="number">
+</div>
 
-    function linhaMP(nome,taxa){
-      let liquido = valor * (1 - taxa/100);
-      html+=`<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
-    }
+<!-- Mercado Pago -->
+<div id="taxas-mp" style="display:none">
+<h3>Mercado Pago</h3>
+<label>Pix (%)</label>
+<input id="mp_pix" type="number">
+<label>Débito (%)</label>
+<input id="mp_debito" type="number">
+<label>1x (%)</label>
+<input id="mp1" type="number">
 
-    linhaMP("Pix",pix);
-    linhaMP("Débito",debito);
-    linhaMP("1x",taxa1x);
+<button class="upload" onclick="document.getElementById('img').click()">Carregar imagem da tabela</button>
+<input type="file" id="img" accept="image/*" style="display:none">
 
-    for(let i=2;i<=18;i++){
-      let t=parseFloat(document.getElementById("mp"+i).value)||0;
-      linhaMP(i+"x",t);
-    }
-  }
+<div id="camposMP"></div>
+</div>
 
-  html+="</table>";
-  document.getElementById("resultado").innerHTML = html;
-}
+<button class="simular" onclick="calcular()">SIMULAR</button>
+<button class="share" onclick="compartilhar()">COMPARTILHAR</button>
 
-// Gera texto para WhatsApp alinhado
-function gerarTextoWhatsApp(){
-  let linhas = [];
-  let tipo = document.getElementById("tipo").value;
-  let valor = parseFloat(document.getElementById("valor").value).toFixed(2);
-  linhas.push("💳 XIBUNGÃO TAXAS");
-  linhas.push("Valor da venda: R$ "+valor);
-  linhas.push("----------------------------");
+</div>
 
-  function addLinha(nome,taxa,valorLiquido){
-    let linha = nome.padEnd(10,' ') + " | " + taxa.toFixed(2).padStart(5,' ')+"% | R$ "+valorLiquido.toFixed(2);
-    linhas.push(linha);
-  }
+<div id="resultado"></div>
 
-  let valorNum = parseFloat(document.getElementById("valor").value);
-
-  if(tipo=="outras"){
-    let pix=parseFloat(document.getElementById("pix").value)||0;
-    let debito=parseFloat(document.getElementById("debito").value)||0;
-    let mdr=parseFloat(document.getElementById("mdr").value)||0;
-    let credito1x=parseFloat(document.getElementById("credito1x").value)||mdr;
-    let taxa1=parseFloat(document.getElementById("taxa1").value)||0;
-    let taxa2=parseFloat(document.getElementById("taxa2").value)||0;
-    let taxa3=parseFloat(document.getElementById("taxa3").value)||0;
-
-    addLinha("Pix",pix,valorNum*(1-pix/100));
-    addLinha("Débito",debito,valorNum*(1-debito/100));
-    addLinha("1x",credito1x,valorNum*(1-mdr/100)*(1-credito1x/100));
-
-    for(let i=2;i<=6;i++) addLinha(i+"x",taxa1,valorNum*(1-mdr/100)*(1-taxa1/100));
-    for(let i=7;i<=12;i++) addLinha(i+"x",taxa2,valorNum*(1-mdr/100)*(1-taxa2/100));
-    for(let i=13;i<=21;i++) addLinha(i+"x",taxa3,valorNum*(1-mdr/100)*(1-taxa3/100));
-  }
-
-  if(tipo=="mp"){
-    let pix=parseFloat(document.getElementById("mp_pix").value)||0;
-    let debito=parseFloat(document.getElementById("mp_debito").value)||0;
-    let taxa1x=parseFloat(document.getElementById("mp1").value)||0;
-
-    addLinha("Pix",pix,valorNum*(1-pix/100));
-    addLinha("Débito",debito,valorNum*(1-debito/100));
-    addLinha("1x",taxa1x,valorNum*(1-taxa1x/100));
-
-    for(let i=2;i<=18;i++){
-      let t=parseFloat(document.getElementById("mp"+i).value)||0;
-      addLinha(i+"x",t,valorNum*(1-t/100));
-    }
-  }
-
-  return linhas.join("\n");
-}
-
-// Compartilhar exportação
-function compartilhar(){
-  let texto = gerarTextoWhatsApp();
-  if(navigator.share){
-    navigator.share({title:"Simulação XIBUNGÃO TAXAS", text:texto});
-  } else {
-    navigator.clipboard.writeText(texto);
-    alert("Texto copiado! Agora cole no WhatsApp ou outro app.");
-  }
-}
+<script src="app.js"></script>
+</body>
+</html>
