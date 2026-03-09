@@ -2,14 +2,13 @@
 <html lang="pt-BR">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>XIBUNGÃO TAXAS</title>
 
 <link rel="stylesheet" href="style.css">
-
-<link rel="icon" type="image/png" href="icone.png">
 
 </head>
 
@@ -19,16 +18,14 @@
 
 <div class="container">
 
-<!-- VALOR PRIMEIRO -->
-
 <label>Valor da venda</label>
-<input id="valor" type="number" placeholder="Digite o valor da venda">
+<input id="valor" type="number" placeholder="Digite o valor">
 
 <br><br>
 
 <label>Tipo de simulação</label>
 
-<select id="tipo">
+<select id="tipo" onchange="trocarTipo()">
 
 <option value="outras">Outras adquirências</option>
 <option value="mp">Mercado Pago</option>
@@ -39,7 +36,7 @@
 
 <div id="taxas-outras">
 
-<h3>Taxas outras adquirências</h3>
+<h3>Outras adquirências</h3>
 
 <label>Pix (%)</label>
 <input id="pix" type="number">
@@ -63,7 +60,7 @@
 
 <div id="taxas-mp" style="display:none">
 
-<h3>Taxas Mercado Pago</h3>
+<h3>Mercado Pago</h3>
 
 <label>Pix (%)</label>
 <input id="mp_pix" type="number">
@@ -71,59 +68,23 @@
 <label>Débito (%)</label>
 <input id="mp_debito" type="number">
 
-<label>1x (%)</label>
-<input id="mp1" type="number">
+<br><br>
 
-<label>2x (%)</label>
-<input id="mp2" type="number">
+<label>Colar tabela Mercado Pago</label>
 
-<label>3x (%)</label>
-<input id="mp3" type="number">
+<textarea id="colarTabela" placeholder="Exemplo:
 
-<label>4x (%)</label>
-<input id="mp4" type="number">
+1x 4.99
+2x 6.59
+3x 7.99
+...
+18x 22.59"></textarea>
 
-<label>5x (%)</label>
-<input id="mp5" type="number">
+<button onclick="preencherTabela()">Preencher taxas automaticamente</button>
 
-<label>6x (%)</label>
-<input id="mp6" type="number">
+<br><br>
 
-<label>7x (%)</label>
-<input id="mp7" type="number">
-
-<label>8x (%)</label>
-<input id="mp8" type="number">
-
-<label>9x (%)</label>
-<input id="mp9" type="number">
-
-<label>10x (%)</label>
-<input id="mp10" type="number">
-
-<label>11x (%)</label>
-<input id="mp11" type="number">
-
-<label>12x (%)</label>
-<input id="mp12" type="number">
-
-<label>13x (%)</label>
-<input id="mp13" type="number">
-
-<label>14x (%)</label>
-<input id="mp14" type="number">
-
-<label>15x (%)</label>
-<input id="mp15" type="number">
-
-<label>16x (%)</label>
-<input id="mp16" type="number">
-
-<label>17x (%)</label>
-<input id="mp17" type="number">
-
-<label>18x (%)</label>
-<input id="mp18" type="number">
+<div id="camposMP"></div>
 
 </div>
 
