@@ -19,6 +19,31 @@ modo.addEventListener("change",()=>{
 
 if(modo.value==="mp"){
 
+let pix=parseFloat(document.getElementById("mpPix").value||0)
+let debito=parseFloat(document.getElementById("mpDebito").value||0)
+
+let liquidoPix = valor*(1-(pix/100))
+let liquidoDeb = valor*(1-(debito/100))
+
+if(liquidoPix < menorLiquido) menorLiquido = liquidoPix
+if(liquidoDeb < menorLiquido) menorLiquido = liquidoDeb
+
+tabela.innerHTML+=`
+<tr>
+<td>PIX</td>
+<td>-</td>
+<td>R$ ${liquidoPix.toFixed(2)}</td>
+</tr>
+`
+
+tabela.innerHTML+=`
+<tr>
+<td>Débito</td>
+<td>-</td>
+<td>R$ ${liquidoDeb.toFixed(2)}</td>
+</tr>
+`
+
 document.body.className="mp"
 
 document.getElementById("mercadopago").style.display="block"
