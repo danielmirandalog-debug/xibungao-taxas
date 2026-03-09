@@ -8,124 +8,75 @@
 
 <title>XIBUNGÃO TAXAS</title>
 
-<link rel="manifest" href="manifest.json">
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 
 <style>
 
 body{
-
 font-family:Arial;
-margin:0;
-padding:20px;
 background:#f2f2f2;
-
+padding:20px;
 }
 
 h1{
-
 text-align:center;
-
 }
 
 .container{
-
 background:white;
 padding:20px;
 border-radius:10px;
 max-width:500px;
 margin:auto;
-
 }
 
-input,select,textarea{
-
+input,select{
 width:100%;
 padding:10px;
 margin-top:5px;
 margin-bottom:15px;
 border-radius:6px;
 border:1px solid #ccc;
-
 }
 
 button{
-
 width:100%;
 padding:12px;
+margin-top:10px;
 border:none;
 border-radius:8px;
-margin-top:10px;
 font-size:16px;
 cursor:pointer;
-
 }
 
-button:hover{
+.simular{background:#27ae60;color:white;}
+.share{background:#3498db;color:white;}
+.upload{background:#f39c12;color:white;}
 
-opacity:0.9;
-
-}
-
-.simular{
-
-background:#2ecc71;
+#taxas-outras{
+background:black;
 color:white;
-
-}
-
-.compartilhar{
-
-background:#3498db;
-color:white;
-
-}
-
-.upload{
-
-background:#f39c12;
-color:white;
-
+padding:15px;
+border-radius:10px;
 }
 
 #taxas-mp{
-
-background:#fff3b0;
+background:#ffe066;
 padding:15px;
 border-radius:10px;
-
-}
-
-#taxas-outras{
-
-background:#000;
-color:white;
-padding:15px;
-border-radius:10px;
-
 }
 
 table{
-
 width:100%;
 border-collapse:collapse;
 margin-top:20px;
-
+background:white;
 }
 
 td,th{
-
 border:1px solid #ccc;
 padding:8px;
 text-align:center;
-
-}
-
-th{
-
-background:#eee;
-
 }
 
 </style>
@@ -139,15 +90,13 @@ background:#eee;
 <div class="container">
 
 <label>Valor da venda</label>
-<input id="valor" type="number" placeholder="Digite o valor">
+<input id="valor" type="number">
 
 <label>Tipo de simulação</label>
 
 <select id="tipo" onchange="trocarTipo()">
-
 <option value="outras">Outras adquirências</option>
 <option value="mp">Mercado Pago</option>
-
 </select>
 
 <div id="taxas-outras">
@@ -160,8 +109,8 @@ background:#eee;
 <label>Débito (%)</label>
 <input id="debito" type="number">
 
-<label>MDR (%)</label>
-<input id="mdr" type="number">
+<label>Crédito 1x (%)</label>
+<input id="credito1x" type="number">
 
 <label>2x a 6x (%)</label>
 <input id="taxa1" type="number">
@@ -187,41 +136,25 @@ background:#eee;
 <label>1x (%)</label>
 <input id="mp1" type="number">
 
-<button class="upload" onclick="document.getElementById('imagemTabela').click()">
+<button class="upload" onclick="document.getElementById('img').click()">
 Carregar imagem da tabela
 </button>
 
-<input type="file" id="imagemTabela" accept="image/*" style="display:none">
-
-<p>OCR preencherá automaticamente 2x até 18x</p>
+<input type="file" id="img" accept="image/*" style="display:none">
 
 <div id="camposMP"></div>
 
 </div>
 
-<button class="simular" onclick="calcular()">
-SIMULAR
-</button>
+<button class="simular" onclick="calcular()">SIMULAR</button>
 
-<button class="compartilhar" onclick="compartilhar()">
-COMPARTILHAR
-</button>
+<button class="share" onclick="compartilhar()">COMPARTILHAR</button>
 
 </div>
 
 <div id="resultado"></div>
 
 <script src="app.js"></script>
-
-<script>
-
-if("serviceWorker" in navigator){
-
-navigator.serviceWorker.register("service-worker.js")
-
-}
-
-</script>
 
 </body>
 
