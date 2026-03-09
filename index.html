@@ -12,49 +12,58 @@
 
 body{
 font-family:Arial;
-text-align:center;
 margin:0;
+text-align:center;
+transition:0.4s;
 }
 
 header{
 padding:20px;
-color:white;
-font-size:30px;
+font-size:32px;
+font-weight:bold;
 }
 
 .container{
-padding:20px;
-max-width:400px;
+max-width:420px;
 margin:auto;
+padding:20px;
 }
 
 input,select{
 width:90%;
 padding:10px;
-margin:8px;
+margin:6px;
 font-size:16px;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 button{
 padding:12px;
 width:95%;
 font-size:18px;
-background:#333;
-color:white;
 border:none;
 border-radius:8px;
 cursor:pointer;
+background:#333;
+color:white;
+margin-top:10px;
 }
 
 table{
 width:100%;
 margin-top:20px;
 border-collapse:collapse;
+background:white;
 }
 
 td{
-border:1px solid #ccc;
+border:1px solid #ddd;
 padding:8px;
+}
+
+#tabela{
+margin-top:20px;
 }
 
 </style>
@@ -63,7 +72,7 @@ padding:8px;
 
 <body>
 
-<header id="topo">💸 XIBUNGÃO TAXAS</header>
+<header id="titulo">💸 XIBUNGÃO TAXAS</header>
 
 <div class="container">
 
@@ -74,9 +83,11 @@ padding:8px;
 
 </select>
 
+<!-- MERCADO PAGO -->
+
 <div id="mercadopago">
 
-<h3>Taxas Mercado Pago</h3>
+<h3>Taxas por parcela</h3>
 
 <input id="valorMP" placeholder="Valor da venda">
 
@@ -86,21 +97,25 @@ padding:8px;
 
 </div>
 
+<!-- OUTRAS ADQUIRENCIAS -->
+
 <div id="outros" style="display:none">
 
 <h3>Outras adquirências</h3>
 
 <input id="valorOUT" placeholder="Valor da venda">
 
-<input id="taxa1" placeholder="Taxa 1x (%)">
+<input id="mdrOUT" placeholder="MDR (%)">
 
-<input id="taxa2a6" placeholder="Taxa 2x a 6x (%)">
+<input id="taxa1" placeholder="Taxa antecipação 1x (%)">
 
-<input id="taxa7a12" placeholder="Taxa 7x a 12x (%)">
+<input id="taxa2a6" placeholder="Taxa antecipação 2 a 6 (%)">
 
-<input id="taxa13a18" placeholder="Taxa 13x a 18x (%)">
+<input id="taxa7a12" placeholder="Taxa antecipação 7 a 12 (%)">
 
-<input id="taxa19a21" placeholder="Taxa 19x a 21x (%)">
+<input id="taxa13a18" placeholder="Taxa antecipação 13 a 18 (%)">
+
+<input id="taxa19a21" placeholder="Taxa antecipação 19 a 21 (%)">
 
 <button onclick="calcularOUT()">Calcular</button>
 
@@ -108,113 +123,142 @@ padding:8px;
 
 <table id="tabela"></table>
 
-<button onclick="compartilhar()">📤 Compartilhar</button>
+<button onclick="compartilhar()">📤 Compartilhar simulação</button>
 
 </div>
 
 <script>
 
+/* GERAR CAMPOS MERCADO PAGO */
+
 for(let i=1;i<=18;i++){
 
-let campo=document.createElement("input");
+let campo=document.createElement("input")
 
-campo.placeholder="Taxa "+i+"x (%)";
+campo.placeholder="Taxa "+i+"x (%)"
 
-campo.id="mp"+i;
+campo.id="mp"+i
 
-document.getElementById("taxasMP").appendChild(campo);
+document.getElementById("taxasMP").appendChild(campo)
 
 }
+
+/* TROCAR MODO */
 
 function mudarModo(){
 
-let modo=document.getElementById("modo").value;
+let modo=document.getElementById("modo").value
 
 if(modo=="mp"){
 
-document.getElementById("mercadopago").style.display="block";
-document.getElementById("outros").style.display="none";
-document.body.style.background="#ffd100";
+document.body.style.background="#FFD400"
+document.body.style.color="#000"
 
-}else{
+document.getElementById("mercadopago").style.display="block"
+document.getElementById("outros").style.display="none"
 
-document.getElementById("mercadopago").style.display="none";
-document.getElementById("outros").style.display="block";
-document.body.style.background="#000";
-document.body.style.color="white";
+}
+
+else{
+
+document.body.style.background="#000"
+document.body.style.color="#FFF"
+
+document.getElementById("mercadopago").style.display="none"
+document.getElementById("outros").style.display="block"
 
 }
 
 }
+
+/* CALCULO MERCADO PAGO */
 
 function calcularMP(){
 
-let valor=parseFloat(document.getElementById("valorMP").value);
+let valor=parseFloat(document.getElementById("valorMP").value)
 
-let tabela="";
+let tabela=""
 
 for(let i=1;i<=18;i++){
 
-let taxa=parseFloat(document.getElementById("mp"+i).value)/100;
+let taxa=parseFloat(document.getElementById("mp"+i).value)/100
 
 if(!isNaN(taxa)){
 
-let liquido=valor*(1-taxa);
+let liquido=valor*(1-taxa)
 
-tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>";
-
-}
+tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>"
 
 }
 
-document.getElementById("tabela").innerHTML=tabela;
+}
+
+document.getElementById("tabela").innerHTML=tabela
 
 }
+
+/* CALCULO OUTRAS ADQUIRENCIAS */
 
 function calcularOUT(){
 
-let valor=parseFloat(document.getElementById("valorOUT").value);
+let valor=parseFloat(document.getElementById("valorOUT").value)
 
-let taxa1=document.getElementById("taxa1").value/100;
-let taxa2a6=document.getElementById("taxa2a6").value/100;
-let taxa7a12=document.getElementById("taxa7a12").value/100;
-let taxa13a18=document.getElementById("taxa13a18").value/100;
-let taxa19a21=document.getElementById("taxa19a21").value/100;
+let mdr=parseFloat(document.getElementById("mdrOUT").value)/100
 
-let tabela="";
+let taxa1=parseFloat(document.getElementById("taxa1").value)/100
+let taxa2a6=parseFloat(document.getElementById("taxa2a6").value)/100
+let taxa7a12=parseFloat(document.getElementById("taxa7a12").value)/100
+let taxa13a18=parseFloat(document.getElementById("taxa13a18").value)/100
+let taxa19a21=parseFloat(document.getElementById("taxa19a21").value)/100
+
+let tabela=""
 
 for(let i=1;i<=21;i++){
 
-let taxa;
+let taxa
 
-if(i==1) taxa=taxa1;
-else if(i<=6) taxa=taxa2a6;
-else if(i<=12) taxa=taxa7a12;
-else if(i<=18) taxa=taxa13a18;
-else taxa=taxa19a21;
+if(i==1) taxa=taxa1
+else if(i<=6) taxa=taxa2a6
+else if(i<=12) taxa=taxa7a12
+else if(i<=18) taxa=taxa13a18
+else taxa=taxa19a21
 
-let liquido=valor*(1-taxa);
+let liquido=valor*(1-mdr)*(1-taxa)
 
-tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>";
+tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>"
+
+}
+
+document.getElementById("tabela").innerHTML=tabela
 
 }
 
-document.getElementById("tabela").innerHTML=tabela;
-
-}
+/* COMPARTILHAR */
 
 function compartilhar(){
 
-let texto=document.getElementById("tabela").innerText;
+let texto="Simulação XIBUNGÃO TAXAS\n\n"+document.getElementById("tabela").innerText
+
+if(navigator.share){
 
 navigator.share({
 
-title:"Simulação XIBUNGÃO TAXAS",
+title:"XIBUNGÃO TAXAS",
 text:texto
 
-});
+})
 
 }
+
+else{
+
+alert(texto)
+
+}
+
+}
+
+mudarModo()
 
 </script>
 
