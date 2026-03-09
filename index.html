@@ -4,299 +4,65 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>XIBUNGÃO TAXAS</title>
 
-<style>
-
-body{
-font-family:Arial;
-margin:0;
-text-align:center;
-transition:0.4s;
-}
-
-header{
-padding:20px;
-font-size:32px;
-font-weight:bold;
-}
-
-.sub{
-font-size:14px;
-opacity:0.8;
-}
-
-.container{
-max-width:420px;
-margin:auto;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:12px;
-box-shadow:0 5px 15px rgba(0,0,0,0.15);
-margin-bottom:20px;
-}
-
-input,select{
-width:90%;
-padding:10px;
-margin:6px;
-font-size:16px;
-border-radius:6px;
-border:1px solid #ccc;
-}
-
-button{
-padding:12px;
-width:95%;
-font-size:18px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-background:#333;
-color:white;
-margin-top:10px;
-}
-
-button:hover{
-opacity:0.9;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
-}
-
-td{
-border:1px solid #ddd;
-padding:8px;
-background:white;
-}
-
-.icons{
-font-size:26px;
-margin-bottom:10px;
-}
-
-</style>
+<link rel="stylesheet" href="style.css">
 
 </head>
 
-<body>
+<body class="adq">
 
-<header>
+<h1>💰 XIBUNGÃO TAXAS</h1>
 
-💸 XIBUNGÃO TAXAS
+<select id="modo">
 
-<div class="sub">
-💳 Simule taxas • 💰 Descubra seu lucro • 📈 Venda melhor
-</div>
-
-</header>
-
-<div class="container">
-
-<div class="card">
-
-<div class="icons">
-💳 💰 📈 💲
-</div>
-
-<select id="modo" onchange="mudarModo()">
-
+<option value="adq">Outras adquirências</option>
 <option value="mp">Mercado Pago</option>
-<option value="outros">Outras adquirências</option>
 
 </select>
 
-</div>
+<div id="adquirencia">
 
-<div class="card" id="mercadopago">
+<h2>⚫ Outras adquirências</h2>
 
-<h3>🟡 Mercado Pago</h3>
+<label>MDR %</label>
+<input id="mdr" type="number">
 
-<input id="valorMP" placeholder="Valor da venda">
+<label>Antecipação mensal %</label>
+<input id="antecipacao" type="number">
 
-<div id="taxasMP"></div>
+<label>Taxa 2x a 6x %</label>
+<input id="t26" type="number">
 
-<button onclick="calcularMP()">Calcular</button>
+<label>Taxa 7x a 12x %</label>
+<input id="t712" type="number">
 
-</div>
-
-<div class="card" id="outros" style="display:none">
-
-<h3>⚫ Outras adquirências</h3>
-
-<input id="valorOUT" placeholder="Valor da venda">
-
-<input id="mdrOUT" placeholder="MDR (%)">
-
-<input id="taxa1" placeholder="Antecipação 1x (%)">
-
-<input id="taxa2a6" placeholder="Antecipação 2 a 6 (%)">
-
-<input id="taxa7a12" placeholder="Antecipação 7 a 12 (%)">
-
-<input id="taxa13a18" placeholder="Antecipação 13 a 18 (%)">
-
-<input id="taxa19a21" placeholder="Antecipação 19 a 21 (%)">
-
-<button onclick="calcularOUT()">Calcular</button>
+<label>Taxa 13x a 21x %</label>
+<input id="t1321" type="number">
 
 </div>
 
-<div class="card">
 
-<h3>📊 Resultado</h3>
+<div id="mercadopago" style="display:none">
 
-<table id="tabela"></table>
+<h2>🟡 Mercado Pago</h2>
 
-<button onclick="compartilhar()">📤 Compartilhar</button>
-
-</div>
+<div id="mpInputs"></div>
 
 </div>
 
-<script>
+<label>Valor da venda</label>
+<input id="valor" type="number">
 
-/* CAMPOS MERCADO PAGO */
+<button onclick="calcular()">CALCULAR</button>
 
-for(let i=1;i<=18;i++){
+<div id="resumo"></div>
 
-let campo=document.createElement("input")
+<table id="resultado"></table>
 
-campo.placeholder="Taxa "+i+"x (%)"
-
-campo.id="mp"+i
-
-document.getElementById("taxasMP").appendChild(campo)
-
-}
-
-/* TROCAR MODO */
-
-function mudarModo(){
-
-let modo=document.getElementById("modo").value
-
-if(modo=="mp"){
-
-document.body.style.background="#FFD400"
-document.body.style.color="#000"
-
-document.getElementById("mercadopago").style.display="block"
-document.getElementById("outros").style.display="none"
-
-}
-
-else{
-
-document.body.style.background="#111"
-document.body.style.color="#FFF"
-
-document.getElementById("mercadopago").style.display="none"
-document.getElementById("outros").style.display="block"
-
-}
-
-}
-
-/* MERCADO PAGO */
-
-function calcularMP(){
-
-let valor=parseFloat(document.getElementById("valorMP").value)
-
-let tabela=""
-
-for(let i=1;i<=18;i++){
-
-let taxa=parseFloat(document.getElementById("mp"+i).value)/100
-
-if(!isNaN(taxa)){
-
-let liquido=valor*(1-taxa)
-
-tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>"
-
-}
-
-}
-
-document.getElementById("tabela").innerHTML=tabela
-
-}
-
-/* OUTRAS ADQUIRENCIAS */
-
-function calcularOUT(){
-
-let valor=parseFloat(document.getElementById("valorOUT").value)
-
-let mdr=parseFloat(document.getElementById("mdrOUT").value)/100
-
-let taxa1=parseFloat(document.getElementById("taxa1").value)/100
-let taxa2a6=parseFloat(document.getElementById("taxa2a6").value)/100
-let taxa7a12=parseFloat(document.getElementById("taxa7a12").value)/100
-let taxa13a18=parseFloat(document.getElementById("taxa13a18").value)/100
-let taxa19a21=parseFloat(document.getElementById("taxa19a21").value)/100
-
-let tabela=""
-
-for(let i=1;i<=21;i++){
-
-let taxa
-
-if(i==1) taxa=taxa1
-else if(i<=6) taxa=taxa2a6
-else if(i<=12) taxa=taxa7a12
-else if(i<=18) taxa=taxa13a18
-else taxa=taxa19a21
-
-let liquido=valor*(1-mdr)*(1-taxa)
-
-tabela+="<tr><td>"+i+"x</td><td>R$ "+liquido.toFixed(2)+"</td></tr>"
-
-}
-
-document.getElementById("tabela").innerHTML=tabela
-
-}
-
-/* COMPARTILHAR */
-
-function compartilhar(){
-
-let texto="💸 Simulação XIBUNGÃO TAXAS\n\n"+document.getElementById("tabela").innerText
-
-if(navigator.share){
-
-navigator.share({
-
-title:"XIBUNGÃO TAXAS",
-text:texto
-
-})
-
-}
-
-else{
-
-alert(texto)
-
-}
-
-}
-
-mudarModo()
-
-</script>
+<script src="app.js"></script>
 
 </body>
 </html>
