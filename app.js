@@ -1,4 +1,4 @@
-window.onload=function(){
+window.onload = function(){
   // Cria campos automáticos para 2x a 18x do Mercado Pago
   let campos="";
   for(let i=2;i<=18;i++){
@@ -32,11 +32,13 @@ async function lerImagem(e){
   alert("Taxas preenchidas automaticamente");
 }
 
+// Função para calcular valor líquido com MDR multiplicativo
 function linha(nome, taxaParcela, valor, mdr){
   let liquido = valor * (1 - mdr/100) * (1 - taxaParcela/100);
-  return `<tr><td>${nome}</td><td>${(mdr+taxaParcela).toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
+  return `<tr><td>${nome}</td><td>${taxaParcela.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
 }
 
+// Função principal de cálculo
 function calcular(){
   let valor=parseFloat(document.getElementById("valor").value);
   if(!valor) return alert("Digite um valor");
@@ -56,9 +58,9 @@ function calcular(){
     html += linha("Débito",debito,valor,0);
     html += linha("Crédito 1x",credito1x,valor,mdr);
 
-    for(let i=2;i<=6;i++) html += linha(i+"x",taxa1,valor,mdr);
-    for(let i=7;i<=12;i++) html += linha(i+"x",taxa2,valor,mdr);
-    for(let i=13;i<=21;i++) html += linha(i+"x",taxa3,valor,mdr);
+    for(let i=2;i<=6;i++) html += linha(i+"x", taxa1, valor, mdr);
+    for(let i=7;i<=12;i++) html += linha(i+"x", taxa2, valor, mdr);
+    for(let i=13;i<=21;i++) html += linha(i+"x", taxa3, valor, mdr);
   }
 
   if(tipo=="mp"){
@@ -85,6 +87,7 @@ function calcular(){
   document.getElementById("resultado").innerHTML = html;
 }
 
+// Gera texto para WhatsApp alinhado
 function gerarTextoWhatsApp(){
   let linhas = [];
   let tipo = document.getElementById("tipo").value;
@@ -113,9 +116,9 @@ function gerarTextoWhatsApp(){
     addLinha("Débito",debito,valorNum*(1-debito/100));
     addLinha("1x",credito1x,valorNum*(1-mdr/100)*(1-credito1x/100));
 
-    for(let i=2;i<=6;i++) addLinha(i+"x",taxa1+mdr,valorNum*(1-mdr/100)*(1-taxa1/100));
-    for(let i=7;i<=12;i++) addLinha(i+"x",taxa2+mdr,valorNum*(1-mdr/100)*(1-taxa2/100));
-    for(let i=13;i<=21;i++) addLinha(i+"x",taxa3+mdr,valorNum*(1-mdr/100)*(1-taxa3/100));
+    for(let i=2;i<=6;i++) addLinha(i+"x",taxa1,valorNum*(1-mdr/100)*(1-taxa1/100));
+    for(let i=7;i<=12;i++) addLinha(i+"x",taxa2,valorNum*(1-mdr/100)*(1-taxa2/100));
+    for(let i=13;i<=21;i++) addLinha(i+"x",taxa3,valorNum*(1-mdr/100)*(1-taxa3/100));
   }
 
   if(tipo=="mp"){
@@ -136,6 +139,7 @@ function gerarTextoWhatsApp(){
   return linhas.join("\n");
 }
 
+// Compartilhar exportação
 function compartilhar(){
   let texto = gerarTextoWhatsApp();
   if(navigator.share){
