@@ -70,7 +70,7 @@ function calcular(){
     linha("Pix", pix);
     linha("Débito", debito);
 
-    // 1x
+    // 1x aparece **aqui, antes das parcelas**
     linha("1x", credito1x);
 
     // Parcelas 2x a 6x
@@ -104,10 +104,12 @@ function calcular(){
       html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
     }
 
+    // Mercado Pago: Pix, Débito, 1x
     linha("Pix", pix);
     linha("Débito", debito);
     linha("1x", taxa1x);
 
+    // Parcelas 2x–18x
     for(let i=2;i<=18;i++){
       let taxa = parseFloat(document.getElementById("mp"+i).value)||0;
       linha(i+"x", taxa);
