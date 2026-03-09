@@ -43,10 +43,9 @@ function calcular(){
 let valor=parseFloat(document.getElementById("valor").value)
 
 let tabela=document.getElementById("resultado")
-
 let resumo=document.getElementById("resumo")
 
-tabela.innerHTML="<tr><th>Parcelas</th><th>Valor parcela</th><th>Recebe</th></tr>"
+tabela.innerHTML="<tr><th>Tipo</th><th>Valor parcela</th><th>Recebe</th></tr>"
 
 let menorLiquido = 999999
 
@@ -57,16 +56,13 @@ for(let i=1;i<=18;i++){
 let taxa=parseFloat(document.getElementById("mp"+i).value||0)
 
 let liquido=valor*(1-(taxa/100))
-
 let parcela=valor/i
 
-if(liquido < menorLiquido){
-menorLiquido = liquido
-}
+if(liquido < menorLiquido) menorLiquido = liquido
 
 tabela.innerHTML+=`
 <tr>
-<td>${i}x</td>
+<td>${i}x crédito</td>
 <td>R$ ${parcela.toFixed(2)}</td>
 <td>R$ ${liquido.toFixed(2)}</td>
 </tr>
@@ -78,12 +74,37 @@ tabela.innerHTML+=`
 
 else{
 
+let pix=parseFloat(document.getElementById("pix").value||0)
+let debito=parseFloat(document.getElementById("debito").value||0)
+
 let mdr=parseFloat(document.getElementById("mdr").value||0)
 let antecipacao=parseFloat(document.getElementById("antecipacao").value||0)
 
 let t26=parseFloat(document.getElementById("t26").value||0)
 let t712=parseFloat(document.getElementById("t712").value||0)
 let t1321=parseFloat(document.getElementById("t1321").value||0)
+
+let liquidoPix = valor*(1-(pix/100))
+let liquidoDeb = valor*(1-(debito/100))
+
+if(liquidoPix < menorLiquido) menorLiquido = liquidoPix
+if(liquidoDeb < menorLiquido) menorLiquido = liquidoDeb
+
+tabela.innerHTML+=`
+<tr>
+<td>PIX</td>
+<td>-</td>
+<td>R$ ${liquidoPix.toFixed(2)}</td>
+</tr>
+`
+
+tabela.innerHTML+=`
+<tr>
+<td>Débito</td>
+<td>-</td>
+<td>R$ ${liquidoDeb.toFixed(2)}</td>
+</tr>
+`
 
 for(let i=1;i<=21;i++){
 
@@ -96,16 +117,13 @@ if(i>=13) taxa+=t1321
 taxa+=antecipacao*(i-1)
 
 let liquido=valor*(1-(taxa/100))
-
 let parcela=valor/i
 
-if(liquido < menorLiquido){
-menorLiquido = liquido
-}
+if(liquido < menorLiquido) menorLiquido = liquido
 
 tabela.innerHTML+=`
 <tr>
-<td>${i}x</td>
+<td>${i}x crédito</td>
 <td>R$ ${parcela.toFixed(2)}</td>
 <td>R$ ${liquido.toFixed(2)}</td>
 </tr>
@@ -116,7 +134,6 @@ tabela.innerHTML+=`
 }
 
 let taxaTotal = valor - menorLiquido
-
 let taxaEfetiva = (taxaTotal/valor)*100
 
 resumo.innerHTML=`
