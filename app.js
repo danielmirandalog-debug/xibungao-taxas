@@ -1,4 +1,5 @@
 window.onload=function(){
+  // Cria campos automáticos para 2x a 18x do Mercado Pago
   let campos="";
   for(let i=2;i<=18;i++){
     campos+=`<label>${i}x (%)</label><input id="mp${i}" type="number">`;
@@ -31,6 +32,11 @@ async function lerImagem(e){
   alert("Taxas preenchidas automaticamente");
 }
 
+function linha(nome, taxaParcela, valor, mdr){
+  let liquido = valor * (1 - mdr/100) * (1 - taxaParcela/100);
+  return `<tr><td>${nome}</td><td>${(mdr+taxaParcela).toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
+}
+
 function calcular(){
   let valor=parseFloat(document.getElementById("valor").value);
   if(!valor) return alert("Digite um valor");
@@ -46,18 +52,13 @@ function calcular(){
     let taxa2=parseFloat(document.getElementById("taxa2").value)||0;
     let taxa3=parseFloat(document.getElementById("taxa3").value)||0;
 
-    function linha(nome,taxa){
-      let liquido = valor * (1 - taxa/100);
-      html+=`<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
-    }
+    html += linha("Pix",pix,valor,0);
+    html += linha("Débito",debito,valor,0);
+    html += linha("Crédito 1x",credito1x,valor,mdr);
 
-    linha("Pix",pix);
-    linha("Débito",debito);
-    linha("Crédito 1x",credito1x);
-
-    for(let i=2;i<=6;i++) linha(i+"x",mdr+taxa1);
-    for(let i=7;i<=12;i++) linha(i+"x",mdr+taxa2);
-    for(let i=13;i<=21;i++) linha(i+"x",mdr+taxa3);
+    for(let i=2;i<=6;i++) html += linha(i+"x",taxa1,valor,mdr);
+    for(let i=7;i<=12;i++) html += linha(i+"x",taxa2,valor,mdr);
+    for(let i=13;i<=21;i++) html += linha(i+"x",taxa3,valor,mdr);
   }
 
   if(tipo=="mp"){
@@ -110,11 +111,11 @@ function gerarTextoWhatsApp(){
 
     addLinha("Pix",pix,valorNum*(1-pix/100));
     addLinha("Débito",debito,valorNum*(1-debito/100));
-    addLinha("1x",credito1x,valorNum*(1-credito1x/100));
+    addLinha("1x",credito1x,valorNum*(1-mdr/100)*(1-credito1x/100));
 
-    for(let i=2;i<=6;i++) addLinha(i+"x",mdr+taxa1,valorNum*(1-(mdr+taxa1)/100));
-    for(let i=7;i<=12;i++) addLinha(i+"x",mdr+taxa2,valorNum*(1-(mdr+taxa2)/100));
-    for(let i=13;i<=21;i++) addLinha(i+"x",mdr+taxa3,valorNum*(1-(mdr+taxa3)/100));
+    for(let i=2;i<=6;i++) addLinha(i+"x",taxa1+mdr,valorNum*(1-mdr/100)*(1-taxa1/100));
+    for(let i=7;i<=12;i++) addLinha(i+"x",taxa2+mdr,valorNum*(1-mdr/100)*(1-taxa2/100));
+    for(let i=13;i<=21;i++) addLinha(i+"x",taxa3+mdr,valorNum*(1-mdr/100)*(1-taxa3/100));
   }
 
   if(tipo=="mp"){
