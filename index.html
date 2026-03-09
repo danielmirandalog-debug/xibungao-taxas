@@ -1,98 +1,141 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>XIBUNGÃO TAXAS</title>
 
-<link rel="icon" type="image/png" href="icon.png">
-<link rel="manifest" href="manifest.json">
-
 <link rel="stylesheet" href="style.css">
+
+<link rel="icon" type="image/png" href="icone.png">
 
 </head>
 
-<body class="adq">
+<body>
 
-<h1>💰 XIBUNGÃO TAXAS</h1>
+<h1>XIBUNGÃO TAXAS</h1>
 
-<select id="modo">
+<div class="container">
 
-<option value="adq">Outras adquirências</option>
+<!-- VALOR PRIMEIRO -->
+
+<label>Valor da venda</label>
+<input id="valor" type="number" placeholder="Digite o valor da venda">
+
+<br><br>
+
+<label>Tipo de simulação</label>
+
+<select id="tipo">
+
+<option value="outras">Outras adquirências</option>
 <option value="mp">Mercado Pago</option>
 
 </select>
 
+<br><br>
 
-<div id="adquirencia">
+<div id="taxas-outras">
 
-<h2>⚫ Outras adquirências</h2>
+<h3>Taxas outras adquirências</h3>
 
-<label>Taxa PIX %</label>
+<label>Pix (%)</label>
 <input id="pix" type="number">
 
-<label>Taxa Débito %</label>
+<label>Débito (%)</label>
 <input id="debito" type="number">
 
-<label>MDR crédito %</label>
+<label>MDR Crédito (%)</label>
 <input id="mdr" type="number">
 
-<label>Antecipação mensal %</label>
-<input id="antecipacao" type="number">
+<label>2x a 6x (%)</label>
+<input id="taxa1" type="number">
 
-<label>Taxa crédito 2x a 6x %</label>
-<input id="t26" type="number">
+<label>7x a 12x (%)</label>
+<input id="taxa2" type="number">
 
-<label>Taxa crédito 7x a 12x %</label>
-<input id="t712" type="number">
-
-<label>Taxa crédito 13x a 21x %</label>
-<input id="t1321" type="number">
+<label>13x a 21x (%)</label>
+<input id="taxa3" type="number">
 
 </div>
 
+<div id="taxas-mp" style="display:none">
 
-<div id="mercadopago" style="display:none">
+<h3>Taxas Mercado Pago</h3>
 
-<h2>🟡 Mercado Pago</h2>
+<label>Pix (%)</label>
+<input id="mp_pix" type="number">
 
-<label>Taxa PIX %</label>
-<input id="mpPix" type="number">
+<label>Débito (%)</label>
+<input id="mp_debito" type="number">
 
-<label>Taxa Débito %</label>
-<input id="mpDebito" type="number">
+<label>1x (%)</label>
+<input id="mp1" type="number">
 
-<p>Informe a taxa de cada parcela</p>
+<label>2x (%)</label>
+<input id="mp2" type="number">
 
-<div id="mpInputs"></div>
+<label>3x (%)</label>
+<input id="mp3" type="number">
+
+<label>4x (%)</label>
+<input id="mp4" type="number">
+
+<label>5x (%)</label>
+<input id="mp5" type="number">
+
+<label>6x (%)</label>
+<input id="mp6" type="number">
+
+<label>7x (%)</label>
+<input id="mp7" type="number">
+
+<label>8x (%)</label>
+<input id="mp8" type="number">
+
+<label>9x (%)</label>
+<input id="mp9" type="number">
+
+<label>10x (%)</label>
+<input id="mp10" type="number">
+
+<label>11x (%)</label>
+<input id="mp11" type="number">
+
+<label>12x (%)</label>
+<input id="mp12" type="number">
+
+<label>13x (%)</label>
+<input id="mp13" type="number">
+
+<label>14x (%)</label>
+<input id="mp14" type="number">
+
+<label>15x (%)</label>
+<input id="mp15" type="number">
+
+<label>16x (%)</label>
+<input id="mp16" type="number">
+
+<label>17x (%)</label>
+<input id="mp17" type="number">
+
+<label>18x (%)</label>
+<input id="mp18" type="number">
 
 </div>
 
-
-<label>Valor da venda</label>
-<input id="valor" type="number">
+<br>
 
 <button onclick="calcular()">SIMULAR</button>
 
 <button onclick="compartilhar()">COMPARTILHAR</button>
 
+</div>
 
-<div id="resumo"></div>
-
-
-<table id="resultado">
-
-<tr>
-<th>Tipo</th>
-<th>Taxa</th>
-<th>Recebe</th>
-</tr>
-
-</table>
-
+<div id="resultado"></div>
 
 <script src="app.js"></script>
 
