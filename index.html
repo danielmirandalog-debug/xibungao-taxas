@@ -23,10 +23,23 @@ font-size:32px;
 font-weight:bold;
 }
 
+.sub{
+font-size:14px;
+opacity:0.8;
+}
+
 .container{
 max-width:420px;
 margin:auto;
 padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.15);
+margin-bottom:20px;
 }
 
 input,select{
@@ -50,20 +63,25 @@ color:white;
 margin-top:10px;
 }
 
+button:hover{
+opacity:0.9;
+}
+
 table{
 width:100%;
-margin-top:20px;
 border-collapse:collapse;
-background:white;
+margin-top:20px;
 }
 
 td{
 border:1px solid #ddd;
 padding:8px;
+background:white;
 }
 
-#tabela{
-margin-top:20px;
+.icons{
+font-size:26px;
+margin-bottom:10px;
 }
 
 </style>
@@ -72,9 +90,23 @@ margin-top:20px;
 
 <body>
 
-<header id="titulo">💸 XIBUNGÃO TAXAS</header>
+<header>
+
+💸 XIBUNGÃO TAXAS
+
+<div class="sub">
+💳 Simule taxas • 💰 Descubra seu lucro • 📈 Venda melhor
+</div>
+
+</header>
 
 <div class="container">
+
+<div class="card">
+
+<div class="icons">
+💳 💰 📈 💲
+</div>
 
 <select id="modo" onchange="mudarModo()">
 
@@ -83,11 +115,11 @@ margin-top:20px;
 
 </select>
 
-<!-- MERCADO PAGO -->
+</div>
 
-<div id="mercadopago">
+<div class="card" id="mercadopago">
 
-<h3>Taxas por parcela</h3>
+<h3>🟡 Mercado Pago</h3>
 
 <input id="valorMP" placeholder="Valor da venda">
 
@@ -97,39 +129,43 @@ margin-top:20px;
 
 </div>
 
-<!-- OUTRAS ADQUIRENCIAS -->
+<div class="card" id="outros" style="display:none">
 
-<div id="outros" style="display:none">
-
-<h3>Outras adquirências</h3>
+<h3>⚫ Outras adquirências</h3>
 
 <input id="valorOUT" placeholder="Valor da venda">
 
 <input id="mdrOUT" placeholder="MDR (%)">
 
-<input id="taxa1" placeholder="Taxa antecipação 1x (%)">
+<input id="taxa1" placeholder="Antecipação 1x (%)">
 
-<input id="taxa2a6" placeholder="Taxa antecipação 2 a 6 (%)">
+<input id="taxa2a6" placeholder="Antecipação 2 a 6 (%)">
 
-<input id="taxa7a12" placeholder="Taxa antecipação 7 a 12 (%)">
+<input id="taxa7a12" placeholder="Antecipação 7 a 12 (%)">
 
-<input id="taxa13a18" placeholder="Taxa antecipação 13 a 18 (%)">
+<input id="taxa13a18" placeholder="Antecipação 13 a 18 (%)">
 
-<input id="taxa19a21" placeholder="Taxa antecipação 19 a 21 (%)">
+<input id="taxa19a21" placeholder="Antecipação 19 a 21 (%)">
 
 <button onclick="calcularOUT()">Calcular</button>
 
 </div>
 
+<div class="card">
+
+<h3>📊 Resultado</h3>
+
 <table id="tabela"></table>
 
-<button onclick="compartilhar()">📤 Compartilhar simulação</button>
+<button onclick="compartilhar()">📤 Compartilhar</button>
+
+</div>
 
 </div>
 
 <script>
 
-/* GERAR CAMPOS MERCADO PAGO */
+/* CAMPOS MERCADO PAGO */
 
 for(let i=1;i<=18;i++){
 
@@ -161,7 +197,7 @@ document.getElementById("outros").style.display="none"
 
 else{
 
-document.body.style.background="#000"
+document.body.style.background="#111"
 document.body.style.color="#FFF"
 
 document.getElementById("mercadopago").style.display="none"
@@ -171,7 +207,7 @@ document.getElementById("outros").style.display="block"
 
 }
 
-/* CALCULO MERCADO PAGO */
+/* MERCADO PAGO */
 
 function calcularMP(){
 
@@ -197,7 +233,7 @@ document.getElementById("tabela").innerHTML=tabela
 
 }
 
-/* CALCULO OUTRAS ADQUIRENCIAS */
+/* OUTRAS ADQUIRENCIAS */
 
 function calcularOUT(){
 
@@ -237,7 +273,7 @@ document.getElementById("tabela").innerHTML=tabela
 
 function compartilhar(){
 
-let texto="Simulação XIBUNGÃO TAXAS\n\n"+document.getElementById("tabela").innerText
+let texto="💸 Simulação XIBUNGÃO TAXAS\n\n"+document.getElementById("tabela").innerText
 
 if(navigator.share){
 
