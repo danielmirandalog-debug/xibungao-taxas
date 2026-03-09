@@ -1,7 +1,6 @@
 const modo = document.getElementById("modo")
 const mpInputs = document.getElementById("mpInputs")
 
-// cria campos de parcelas Mercado Pago
 for(let i=1;i<=18;i++){
 
 let label=document.createElement("label")
@@ -47,9 +46,6 @@ let resumo=document.getElementById("resumo")
 
 tabela.innerHTML="<tr><th>Tipo</th><th>Taxa</th><th>Recebe</th></tr>"
 
-let menorLiquido = 999999
-
-// MERCADO PAGO
 if(modo.value==="mp"){
 
 let pix=parseFloat(document.getElementById("mpPix").value||0)
@@ -57,9 +53,6 @@ let debito=parseFloat(document.getElementById("mpDebito").value||0)
 
 let liquidoPix = valor*(1-(pix/100))
 let liquidoDeb = valor*(1-(debito/100))
-
-if(liquidoPix < menorLiquido) menorLiquido = liquidoPix
-if(liquidoDeb < menorLiquido) menorLiquido = liquidoDeb
 
 tabela.innerHTML+=`
 <tr>
@@ -83,8 +76,6 @@ let taxa=parseFloat(document.getElementById("mp"+i).value||0)
 
 let liquido=valor*(1-(taxa/100))
 
-if(liquido < menorLiquido) menorLiquido = liquido
-
 tabela.innerHTML+=`
 <tr>
 <td>${i}x crédito</td>
@@ -97,7 +88,6 @@ tabela.innerHTML+=`
 
 }
 
-// OUTRAS ADQUIRENCIAS
 else{
 
 let pix=parseFloat(document.getElementById("pix").value||0)
@@ -112,9 +102,6 @@ let t1321=parseFloat(document.getElementById("t1321").value||0)
 
 let liquidoPix = valor*(1-(pix/100))
 let liquidoDeb = valor*(1-(debito/100))
-
-if(liquidoPix < menorLiquido) menorLiquido = liquidoPix
-if(liquidoDeb < menorLiquido) menorLiquido = liquidoDeb
 
 tabela.innerHTML+=`
 <tr>
@@ -144,8 +131,6 @@ taxa+=antecipacao*(i-1)
 
 let liquido=valor*(1-(taxa/100))
 
-if(liquido < menorLiquido) menorLiquido = liquido
-
 tabela.innerHTML+=`
 <tr>
 <td>${i}x crédito</td>
@@ -158,13 +143,20 @@ tabela.innerHTML+=`
 
 }
 
-// RESUMO SIMPLES
 resumo.innerHTML=`
-
 <h3>Valor simulado</h3>
-
 <p><b>R$ ${valor.toFixed(2)}</b></p>
-
 `
+
+}
+
+function compartilhar(){
+
+let texto=document.getElementById("resultado").innerText
+
+navigator.share({
+title:"Simulação XIBUNGÃO TAXAS",
+text:texto
+})
 
 }
