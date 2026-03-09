@@ -44,7 +44,6 @@ function calcular(){
   if(!valor) return alert("Digite o valor");
 
   let tipo = document.getElementById("tipo").value;
-
   let html = `<table>
     <tr>
       <th>Parcela</th>
@@ -56,31 +55,41 @@ function calcular(){
 
     let pix = parseFloat(document.getElementById("pix").value)||0;
     let debito = parseFloat(document.getElementById("debito").value)||0;
-    let antecipacao = parseFloat(document.getElementById("antecipacao").value)||0;
     let credito1x = parseFloat(document.getElementById("credito1x").value)||0;
+    let antecipacao = parseFloat(document.getElementById("antecipacao").value)||0;
     let taxa1 = parseFloat(document.getElementById("taxa1").value)||0;
     let taxa2 = parseFloat(document.getElementById("taxa2").value)||0;
     let taxa3 = parseFloat(document.getElementById("taxa3").value)||0;
 
-    function linha(nome,taxa){
+    function linha(nome, taxa){
       let liquido = valor * (1 - taxa/100);
       html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
     }
 
-    linha("Pix",pix);
-    linha("Débito",debito);
+    // Pix e Débito
+    linha("Pix", pix);
+    linha("Débito", debito);
 
-    // 1x
-    linha("1x",credito1x);
+    // Crédito 1x (não sofre antecipação)
+    linha("1x", credito1x);
 
-    function calcularParcelado(nParcelas, mdr){
-      let taxaTotal = mdr + antecipacao*((nParcelas-1)/2);
-      return taxaTotal;
+    // Parcelas 2x a 6x
+    for(let i=2;i<=6;i++){
+      let taxaTotal = taxa1 + antecipacao*((i-1)/2);
+      linha(i+"x", taxaTotal);
     }
 
-    for(let i=2;i<=6;i++) linha(i+"x",calcularParcelado(i,taxa1));
-    for(let i=7;i<=12;i++) linha(i+"x",calcularParcelado(i,taxa2));
-    for(let i=13;i<=21;i++) linha(i+"x",calcularParcelado(i,taxa3));
+    // Parcelas 7x a 12x
+    for(let i=7;i<=12;i++){
+      let taxaTotal = taxa2 + antecipacao*((i-1)/2);
+      linha(i+"x", taxaTotal);
+    }
+
+    // Parcelas 13x a 21x
+    for(let i=13;i<=21;i++){
+      let taxaTotal = taxa3 + antecipacao*((i-1)/2);
+      linha(i+"x", taxaTotal);
+    }
 
   }
 
@@ -95,13 +104,13 @@ function calcular(){
       html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
     }
 
-    linha("Pix",pix);
-    linha("Débito",debito);
-    linha("1x",taxa1x);
+    linha("Pix", pix);
+    linha("Débito", debito);
+    linha("1x", taxa1x);
 
     for(let i=2;i<=18;i++){
       let taxa = parseFloat(document.getElementById("mp"+i).value)||0;
-      linha(i+"x",taxa);
+      linha(i+"x", taxa);
     }
 
   }
