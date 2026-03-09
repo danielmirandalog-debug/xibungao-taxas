@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>XIBUNGÃO TAXAS</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:linear-gradient(135deg,#ffcc00,#ff6600);
+padding:20px;
+}
+
+h1{
+color:white;
+font-size:40px;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:15px;
+max-width:350px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input,select{
+width:90%;
+padding:10px;
+margin:8px;
+font-size:16px;
+}
+
+button{
+background:#ff6600;
+color:white;
+border:none;
+padding:12px;
+width:95%;
+font-size:18px;
+border-radius:8px;
+cursor:pointer;
+}
+
+button:hover{
+background:#ff4500;
+}
+
+.resultado{
+margin-top:15px;
+font-size:20px;
+font-weight:bold;
+color:#333;
+}
+
+.menu{
+margin-bottom:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>💸 XIBUNGÃO TAXAS</h1>
+
+<div class="container">
+
+<div class="menu">
+
+<select id="modo" onchange="mudarModo()">
+
+<option value="mdr">MDR + Antecipação</option>
+<option value="final">Taxa Final</option>
+
+</select>
+
+</div>
+
+<div id="simuladorMDR">
+
+<input id="valor" placeholder="Valor da venda">
+
+<input id="mdr" placeholder="Taxa MDR (%)">
+
+<input id="antecipacao" placeholder="Antecipação (% a.m)">
+
+<select id="parcelasMDR"></select>
+
+<button onclick="calcularMDR()">Calcular</button>
+
+</div>
+
+<div id="simuladorFinal" style="display:none">
+
+<input id="valor2" placeholder="Valor da venda">
+
+<input id="taxafinal" placeholder="Taxa final (%)">
+
+<select id="parcelasFinal"></select>
+
+<button onclick="calcularFinal()">Calcular</button>
+
+</div>
+
+<div class="resultado" id="resultado"></div>
+
+</div>
+
+<script>
+
+for(let i=1;i<=21;i++){
+
+let option=document.createElement("option");
+option.value=i;
+option.text=i+"x";
+
+document.getElementById("parcelasMDR").appendChild(option);
+
+}
+
+for(let i=1;i<=18;i++){
+
+let option=document.createElement("option");
+option.value=i;
+option.text=i+"x";
+
+document.getElementById("parcelasFinal").appendChild(option);
+
+}
+
+function mudarModo(){
+
+let modo=document.getElementById("modo").value;
+
+if(modo=="mdr"){
+
+document.getElementById("simuladorMDR").style.display="block";
+document.getElementById("simuladorFinal").style.display="none";
+
+}else{
+
+document.getElementById("simuladorMDR").style.display="none";
+document.getElementById("simuladorFinal").style.display="block";
+
+}
+
+}
+
+function calcularMDR(){
+
+let valor=parseFloat(document.getElementById("valor").value);
+
+let mdr=parseFloat(document.getElementById("mdr").value)/100;
+
+let ant=parseFloat(document.getElementById("antecipacao").value)/100;
+
+let parcelas=parseInt(document.getElementById("parcelasMDR").value);
+
+let liquido=valor*(1-mdr)*Math.pow((1-ant),(parcelas-1));
+
+document.getElementById("resultado").innerHTML=
+
+"Você recebe: R$ "+liquido.toFixed(2);
+
+}
+
+function calcularFinal(){
+
+let valor=parseFloat(document.getElementById("valor2").value);
+
+let taxa=parseFloat(document.getElementById("taxafinal").value)/100;
+
+let liquido=valor*(1-taxa);
+
+document.getElementById("resultado").innerHTML=
+
+"Você recebe: R$ "+liquido.toFixed(2);
+
+}
+
+</script>
+
+</body>
+</html>
