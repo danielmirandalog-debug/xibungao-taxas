@@ -1,162 +1,146 @@
-const modo = document.getElementById("modo")
-const mpInputs = document.getElementById("mpInputs")
+window.onload = function(){
+
+let campos = ""
 
 for(let i=1;i<=18;i++){
 
-let label=document.createElement("label")
-label.innerText="Taxa "+i+"x %"
-
-let input=document.createElement("input")
-input.type="number"
-input.id="mp"+i
-
-mpInputs.appendChild(label)
-mpInputs.appendChild(input)
+campos += "<label>"+i+"x (%)</label>"
+campos += "<input id='mp"+i+"' type='number'>"
 
 }
 
-modo.addEventListener("change",()=>{
-
-if(modo.value==="mp"){
-
-document.body.className="mp"
-
-document.getElementById("mercadopago").style.display="block"
-document.getElementById("adquirencia").style.display="none"
+document.getElementById("camposMP").innerHTML = campos
 
 }
 
-else{
+function trocarTipo(){
 
-document.body.className="adq"
+let tipo = document.getElementById("tipo").value
 
-document.getElementById("mercadopago").style.display="none"
-document.getElementById("adquirencia").style.display="block"
+if(tipo=="mp"){
+
+document.getElementById("taxas-mp").style.display="block"
+document.getElementById("taxas-outras").style.display="none"
+
+}else{
+
+document.getElementById("taxas-mp").style.display="none"
+document.getElementById("taxas-outras").style.display="block"
+
+}
+
+}
+
+function preencherTabela(){
+
+let texto = document.getElementById("colarTabela").value
+
+let linhas = texto.split("\n")
+
+linhas.forEach(linha =>{
+
+let partes = linha.split(" ")
+
+let parcela = partes[0]
+let taxa = partes[1]
+
+if(parcela && taxa){
+
+let numero = parcela.replace("x","")
+
+let campo = document.getElementById("mp"+numero)
+
+if(campo){
+
+campo.value = taxa
+
+}
 
 }
 
 })
 
+}
+
 function calcular(){
 
-let valor=parseFloat(document.getElementById("valor").value)
+let valor = parseFloat(document.getElementById("valor").value)
 
-let tabela=document.getElementById("resultado")
-let resumo=document.getElementById("resumo")
+let tipo = document.getElementById("tipo").value
 
-tabela.innerHTML="<tr><th>Tipo</th><th>Taxa</th><th>Recebe</th></tr>"
+let html=""
 
-if(modo.value==="mp"){
+if(tipo=="outras"){
 
-let pix=parseFloat(document.getElementById("mpPix").value||0)
-let debito=parseFloat(document.getElementById("mpDebito").value||0)
+let pix = parseFloat(document.getElementById("pix").value)||0
+let debito = parseFloat(document.getElementById("debito").value)||0
+let mdr = parseFloat(document.getElementById("mdr").value)||0
+let taxa1 = parseFloat(document.getElementById("taxa1").value)||0
+let taxa2 = parseFloat(document.getElementById("taxa2").value)||0
+let taxa3 = parseFloat(document.getElementById("taxa3").value)||0
 
-let liquidoPix = valor*(1-(pix/100))
-let liquidoDeb = valor*(1-(debito/100))
+html += "<h2>Resumo</h2>"
+html += "Valor simulado: R$ "+valor.toFixed(2)
 
-tabela.innerHTML+=`
-<tr>
-<td>PIX</td>
-<td>${pix}%</td>
-<td>R$ ${liquidoPix.toFixed(2)}</td>
-</tr>
-`
+html += "<table border='1'>"
 
-tabela.innerHTML+=`
-<tr>
-<td>Débito</td>
-<td>${debito}%</td>
-<td>R$ ${liquidoDeb.toFixed(2)}</td>
-</tr>
-`
-
-for(let i=1;i<=18;i++){
-
-let taxa=parseFloat(document.getElementById("mp"+i).value||0)
-
-let liquido=valor*(1-(taxa/100))
-
-tabela.innerHTML+=`
-<tr>
-<td>${i}x crédito</td>
-<td>${taxa}%</td>
-<td>R$ ${liquido.toFixed(2)}</td>
-</tr>
-`
-
-}
-
-}
-
-else{
-
-let pix=parseFloat(document.getElementById("pix").value||0)
-let debito=parseFloat(document.getElementById("debito").value||0)
-
-let mdr=parseFloat(document.getElementById("mdr").value||0)
-let antecipacao=parseFloat(document.getElementById("antecipacao").value||0)
-
-let t26=parseFloat(document.getElementById("t26").value||0)
-let t712=parseFloat(document.getElementById("t712").value||0)
-let t1321=parseFloat(document.getElementById("t1321").value||0)
-
-let liquidoPix = valor*(1-(pix/100))
-let liquidoDeb = valor*(1-(debito/100))
-
-tabela.innerHTML+=`
-<tr>
-<td>PIX</td>
-<td>${pix}%</td>
-<td>R$ ${liquidoPix.toFixed(2)}</td>
-</tr>
-`
-
-tabela.innerHTML+=`
-<tr>
-<td>Débito</td>
-<td>${debito}%</td>
-<td>R$ ${liquidoDeb.toFixed(2)}</td>
-</tr>
-`
+html += "<tr><td>Pix</td><td>"+pix+"%</td></tr>"
+html += "<tr><td>Débito</td><td>"+debito+"%</td></tr>"
 
 for(let i=1;i<=21;i++){
 
 let taxa=mdr
 
-if(i>=2 && i<=6) taxa+=t26
-if(i>=7 && i<=12) taxa+=t712
-if(i>=13) taxa+=t1321
+if(i>=2 && i<=6) taxa += taxa1
+if(i>=7 && i<=12) taxa += taxa2
+if(i>=13) taxa += taxa3
 
-taxa+=antecipacao*(i-1)
-
-let liquido=valor*(1-(taxa/100))
-
-tabela.innerHTML+=`
-<tr>
-<td>${i}x crédito</td>
-<td>${taxa.toFixed(2)}%</td>
-<td>R$ ${liquido.toFixed(2)}</td>
-</tr>
-`
+html+="<tr><td>"+i+"x</td><td>"+taxa.toFixed(2)+"%</td></tr>"
 
 }
 
+html+="</table>"
+
 }
 
-resumo.innerHTML=`
-<h3>Valor simulado</h3>
-<p><b>R$ ${valor.toFixed(2)}</b></p>
-`
+if(tipo=="mp"){
+
+let pix = parseFloat(document.getElementById("mp_pix").value)||0
+let debito = parseFloat(document.getElementById("mp_debito").value)||0
+
+html += "<h2>Resumo</h2>"
+html += "Valor simulado: R$ "+valor.toFixed(2)
+
+html+="<table border='1'>"
+
+html+="<tr><td>Pix</td><td>"+pix+"%</td></tr>"
+html+="<tr><td>Débito</td><td>"+debito+"%</td></tr>"
+
+for(let i=1;i<=18;i++){
+
+let taxa = document.getElementById("mp"+i).value||0
+
+html+="<tr><td>"+i+"x</td><td>"+taxa+"%</td></tr>"
+
+}
+
+html+="</table>"
+
+}
+
+document.getElementById("resultado").innerHTML = html
 
 }
 
 function compartilhar(){
 
-let texto=document.getElementById("resultado").innerText
+let texto = document.getElementById("resultado").innerText
 
 navigator.share({
+
 title:"Simulação XIBUNGÃO TAXAS",
 text:texto
+
 })
 
 }
