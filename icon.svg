@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+
+<rect width="512" height="512" rx="120" fill="#111"/>
+
+<text x="50%" y="50%" text-anchor="middle" fill="#ffd700" font-size="90" dy=".3em">
+BA21
+</text>
+
+</svg>
