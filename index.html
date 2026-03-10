@@ -1,89 +1,141 @@
 <!DOCTYPE html>
+
 <html lang="pt-BR">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CALCULADORA DE TAXAS DOS FALCÕES DA BA21</title>
 
-<!-- Ícone do app -->
-<link rel="icon" type="image/png" href="icon.png">
+<title>CALCULADORA DE TAXAS FALCÕES DA BA21</title>
 
-<!-- OCR -->
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 
-<!-- Estilo -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="app.js" defer></script>
+
 <style>
-body{font-family:Arial;background:#f2f2f2;padding:20px;}
-h1{text-align:center;margin-bottom:20px;}
-.container{background:white;padding:20px;border-radius:10px;max-width:500px;margin:auto;}
-input,select{width:100%;padding:10px;margin:5px 0 15px 0;border-radius:6px;border:1px solid #ccc;}
-button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:8px;font-size:16px;cursor:pointer;}
-.simular{background:#27ae60;color:white;}
-.share{background:#3498db;color:white;}
-.upload{background:#f39c12;color:white;}
-#taxas-outras{background:black;color:white;padding:15px;border-radius:10px;margin-bottom:20px;}
-#taxas-mp{background:#ffe066;padding:15px;border-radius:10px;margin-bottom:20px;}
-table{width:100%;border-collapse:collapse;margin-top:20px;background:white;}
-td,th{border:1px solid #ccc;padding:8px;text-align:center;}
+
+body{
+font-family:Arial;
+background:#f4f4f4;
+padding:20px;
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+max-width:700px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+background:#111;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold;
+}
+
+button:hover{
+background:#333;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #ccc;
+padding:8px;
+text-align:center;
+}
+
+.mp{
+background:#ffe066;
+}
+
+.outras{
+background:#111;
+color:white;
+}
+
 </style>
+
 </head>
+
 <body>
 
-<h1>CALCULADORA DE TAXAS DOS FALCÕES DA BA21</h1>
+<h1>🦅 CALCULADORA DE TAXAS FALCÕES DA BA21</h1>
 
 <div class="container">
 
-<label>Valor da venda</label>
-<input id="valor" type="number" placeholder="Digite o valor">
+<label>Valor da venda</label> <input id="valor" type="number">
 
-<label>Tipo de simulação</label>
-<select id="tipo" onchange="trocarTipo()">
-  <option value="outras">Outras adquirências</option>
-  <option value="mp">Mercado Pago</option>
-</select>
-
-<!-- Outras adquirências -->
-<div id="taxas-outras">
-<h3>Outras adquirências</h3>
-<label>Pix (%)</label>
-<input id="pix" type="number">
-<label>Débito (%)</label>
-<input id="debito" type="number">
-<label>Taxa de Antecipação (%)</label>
-<input id="antecipacao" type="number">
-<label>Crédito 1x (%)</label>
-<input id="credito1x" type="number">
-<label>2x a 6x (%)</label>
-<input id="taxa1" type="number">
-<label>7x a 12x (%)</label>
-<input id="taxa2" type="number">
-<label>13x a 21x (%)</label>
-<input id="taxa3" type="number">
-</div>
-
-<!-- Mercado Pago -->
-<div id="taxas-mp" style="display:none">
 <h3>Mercado Pago</h3>
-<label>Pix (%)</label>
-<input id="mp_pix" type="number">
-<label>Débito (%)</label>
-<input id="mp_debito" type="number">
-<label>1x (%)</label>
-<input id="mp1" type="number">
 
-<button class="upload" onclick="document.getElementById('img').click()">Carregar imagem da tabela</button>
-<input type="file" id="img" accept="image/*" style="display:none">
+<label>Pix %</label> <input id="mp_pix" type="number">
 
-<div id="camposMP"></div>
-</div>
+<label>Débito %</label> <input id="mp_debito" type="number">
 
-<button class="simular" onclick="calcular()">SIMULAR</button>
-<button class="share" onclick="compartilhar()">COMPARTILHAR</button>
+<label>1x %</label> <input id="mp1" type="number">
+
+<div id="mpParcelas"></div>
+
+<h3>Outras adquirências</h3>
+
+<label>Pix %</label> <input id="out_pix" type="number">
+
+<label>Débito %</label> <input id="out_debito" type="number">
+
+<label>1x %</label> <input id="out1" type="number">
+
+<label>MDR 2-6x</label> <input id="mdr1" type="number">
+
+<label>MDR 7-12x</label> <input id="mdr2" type="number">
+
+<label>MDR 13-21x</label> <input id="mdr3" type="number">
+
+<label>Taxa de antecipação mensal (%)</label> <input id="antecipacao" type="number">
+
+<h3>Custos adicionais</h3>
+
+<label>Software Seller</label> <input id="custoSeller" type="number">
+
+<label>Cesta de serviços da conta</label> <input id="custoConta" type="number">
+
+<label>Aluguel da máquina</label> <input id="custoMaquina" type="number">
+
+<button onclick="simular()">SIMULAR</button>
+
+<button onclick="exportar()">EXPORTAR TABELA PNG</button>
 
 </div>
 
 <div id="resultado"></div>
 
-<script src="app.js"></script>
 </body>
+
 </html>
