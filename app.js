@@ -1,130 +1,130 @@
-window.onload = function() {
-  // Gerar inputs do Mercado Pago 2x–18x
-  let camposMP = "";
-  for (let i = 2; i <= 18; i++) {
-    camposMP += `<label>${i}x (%)</label><input id="mp${i}" type="number">`;
-  }
-  document.getElementById("camposMP").innerHTML = camposMP;
+window.onload=function(){
 
-  document.getElementById("img").addEventListener("change", lerImagem);
+let html="";
+
+for(let i=2;i<=21;i++){
+
+html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
+
 }
 
-function trocarTipo() {
-  let tipo = document.getElementById("tipo").value;
-  document.getElementById("taxas-mp").style.display = (tipo == "mp") ? "block" : "none";
-  document.getElementById("taxas-outras").style.display = (tipo == "outras") ? "block" : "none";
+document.getElementById("mpParcelas").innerHTML=html;
+
 }
 
-async function lerImagem(e) {
-  let arquivo = e.target.files[0];
-  if (!arquivo) return;
+function liquido(valor,taxa){
 
-  let resultado = await Tesseract.recognize(arquivo, 'por');
-  let texto = resultado.data.text;
-  let numeros = texto.match(/[\d]+[.,][\d]+/g);
-
-  if (!numeros) return alert("Não consegui identificar as taxas");
-
-  let parcela = 2;
-  numeros.forEach(n => {
-    if (parcela <= 18) {
-      let campo = document.getElementById("mp" + parcela);
-      if (campo) campo.value = n.replace(",", ".");
-      parcela++;
-    }
-  });
-
-  alert("Taxas preenchidas automaticamente");
+if(!taxa || isNaN(taxa)){
+return "NÃO SE APLICA";
 }
 
-function calcular() {
+let resultado = valor * (1 - taxa/100);
 
-  let valor = parseFloat(document.getElementById("valor").value);
-  if (!valor) return alert("Digite o valor");
+return "R$ "+resultado.toFixed(2);
 
-  let tipo = document.getElementById("tipo").value;
-  let html = `<table>
-      <tr>
-        <th>Parcela</th>
-        <th>Taxa Total</th>
-        <th>Valor Líquido</th>
-      </tr>`;
-
-  if (tipo == "outras") {
-
-    let pix = parseFloat(document.getElementById("pix").value) || 0;
-    let debito = parseFloat(document.getElementById("debito").value) || 0;
-    let credito1x = parseFloat(document.getElementById("credito1x").value) || 0;
-    let antecipacao = parseFloat(document.getElementById("antecipacao").value) || 0;
-    let taxa1 = parseFloat(document.getElementById("taxa1").value) || 0;
-    let taxa2 = parseFloat(document.getElementById("taxa2").value) || 0;
-    let taxa3 = parseFloat(document.getElementById("taxa3").value) || 0;
-
-    function linha(nome, taxa) {
-      let liquido = valor * (1 - taxa / 100);
-      html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
-    }
-
-    // Pix e Débito
-    linha("Pix", pix);
-    linha("Débito", debito);
-
-    // Crédito 1x (apenas uma linha, antes das parcelas)
-    linha("1x", credito1x);
-
-    // Parcelas 2x–6x
-    for (let i = 2; i <= 6; i++) {
-      let taxaTotal = taxa1 + antecipacao * ((i - 1) / 2);
-      linha(i + "x", taxaTotal);
-    }
-
-    // Parcelas 7x–12x
-    for (let i = 7; i <= 12; i++) {
-      let taxaTotal = taxa2 + antecipacao * ((i - 1) / 2);
-      linha(i + "x", taxaTotal);
-    }
-
-    // Parcelas 13x–21x
-    for (let i = 13; i <= 21; i++) {
-      let taxaTotal = taxa3 + antecipacao * ((i - 1) / 2);
-      linha(i + "x", taxaTotal);
-    }
-  }
-
-  if (tipo == "mp") {
-
-    let pix = parseFloat(document.getElementById("mp_pix").value) || 0;
-    let debito = parseFloat(document.getElementById("mp_debito").value) || 0;
-    let taxa1x = parseFloat(document.getElementById("mp1").value) || 0;
-
-    function linha(nome, taxa) {
-      let liquido = valor * (1 - taxa / 100);
-      html += `<tr><td>${nome}</td><td>${taxa.toFixed(2)}%</td><td>R$ ${liquido.toFixed(2)}</td></tr>`;
-    }
-
-    // Mercado Pago: Pix, Débito, 1x
-    linha("Pix", pix);
-    linha("Débito", debito);
-    linha("1x", taxa1x);
-
-    // Parcelas 2x–18x
-    for (let i = 2; i <= 18; i++) {
-      let taxa = parseFloat(document.getElementById("mp" + i).value) || 0;
-      linha(i + "x", taxa);
-    }
-  }
-
-  html += "</table>";
-  document.getElementById("resultado").innerHTML = html;
 }
 
-// Exportar para WhatsApp
-function compartilhar() {
-  let texto = document.getElementById("resultado").innerText;
-  if (navigator.share) {
-    navigator.share({ title: "Simulação XIBUNGÃO TAXAS", text: texto });
-  } else {
-    navigator.clipboard.writeText(texto);
-    alert("Texto copiado para WhatsApp ou outro app.");
-  }
+function simular(){
+
+let valor=parseFloat(document.getElementById("valor").value);
+
+let mp={};
+let outras={};
+
+mp[0]=parseFloat(document.getElementById("mp_pix").value);
+mp[1]=parseFloat(document.getElementById("mp1").value);
+
+for(let i=2;i<=21;i++){
+
+mp[i]=parseFloat(document.getElementById("mp"+i).value);
+
+}
+
+outras[0]=parseFloat(document.getElementById("out_pix").value);
+outras[1]=parseFloat(document.getElementById("out1").value);
+
+let mdr1=parseFloat(document.getElementById("mdr1").value);
+let mdr2=parseFloat(document.getElementById("mdr2").value);
+let mdr3=parseFloat(document.getElementById("mdr3").value);
+
+let antecipacao=parseFloat(document.getElementById("antecipacao").value);
+
+for(let i=2;i<=6;i++){
+
+outras[i]=mdr1 + (antecipacao*(i-1));
+
+}
+
+for(let i=7;i<=12;i++){
+
+outras[i]=mdr2 + (antecipacao*(i-1));
+
+}
+
+for(let i=13;i<=21;i++){
+
+outras[i]=mdr3 + (antecipacao*(i-1));
+
+}
+
+gerarTabela(valor,mp,outras);
+
+}
+
+function gerarTabela(valor,mp,outras){
+
+let html="<table>";
+
+html+="<tr><th>Parcela</th><th>Mercado Pago</th><th>Outras</th></tr>";
+
+for(let i=0;i<=21;i++){
+
+let nome = i==0 ? "Pix" : i+"x";
+
+html+=`<tr>
+
+<td>${nome}</td>
+
+<td class="mp">${liquido(valor,mp[i])}</td>
+
+<td class="outras">${liquido(valor,outras[i])}</td>
+
+</tr>`;
+
+}
+
+html+="</table>";
+
+let seller=document.getElementById("custoSeller").value;
+let conta=document.getElementById("custoConta").value;
+let maquina=document.getElementById("custoMaquina").value;
+
+if(seller || conta || maquina){
+
+html+="<h3>Custos adicionais</h3>";
+
+if(seller) html+="Software Seller: R$ "+seller+"<br>";
+if(conta) html+="Cesta de serviços: R$ "+conta+"<br>";
+if(maquina) html+="Aluguel da máquina: R$ "+maquina+"<br>";
+
+}
+
+document.getElementById("resultado").innerHTML=html;
+
+}
+
+function exportar(){
+
+html2canvas(document.getElementById("resultado")).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="simulacao.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
+
 }
