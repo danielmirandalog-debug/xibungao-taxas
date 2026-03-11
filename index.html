@@ -7,11 +7,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculadora de Taxas Falcões BA21</title>
+<title>Calculadora Falcões BA21</title>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="app.js" defer></script>
 
@@ -24,15 +26,24 @@ margin:0;
 }
 
 header{
-background:#111;
+background:#0f172a;
 color:white;
-padding:15px;
+padding:20px;
 text-align:center;
-font-size:22px;
+}
+
+.logo{
+font-size:26px;
+font-weight:bold;
+}
+
+.sub{
+font-size:14px;
+opacity:0.8;
 }
 
 .container{
-max-width:900px;
+max-width:950px;
 margin:auto;
 padding:20px;
 }
@@ -42,7 +53,7 @@ background:white;
 padding:20px;
 margin-bottom:20px;
 border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
 input{
@@ -50,30 +61,33 @@ width:100%;
 padding:6px;
 margin-bottom:8px;
 border:1px solid #ccc;
-border-radius:5px;
+border-radius:6px;
 }
 
 button{
-width:100%;
 padding:10px;
-margin-top:10px;
 border:none;
 border-radius:6px;
-background:#2c7be5;
+background:#2563eb;
 color:white;
 font-weight:bold;
 cursor:pointer;
+margin-top:10px;
+}
+
+button:hover{
+background:#1e40af;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-font-size:11px;
+font-size:12px;
 }
 
 td,th{
 border:1px solid #ddd;
-padding:4px;
+padding:6px;
 text-align:center;
 }
 
@@ -82,15 +96,23 @@ color:red;
 font-weight:bold;
 }
 
-.tituloModo{
-display:flex;
-align-items:center;
-gap:15px;
+.pergunta{
+text-align:center;
+padding:20px;
+background:#f1f5f9;
+border-radius:8px;
 }
 
-.opcoes{
-display:flex;
-gap:10px;
+.botoesPergunta button{
+margin:10px;
+}
+
+.balao{
+background:#d1fae5;
+padding:15px;
+border-radius:8px;
+text-align:center;
+margin-top:10px;
 }
 
 </style>
@@ -100,7 +122,10 @@ gap:10px;
 <body>
 
 <header>
-🦅 CALCULADORA DE TAXAS FALCÕES DA BA21
+
+<div class="logo">🦅 Falcões BA21</div>
+<div class="sub">Comparador profissional de adquirência</div>
+
 </header>
 
 <div class="container">
@@ -121,11 +146,9 @@ gap:10px;
 
 <label>Crédito 1x (%)</label> <input id="mp1">
 
-<h4>Importar taxas do print</h4>
+<h4>Importar taxas por imagem</h4>
 
 <input type="file" id="uploadOCR">
-
-<div id="statusOCR"></div>
 
 <div id="mpParcelas"></div>
 
@@ -133,25 +156,7 @@ gap:10px;
 
 <div class="card">
 
-<div class="tituloModo">
-
 <h3>Outras adquirências</h3>
-
-<div class="opcoes">
-
-<label>
-<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()"> Faixa MDR
-</label>
-
-<label>
-<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()"> Manual
-</label>
-
-</div>
-
-</div>
-
-<div id="modoFaixa">
 
 <label>Pix (%)</label> <input id="out_pix">
 
@@ -165,23 +170,13 @@ gap:10px;
 
 <label>MDR 13-21x</label> <input id="mdr3">
 
-<label>Antecipação mensal (%)</label> <input id="antecipacao">
-
-</div>
-
-<div id="modoManual" style="display:none">
-
-<div id="manualParcelas"></div>
-
-</div>
+<label>Antecipação (%)</label> <input id="antecipacao">
 
 </div>
 
 <div class="card">
 
-<button onclick="simular()">SIMULAR</button>
-
-<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
+<button onclick="simular()">SIMULAR</button> <button onclick="exportar()">EXPORTAR RELATÓRIO</button>
 
 </div>
 
@@ -191,9 +186,27 @@ gap:10px;
 
 </div>
 
+<div class="card" id="perguntaFaturamento" style="display:none">
+
+<div class="pergunta">
+
+<h3>📊 Deseja simular faturamento do cliente?</h3>
+
+<div class="botoesPergunta">
+
+<button onclick="abrirFaturamento()">SIM</button> <button onclick="agradecer()">NÃO</button>
+
+</div>
+
+<div id="balao"></div>
+
+</div>
+
+</div>
+
 <div class="card" id="simulacaoFaturamento" style="display:none">
 
-<h3>📊 Simulação de faturamento</h3>
+<h3>Simulação de faturamento</h3>
 
 <label>Faturamento médio mensal</label> <input id="faturamentoMensal">
 
@@ -220,7 +233,7 @@ gap:10px;
 </tr>
 
 <tr>
-<td>Cesta de serviços</td>
+<td>Cesta serviços</td>
 <td><input id="mp_cesta"></td>
 <td><input id="out_cesta"></td>
 </tr>
@@ -240,6 +253,8 @@ gap:10px;
 </table>
 
 <button onclick="calcularFaturamento()">Calcular economia anual</button>
+
+<canvas id="grafico"></canvas>
 
 <div id="resultadoFaturamento"></div>
 
