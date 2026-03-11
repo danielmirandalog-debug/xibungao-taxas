@@ -17,6 +17,16 @@
 
 <style>
 
+<script>
+
+if ("serviceWorker" in navigator) {
+navigator.serviceWorker.register("service-worker.js")
+.then(() => console.log("Service Worker registrado"));
+}
+
+</script>
+
+
 body{
 font-family:Segoe UI,Arial;
 background:#f4f6fa;
