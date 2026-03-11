@@ -59,7 +59,17 @@ return valor*(1-(taxa/100));
 
 function simular(){
 
-let valor=parseFloat(document.getElementById("valor").value);
+let valorCampo=document.getElementById("valor").value;
+
+if(valorCampo === "" || parseFloat(valorCampo) <= 0){
+
+alert("Informe o valor da venda para realizar a simulação.");
+
+return;
+
+}
+
+let valor=parseFloat(valorCampo);
 
 let mp={};
 let outras={};
