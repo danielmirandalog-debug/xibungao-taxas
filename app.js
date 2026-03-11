@@ -23,44 +23,41 @@ let arquivo=e.target.files[0]
 
 if(!arquivo) return
 
-document.getElementById("statusOCR").innerHTML="Lendo imagem..."
+statusOCR.innerHTML="Lendo imagem..."
 
-const worker=await Tesseract.createWorker()
-
-await worker.loadLanguage('eng')
-await worker.initialize('eng')
+const worker=await Tesseract.createWorker('eng')
 
 const { data:{ text } } = await worker.recognize(arquivo)
 
 await worker.terminate()
 
-document.getElementById("statusOCR").innerHTML="Imagem processada"
-
 let numeros=text.match(/\d+[.,]?\d*/g)
 
-if(!numeros) return
+if(!numeros){
+
+statusOCR.innerHTML="Não foi possível identificar taxas"
+return
+
+}
 
 numeros=numeros.map(n=>parseFloat(n.replace(",",".")))
 
-let campos=["mp_pix","mp_debito","mp1"]
+let indice=0
 
 for(let i=2;i<=21;i++){
 
-campos.push("mp"+i)
+let campo=document.getElementById("mp"+i)
 
-}
+if(campo && numeros[indice]!=null){
 
-for(let i=0;i<numeros.length && i<campos.length;i++){
-
-let campo=document.getElementById(campos[i])
-
-if(campo){
-
-campo.value=numeros[i]
+campo.value=numeros[indice]
+indice++
 
 }
 
 }
+
+statusOCR.innerHTML="Taxas de parcelamento carregadas ✔"
 
 }
 
@@ -74,11 +71,11 @@ return valor*(1-(taxa/100))
 
 function simular(){
 
-let valor=parseFloat(document.getElementById("valor").value)
+let valor=parseFloat(valor.value)
 
-mp["pix"]=parseFloat(document.getElementById("mp_pix").value)
-mp["debito"]=parseFloat(document.getElementById("mp_debito").value)
-mp[1]=parseFloat(document.getElementById("mp1").value)
+mp["pix"]=parseFloat(mp_pix.value)
+mp["debito"]=parseFloat(mp_debito.value)
+mp[1]=parseFloat(mp1.value)
 
 for(let i=2;i<=21;i++){
 
@@ -86,47 +83,33 @@ mp[i]=parseFloat(document.getElementById("mp"+i).value)
 
 }
 
-outras["pix"]=parseFloat(document.getElementById("out_pix").value)
-outras["debito"]=parseFloat(document.getElementById("out_debito").value)
-outras[1]=parseFloat(document.getElementById("out1").value)
+outras["pix"]=parseFloat(out_pix.value)
+outras["debito"]=parseFloat(out_debito.value)
+outras[1]=parseFloat(out1.value)
 
-let mdr1=parseFloat(document.getElementById("mdr1").value)
-let mdr2=parseFloat(document.getElementById("mdr2").value)
-let mdr3=parseFloat(document.getElementById("mdr3").value)
+let mdr1=parseFloat(mdr1.value)
+let mdr2=parseFloat(mdr2.value)
+let mdr3=parseFloat(mdr3.value)
 
-let ant=parseFloat(document.getElementById("antecipacao").value)
+let ant=parseFloat(antecipacao.value)
 
-for(let i=2;i<=6;i++){
-
-outras[i]=mdr1+(ant*(i-1))
-
-}
-
-for(let i=7;i<=12;i++){
-
-outras[i]=mdr2+(ant*(i-1))
-
-}
-
-for(let i=13;i<=21;i++){
-
-outras[i]=mdr3+(ant*(i-1))
-
-}
+for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1))
+for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1))
+for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1))
 
 gerarTabela(valor)
 
-document.getElementById("simulacaoFaturamento").style.display="block"
+simulacaoFaturamento.style.display="block"
 
 }
 
-function gerarTabela(valor){
+function gerarTabela(valorVenda){
 
 let parcelas=["pix","debito",1]
 
 for(let i=2;i<=21;i++) parcelas.push(i)
 
-let html=`<table>
+let html=`<table id="tabelaResultado">
 
 <tr>
 <th>Parcela</th>
@@ -143,50 +126,45 @@ let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x"
 let taxaMP=mp[p]
 let taxaOut=outras[p]
 
-let valorMP=liquido(valor,taxaMP)
-let valorOut=liquido(valor,taxaOut)
+let valorMP=liquido(valorVenda,taxaMP)
+let valorOut=liquido(valorVenda,taxaOut)
 
 html+=`<tr>
 
 <td>${nome}</td>
-
-<td>${taxaMP ?? "Não se aplica"}%</td>
-
-<td>${valorMP? "R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
-
-<td>${taxaOut ?? "Não se aplica"}%</td>
-
-<td>${valorOut? "R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
-
+<td>${taxaMP ?? "-"}</td>
+<td>${valorMP? "R$ "+valorMP.toFixed(2):"-"}</td>
+<td>${taxaOut ?? "-"}</td>
+<td>${valorOut? "R$ "+valorOut.toFixed(2):"-"}</td>
 </tr>`
 
 })
 
 html+="</table>"
 
-document.getElementById("resultado").innerHTML=html
+resultado.innerHTML=html
 
 }
 
 function verificarShares(){
 
-let pix=parseFloat(document.getElementById("share_pix").value)||0
-let deb=parseFloat(document.getElementById("share_debito").value)||0
-let c1=parseFloat(document.getElementById("share_1x").value)||0
-let c26=parseFloat(document.getElementById("share_2_6").value)||0
-let c712=parseFloat(document.getElementById("share_7_12").value)||0
+let pix=parseFloat(share_pix.value)||0
+let deb=parseFloat(share_debito.value)||0
+let c1=parseFloat(share_1x.value)||0
+let c26=parseFloat(share_2_6.value)||0
+let c712=parseFloat(share_7_12.value)||0
 
 let total=pix+deb+c1+c26+c712
 
-document.getElementById("totalShare").innerHTML="Total: "+total+"%"
+totalShare.innerHTML="Total: "+total+"%"
 
 if(total!=100){
 
-document.getElementById("erroShare").innerHTML="⚠ O total deve ser 100%"
+erroShare.innerHTML="⚠ Total precisa ser 100%"
 
 }else{
 
-document.getElementById("erroShare").innerHTML=""
+erroShare.innerHTML=""
 
 }
 
@@ -194,38 +172,34 @@ document.getElementById("erroShare").innerHTML=""
 
 function calcularFaturamento(){
 
-let faturamento=parseFloat(document.getElementById("faturamentoMensal").value)
+let faturamento=parseFloat(faturamentoMensal.value)
 
 let custosMP=
-(parseFloat(document.getElementById("mp_cesta").value)||0)+
-(parseFloat(document.getElementById("mp_maquina").value)||0)+
-(parseFloat(document.getElementById("mp_sistema").value)||0)
+(parseFloat(mp_cesta.value)||0)+
+(parseFloat(mp_maquina.value)||0)+
+(parseFloat(mp_sistema.value)||0)
 
 let custosOut=
-(parseFloat(document.getElementById("out_cesta").value)||0)+
-(parseFloat(document.getElementById("out_maquina").value)||0)+
-(parseFloat(document.getElementById("out_sistema").value)||0)
+(parseFloat(out_cesta.value)||0)+
+(parseFloat(out_maquina.value)||0)+
+(parseFloat(out_sistema.value)||0)
 
 let economia=(custosOut-custosMP)*12
 
-document.getElementById("resultadoFaturamento").innerHTML=
-
-`<h3>Economia anual estimada</h3>
-
-Economia anual com custos fixos:
-
-<b>R$ ${economia.toFixed(2)}</b>
-`
+resultadoFaturamento.innerHTML=
+"<h3>Economia anual</h3><b>R$ "+economia.toFixed(2)+"</b>"
 
 }
 
-function exportar(){
+function exportarTabela(){
 
-html2canvas(document.body).then(canvas=>{
+let tabela=document.getElementById("tabelaResultado")
+
+html2canvas(tabela).then(canvas=>{
 
 let link=document.createElement("a")
 
-link.download="simulacao.png"
+link.download="resultado.png"
 
 link.href=canvas.toDataURL()
 
