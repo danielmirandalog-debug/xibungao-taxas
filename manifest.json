@@ -1,7 +1,7 @@
 {
-"name": "Comparador de Taxas",
-"short_name": "Taxas",
-"start_url": ".",
+"name": "Calculadora de Taxas BA21",
+"short_name": "Taxas BA21",
+"start_url": "./index.html",
 "display": "standalone",
 "background_color": "#ffffff",
 "theme_color": "#111111",
@@ -9,6 +9,11 @@
 {
 "src": "icon.png",
 "sizes": "192x192",
+"type": "image/png"
+},
+{
+"src": "icon.png",
+"sizes": "512x512",
 "type": "image/png"
 }
 ]
