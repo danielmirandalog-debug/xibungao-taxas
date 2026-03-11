@@ -7,66 +7,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculadora de Taxas Falcões BA21</title>
+<title>Comparador de Taxas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<link rel="manifest" href="manifest.json">
 
 <script src="app.js" defer></script>
 
 <style>
 
 body{
-font-family:Arial;
-background:#f2f2f2;
-padding:20px;
+font-family:Segoe UI,Arial;
+background:#f4f6fa;
+margin:0;
+}
+
+header{
+background:#111;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
 }
 
 .container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
 background:white;
 padding:20px;
+margin-bottom:20px;
 border-radius:10px;
-max-width:700px;
-margin:auto;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
 input{
 width:100%;
 padding:8px;
 margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
 }
 
 button{
 width:100%;
 padding:12px;
 margin-top:10px;
-background:#111;
-color:white;
 border:none;
-border-radius:5px;
+border-radius:6px;
+background:#2c7be5;
+color:white;
+font-weight:bold;
 cursor:pointer;
+}
+
+button:hover{
+background:#1a5edb;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-margin-top:20px;
+font-size:12px;
 }
 
 td,th{
-border:1px solid #ccc;
-padding:8px;
+border:1px solid #ddd;
+padding:5px;
 text-align:center;
 }
 
-.mp{
-background:#ffe066;
-}
-
-.outras{
-background:#111;
-color:white;
+th{
+background:#f0f2f6;
 }
 
 .taxaRuim{
@@ -74,22 +94,8 @@ color:red;
 font-weight:bold;
 }
 
-#statusOCR{
-font-weight:bold;
-margin:10px 0;
-}
-
-.tituloModo{
-display:flex;
-align-items:center;
-gap:15px;
+canvas{
 margin-top:20px;
-}
-
-.radioGroup{
-display:flex;
-gap:10px;
-font-size:14px;
 }
 
 </style>
@@ -98,11 +104,19 @@ font-size:14px;
 
 <body>
 
-<h1>🦅 Calculadora de Taxas</h1>
+<header>
+🦅 Comparador de Taxas
+</header>
 
 <div class="container">
 
+<div class="card">
+
 <label>Valor da venda</label> <input id="valor" type="number">
+
+</div>
+
+<div class="card">
 
 <h3>Mercado Pago</h3>
 
@@ -112,7 +126,7 @@ font-size:14px;
 
 <label>Crédito 1x (%)</label> <input id="mp1">
 
-<h3>Importar Parcelamento Mercado Pago</h3>
+<h4>Importar taxas por imagem</h4>
 
 <input type="file" id="uploadOCR">
 
@@ -120,25 +134,19 @@ font-size:14px;
 
 <div id="mpParcelas"></div>
 
-<div class="tituloModo">
+</div>
+
+<div class="card">
 
 <h3>Outras adquirências</h3>
 
-<div class="radioGroup">
-
 <label>
-<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()">
-Faixa MDR
+<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()"> Faixa MDR
 </label>
 
 <label>
-<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()">
-Manual
+<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()"> Manual
 </label>
-
-</div>
-
-</div>
 
 <div id="modoFaixa">
 
@@ -159,18 +167,28 @@ Manual
 </div>
 
 <div id="modoManual" style="display:none">
-
 <div id="manualParcelas"></div>
+</div>
 
 </div>
+
+<div class="card">
 
 <button onclick="simular()">SIMULAR</button>
 
-<button onclick="exportar()">EXPORTAR RESULTADO</button>
+<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
 
 </div>
 
+<div class="card">
+
 <div id="resultado"></div>
+
+<canvas id="grafico"></canvas>
+
+</div>
+
+</div>
 
 </body>
 
