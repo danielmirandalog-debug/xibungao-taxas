@@ -12,11 +12,15 @@ document.getElementById("mpParcelas").innerHTML=html;
 
 let manualHTML="";
 
-for(let i=0;i<=21;i++){
+manualHTML+=`<label>Pix (%)</label> <input id="manual_pix" type="number">`;
 
-let nome=i==0?"Pix":i+"x";
+manualHTML+=`<label>Débito (%)</label> <input id="manual_debito" type="number">`;
 
-manualHTML+=`<label>${nome} (%)</label> <input id="manual${i}" type="number">`;
+manualHTML+=`<label>Crédito 1x (%)</label> <input id="manual1" type="number">`;
+
+for(let i=2;i<=21;i++){
+
+manualHTML+=`<label>${i}x (%)</label> <input id="manual${i}" type="number">`;
 
 }
 
@@ -80,7 +84,11 @@ let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
 if(modo==="manual"){
 
-for(let i=0;i<=21;i++){
+outras[0]=parseFloat(document.getElementById("manual_pix").value);
+outras["debito"]=parseFloat(document.getElementById("manual_debito").value);
+outras[1]=parseFloat(document.getElementById("manual1").value);
+
+for(let i=2;i<=21;i++){
 
 outras[i]=parseFloat(document.getElementById("manual"+i).value);
 
@@ -89,6 +97,7 @@ outras[i]=parseFloat(document.getElementById("manual"+i).value);
 }else{
 
 outras[0]=parseFloat(document.getElementById("out_pix").value);
+outras["debito"]=parseFloat(document.getElementById("out_debito").value);
 outras[1]=parseFloat(document.getElementById("out1").value);
 
 let mdr1=parseFloat(document.getElementById("mdr1").value);
