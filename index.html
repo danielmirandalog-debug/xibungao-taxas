@@ -74,10 +74,6 @@ font-weight:bold;
 cursor:pointer;
 }
 
-button:hover{
-opacity:0.9;
-}
-
 table{
 width:100%;
 border-collapse:collapse;
@@ -87,21 +83,6 @@ font-size:12px;
 td,th{
 border:1px solid #ddd;
 padding:6px;
-text-align:center;
-}
-
-.pergunta{
-text-align:center;
-background:#FFF9C4;
-padding:20px;
-border-radius:8px;
-}
-
-.balao{
-background:#DCFCE7;
-padding:15px;
-border-radius:8px;
-margin-top:10px;
 text-align:center;
 }
 
@@ -178,20 +159,6 @@ text-align:center;
 
 </div>
 
-<div class="card" id="perguntaFaturamento" style="display:none">
-
-<div class="pergunta">
-
-<h3>Deseja simular faturamento do cliente?</h3>
-
-<button onclick="abrirFaturamento()">SIM</button> <button onclick="agradecer()">NÃO</button>
-
-<div id="balao"></div>
-
-</div>
-
-</div>
-
 <div class="card" id="simulacaoFaturamento" style="display:none">
 
 <h3>Simulação de faturamento</h3>
@@ -200,9 +167,7 @@ text-align:center;
 
 <h4>
 Concentração de vendas
-<span id="totalShare" style="font-weight:bold;margin-left:10px">
-Total: 100%
-</span>
+<span id="totalShare">Total: 100%</span>
 </h4>
 
 <label>Pix (%)</label> <input id="share_pix" value="20" oninput="verificarShares()">
@@ -215,7 +180,37 @@ Total: 100%
 
 <label>Parcelado 7-12x (%)</label> <input id="share_7_12" value="20" oninput="verificarShares()">
 
-<div id="erroShare" style="color:red;font-weight:bold"></div>
+<div id="erroShare" style="color:red"></div>
+
+<h3>Custos mensais</h3>
+
+<table>
+
+<tr>
+<th></th>
+<th>Mercado Pago</th>
+<th>Outros</th>
+</tr>
+
+<tr>
+<td>Cesta de serviços</td>
+<td><input id="mp_cesta"></td>
+<td><input id="out_cesta"></td>
+</tr>
+
+<tr>
+<td>Aluguel máquina</td>
+<td><input id="mp_maquina"></td>
+<td><input id="out_maquina"></td>
+</tr>
+
+<tr>
+<td>Sistema integrado</td>
+<td><input id="mp_sistema"></td>
+<td><input id="out_sistema"></td>
+</tr>
+
+</table>
 
 <button onclick="calcularFaturamento()">Calcular economia anual</button>
 
