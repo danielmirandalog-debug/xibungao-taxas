@@ -13,9 +13,7 @@ document.getElementById("mpParcelas").innerHTML=html;
 let manualHTML="";
 
 manualHTML+=`<label>Pix (%)</label> <input id="manual_pix">`;
-
 manualHTML+=`<label>Débito (%)</label> <input id="manual_debito">`;
-
 manualHTML+=`<label>Crédito 1x (%)</label> <input id="manual1">`;
 
 for(let i=2;i<=21;i++){
@@ -241,12 +239,16 @@ link.click();
 
 }
 
+/* ========================= */
+/* OCR PROFISSIONAL */
+/* ========================= */
+
 async function processarOCR(event){
 
 let file=event.target.files[0];
 if(!file) return;
 
-document.getElementById("statusOCR").innerText="Lendo imagem...";
+document.getElementById("statusOCR").innerText="Processando imagem...";
 
 const worker = await Tesseract.createWorker("eng");
 
@@ -254,11 +256,51 @@ const { data } = await worker.recognize(file);
 
 await worker.terminate();
 
-let texto=data.text;
+let texto=data.text.toLowerCase();
+
+console.log("OCR TEXTO:",texto);
+
+/* limpeza de caracteres ruins */
+
+texto=texto
+.replace(/o/g,"0")
+.replace(/s/g,"5")
+.replace(/l/g,"1");
+
+/* regex inteligente */
+
+let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
+
+let encontrados=0;
+let match;
+
+while((match=regex.exec(texto))!==null){
+
+let parcela=parseInt(match[1]);
+let taxa=parseFloat(match[2].replace(",","."));
+
+if(parcela>=2 && parcela<=21){
+
+let campo=document.getElementById("mp"+parcela);
+
+if(campo){
+
+campo.value=taxa.toFixed(2);
+encontrados++;
+
+}
+
+}
+
+}
+
+/* fallback caso OCR não encontre parcelas */
+
+if(encontrados===0){
 
 let numeros=texto.match(/[0-9]+[.,][0-9]+/g);
 
-if(!numeros) return;
+if(numeros){
 
 for(let i=2;i<=21;i++){
 
@@ -271,6 +313,10 @@ parseFloat(numeros[i-2].replace(",",".")).toFixed(2);
 
 }
 
-document.getElementById("statusOCR").innerText="Taxas carregadas";
+}
+
+}
+
+document.getElementById("statusOCR").innerText="Taxas carregadas com OCR PRO";
 
 }
