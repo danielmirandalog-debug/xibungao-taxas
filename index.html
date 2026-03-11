@@ -18,30 +18,21 @@
 <style>
 
 body{
-font-family:Arial;
-background:#f5f5f5;
+font-family:Segoe UI,Arial;
+background:#f4f6fa;
 margin:0;
 }
 
 header{
-background:#FFE600;
-color:#2D3277;
-padding:20px;
+background:#111;
+color:white;
+padding:15px;
 text-align:center;
-border-bottom:4px solid #2D3277;
-}
-
-.logo{
-font-size:28px;
-font-weight:bold;
-}
-
-.sub{
-font-size:14px;
+font-size:22px;
 }
 
 .container{
-max-width:1000px;
+max-width:900px;
 margin:auto;
 padding:20px;
 }
@@ -56,33 +47,59 @@ box-shadow:0 4px 10px rgba(0,0,0,0.08);
 
 input{
 width:100%;
-padding:6px;
-margin-bottom:8px;
-border-radius:6px;
+padding:8px;
+margin-bottom:10px;
 border:1px solid #ccc;
+border-radius:5px;
 }
 
 button{
-padding:10px;
+width:100%;
+padding:12px;
+margin-top:10px;
 border:none;
 border-radius:6px;
-background:#2D3277;
+background:#2c7be5;
 color:white;
 font-weight:bold;
 cursor:pointer;
-margin-right:10px;
+}
+
+button:hover{
+background:#1a5edb;
 }
 
 table{
 width:100%;
 border-collapse:collapse;
-font-size:12px;
+font-size:11px;
 }
 
-th,td{
+td,th{
 border:1px solid #ddd;
-padding:6px;
+padding:4px;
 text-align:center;
+}
+
+th{
+background:#f0f2f6;
+}
+
+.taxaRuim{
+color:red;
+font-weight:bold;
+}
+
+.tituloModo{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.opcoes{
+display:flex;
+gap:10px;
+font-size:14px;
 }
 
 </style>
@@ -92,10 +109,7 @@ text-align:center;
 <body>
 
 <header>
-
-<div class="logo">🦅 Falcões BA21</div>
-<div class="sub">Comparador profissional de taxas</div>
-
+🦅 Comparador de Taxas
 </header>
 
 <div class="container">
@@ -128,7 +142,25 @@ text-align:center;
 
 <div class="card">
 
+<div class="tituloModo">
+
 <h3>Outras adquirências</h3>
+
+<div class="opcoes">
+
+<label>
+<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()"> Faixa MDR
+</label>
+
+<label>
+<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()"> Manual
+</label>
+
+</div>
+
+</div>
+
+<div id="modoFaixa">
 
 <label>Pix (%)</label> <input id="out_pix">
 
@@ -142,74 +174,29 @@ text-align:center;
 
 <label>MDR 13-21x</label> <input id="mdr3">
 
-<label>Antecipação (%)</label> <input id="antecipacao">
+<label>Antecipação mensal (%)</label> <input id="antecipacao">
+
+</div>
+
+<div id="modoManual" style="display:none">
+
+<div id="manualParcelas"></div>
+
+</div>
 
 </div>
 
 <div class="card">
 
-<button onclick="simular()">SIMULAR</button> <button onclick="exportarTabela()">EXPORTAR RESULTADO</button>
+<button onclick="simular()">SIMULAR</button>
+
+<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
 
 </div>
 
-<div class="card" id="resultado"></div>
+<div class="card">
 
-<div class="card" id="simulacaoFaturamento" style="display:none">
-
-<h3>Simulação de faturamento</h3>
-
-<label>Faturamento médio mensal</label> <input id="faturamentoMensal">
-
-<h4>
-Concentração de vendas
-<span id="totalShare">Total: 100%</span>
-</h4>
-
-<label>Pix (%)</label> <input id="share_pix" value="20" oninput="verificarShares()">
-
-<label>Débito (%)</label> <input id="share_debito" value="20" oninput="verificarShares()">
-
-<label>Crédito 1x (%)</label> <input id="share_1x" value="20" oninput="verificarShares()">
-
-<label>Parcelado 2-6x (%)</label> <input id="share_2_6" value="20" oninput="verificarShares()">
-
-<label>Parcelado 7-12x (%)</label> <input id="share_7_12" value="20" oninput="verificarShares()">
-
-<div id="erroShare" style="color:red"></div>
-
-<h3>Custos mensais</h3>
-
-<table>
-
-<tr>
-<th></th>
-<th>Mercado Pago</th>
-<th>Outros</th>
-</tr>
-
-<tr>
-<td>Cesta de serviços</td>
-<td><input id="mp_cesta"></td>
-<td><input id="out_cesta"></td>
-</tr>
-
-<tr>
-<td>Aluguel máquina</td>
-<td><input id="mp_maquina"></td>
-<td><input id="out_maquina"></td>
-</tr>
-
-<tr>
-<td>Sistema integrado</td>
-<td><input id="mp_sistema"></td>
-<td><input id="out_sistema"></td>
-</tr>
-
-</table>
-
-<button onclick="calcularFaturamento()">Calcular economia anual</button>
-
-<div id="resultadoFaturamento"></div>
+<div id="resultado"></div>
 
 </div>
 
