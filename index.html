@@ -7,11 +7,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>CALCULADORA DE TAXAS FALCÕES DA BA21</title>
+<title>Calculadora de Taxas Falcões da BA21</title>
 
-<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script src="app.js" defer></script>
 
@@ -19,13 +22,12 @@
 
 body{
 font-family:Arial;
-background:#f4f4f4;
+background:#f2f2f2;
 padding:20px;
 }
 
 h1{
 text-align:center;
-margin-bottom:30px;
 }
 
 .container{
@@ -34,15 +36,12 @@ padding:20px;
 border-radius:10px;
 max-width:700px;
 margin:auto;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
-input,select{
+input{
 width:100%;
-padding:10px;
+padding:8px;
 margin-bottom:10px;
-border-radius:6px;
-border:1px solid #ccc;
 }
 
 button{
@@ -52,13 +51,8 @@ margin-top:10px;
 background:#111;
 color:white;
 border:none;
-border-radius:6px;
+border-radius:5px;
 cursor:pointer;
-font-weight:bold;
-}
-
-button:hover{
-background:#333;
 }
 
 table{
@@ -67,7 +61,7 @@ border-collapse:collapse;
 margin-top:20px;
 }
 
-th,td{
+td,th{
 border:1px solid #ccc;
 padding:8px;
 text-align:center;
@@ -80,6 +74,11 @@ background:#ffe066;
 .outras{
 background:#111;
 color:white;
+}
+
+.taxaRuim{
+color:red;
+font-weight:bold;
 }
 
 </style>
@@ -96,46 +95,43 @@ color:white;
 
 <h3>Mercado Pago</h3>
 
-<label>Pix %</label> <input id="mp_pix" type="number">
+<label>Pix %</label> <input id="mp_pix">
 
-<label>Débito %</label> <input id="mp_debito" type="number">
+<label>Débito %</label> <input id="mp_debito">
 
-<label>1x %</label> <input id="mp1" type="number">
+<label>Crédito 1x %</label> <input id="mp1">
+
+<h3>Importar parcelamento Mercado Pago</h3>
+
+<input type="file" id="uploadOCR">
+
+<button onclick="lerOCR()">Ler imagem das taxas (2x a 21x)</button>
 
 <div id="mpParcelas"></div>
 
 <h3>Outras adquirências</h3>
 
-<label>Pix %</label> <input id="out_pix" type="number">
+<label>Pix %</label> <input id="out_pix">
 
-<label>Débito %</label> <input id="out_debito" type="number">
+<label>Débito %</label> <input id="out_debito">
 
-<label>1x %</label> <input id="out1" type="number">
+<label>Crédito 1x %</label> <input id="out1">
 
-<label>MDR 2-6x</label> <input id="mdr1" type="number">
+<label>MDR 2-6x</label> <input id="mdr1">
 
-<label>MDR 7-12x</label> <input id="mdr2" type="number">
+<label>MDR 7-12x</label> <input id="mdr2">
 
-<label>MDR 13-21x</label> <input id="mdr3" type="number">
+<label>MDR 13-21x</label> <input id="mdr3">
 
-<label>Taxa de antecipação mensal (%)</label> <input id="antecipacao" type="number">
-
-<h3>Custos adicionais</h3>
-
-<label>Software Seller</label> <input id="custoSeller" type="number">
-
-<label>Cesta de serviços da conta</label> <input id="custoConta" type="number">
-
-<label>Aluguel da máquina</label> <input id="custoMaquina" type="number">
+<label>Taxa antecipação mensal (%)</label> <input id="antecipacao">
 
 <button onclick="simular()">SIMULAR</button>
 
-<button onclick="exportar()">EXPORTAR TABELA PNG</button>
+<button onclick="exportar()">EXPORTAR PNG</button>
 
 </div>
 
 <div id="resultado"></div>
 
 </body>
-
 </html>
