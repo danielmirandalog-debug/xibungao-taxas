@@ -7,14 +7,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Calculadora de Taxas Falcões da BA21</title>
-
-<link rel="icon" href="icon.svg">
-<link rel="manifest" href="manifest.json">
-
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<title>Calculadora de Taxas Falcões BA21</title>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script src="app.js" defer></script>
 
@@ -24,10 +21,6 @@ body{
 font-family:Arial;
 background:#f2f2f2;
 padding:20px;
-}
-
-h1{
-text-align:center;
 }
 
 .container{
@@ -87,7 +80,7 @@ font-weight:bold;
 
 <body>
 
-<h1>🦅 CALCULADORA DE TAXAS FALCÕES DA BA21</h1>
+<h1>🦅 Calculadora de Taxas</h1>
 
 <div class="container">
 
@@ -95,27 +88,27 @@ font-weight:bold;
 
 <h3>Mercado Pago</h3>
 
-<label>Pix %</label> <input id="mp_pix">
+<label>Pix (%)</label> <input id="mp_pix">
 
-<label>Débito %</label> <input id="mp_debito">
+<label>Débito (%)</label> <input id="mp_debito">
 
-<label>Crédito 1x %</label> <input id="mp1">
+<label>Crédito 1x (%)</label> <input id="mp1">
 
-<h3>Importar parcelamento Mercado Pago</h3>
+<h3>Importar Parcelamento Mercado Pago</h3>
 
 <input type="file" id="uploadOCR">
 
-<button onclick="lerOCR()">Ler imagem das taxas (2x a 21x)</button>
+<p id="statusOCR"></p>
 
 <div id="mpParcelas"></div>
 
 <h3>Outras adquirências</h3>
 
-<label>Pix %</label> <input id="out_pix">
+<label>Pix (%)</label> <input id="out_pix">
 
-<label>Débito %</label> <input id="out_debito">
+<label>Débito (%)</label> <input id="out_debito">
 
-<label>Crédito 1x %</label> <input id="out1">
+<label>Crédito 1x (%)</label> <input id="out1">
 
 <label>MDR 2-6x</label> <input id="mdr1">
 
@@ -123,15 +116,16 @@ font-weight:bold;
 
 <label>MDR 13-21x</label> <input id="mdr3">
 
-<label>Taxa antecipação mensal (%)</label> <input id="antecipacao">
+<label>Antecipação mensal (%)</label> <input id="antecipacao">
 
 <button onclick="simular()">SIMULAR</button>
 
-<button onclick="exportar()">EXPORTAR PNG</button>
+<button onclick="exportar()">EXPORTAR RESULTADO</button>
 
 </div>
 
 <div id="resultado"></div>
 
 </body>
+
 </html>
