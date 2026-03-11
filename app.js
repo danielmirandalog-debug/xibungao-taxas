@@ -25,7 +25,10 @@ if(!arquivo) return
 
 document.getElementById("statusOCR").innerHTML="Lendo imagem..."
 
-const worker=await Tesseract.createWorker("por")
+const worker=await Tesseract.createWorker()
+
+await worker.loadLanguage('eng')
+await worker.initialize('eng')
 
 const { data:{ text } } = await worker.recognize(arquivo)
 
@@ -37,7 +40,7 @@ let numeros=text.match(/\d+[.,]?\d*/g)
 
 if(!numeros) return
 
-numeros=numereros=numeros.map(n=>parseFloat(n.replace(",",".")))
+numeros=numeros.map(n=>parseFloat(n.replace(",",".")))
 
 let campos=["mp_pix","mp_debito","mp1"]
 
@@ -113,6 +116,8 @@ outras[i]=mdr3+(ant*(i-1))
 
 gerarTabela(valor)
 
+document.getElementById("simulacaoFaturamento").style.display="block"
+
 }
 
 function gerarTabela(valor){
@@ -161,8 +166,6 @@ html+="</table>"
 
 document.getElementById("resultado").innerHTML=html
 
-document.getElementById("perguntaFaturamento").style.display="block"
-
 }
 
 function verificarShares(){
@@ -189,98 +192,30 @@ document.getElementById("erroShare").innerHTML=""
 
 }
 
-function abrirFaturamento(){
-
-document.getElementById("simulacaoFaturamento").style.display="block"
-
-}
-
-function agradecer(){
-
-document.getElementById("balao").innerHTML=
-`<div class="balao">Obrigado por usar o comparador Falcões BA21 🦅</div>`
-
-}
-
 function calcularFaturamento(){
-
-let total =
-(parseFloat(document.getElementById("share_pix").value)||0)+
-(parseFloat(document.getElementById("share_debito").value)||0)+
-(parseFloat(document.getElementById("share_1x").value)||0)+
-(parseFloat(document.getElementById("share_2_6").value)||0)+
-(parseFloat(document.getElementById("share_7_12").value)||0)
-
-if(total!=100){
-
-alert("A distribuição precisa somar 100%")
-
-return
-
-}
 
 let faturamento=parseFloat(document.getElementById("faturamentoMensal").value)
 
-let pix=document.getElementById("share_pix").value/100
-let deb=document.getElementById("share_debito").value/100
-let c1=document.getElementById("share_1x").value/100
-let c26=document.getElementById("share_2_6").value/100
-let c712=document.getElementById("share_7_12").value/100
+let custosMP=
+(parseFloat(document.getElementById("mp_cesta").value)||0)+
+(parseFloat(document.getElementById("mp_maquina").value)||0)+
+(parseFloat(document.getElementById("mp_sistema").value)||0)
 
-let mpTotal=0
-let outTotal=0
+let custosOut=
+(parseFloat(document.getElementById("out_cesta").value)||0)+
+(parseFloat(document.getElementById("out_maquina").value)||0)+
+(parseFloat(document.getElementById("out_sistema").value)||0)
 
-mpTotal+=faturamento*pix*(1-(mp["pix"]/100))
-mpTotal+=faturamento*deb*(1-(mp["debito"]/100))
-mpTotal+=faturamento*c1*(1-(mp[1]/100))
-mpTotal+=faturamento*c26*(1-(mp[4]/100))
-mpTotal+=faturamento*c712*(1-(mp[10]/100))
-
-outTotal+=faturamento*pix*(1-(outras["pix"]/100))
-outTotal+=faturamento*deb*(1-(outras["debito"]/100))
-outTotal+=faturamento*c1*(1-(outras[1]/100))
-outTotal+=faturamento*c26*(1-(outras[4]/100))
-outTotal+=faturamento*c712*(1-(outras[10]/100))
-
-let economia=(outTotal-mpTotal)*12
+let economia=(custosOut-custosMP)*12
 
 document.getElementById("resultadoFaturamento").innerHTML=
 
 `<h3>Economia anual estimada</h3>
 
-Mercado Pago anual: R$ ${(mpTotal*12).toFixed(2)}<br>
-Outros anual: R$ ${(outTotal*12).toFixed(2)}
+Economia anual com custos fixos:
 
-<br><br>
-
-<b>Economia anual: R$ ${economia.toFixed(2)}</b>
+<b>R$ ${economia.toFixed(2)}</b>
 `
-
-criarGrafico(mpTotal,outTotal)
-
-}
-
-function criarGrafico(mp,out){
-
-new Chart(document.getElementById("grafico"),{
-
-type:"bar",
-
-data:{
-
-labels:["Mercado Pago","Outros"],
-
-datasets:[{
-
-label:"Resultado anual",
-
-data:[mp*12,out*12]
-
-}]
-
-}
-
-})
 
 }
 
