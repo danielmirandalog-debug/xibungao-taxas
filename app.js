@@ -13,31 +13,6 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}">`
 
 document.getElementById("mpParcelas").innerHTML=html
 
-let manualHTML=""
-
-manualHTML+=`<label>Pix (%)</label><input id="manual_pix">`
-manualHTML+=`<label>Débito (%)</label><input id="manual_debito">`
-manualHTML+=`<label>Crédito 1x (%)</label><input id="manual1">`
-
-for(let i=2;i<=21;i++){
-
-manualHTML+=`<label>${i}x (%)</label> <input id="manual${i}">`
-
-}
-
-document.getElementById("manualParcelas").innerHTML=manualHTML
-
-document.getElementById("uploadOCR").addEventListener("change",processarOCR)
-
-}
-
-function alternarModo(){
-
-let modo=document.querySelector('input[name="modoOutras"]:checked').value
-
-document.getElementById("modoFaixa").style.display=(modo==="faixa")?"block":"none"
-document.getElementById("modoManual").style.display=(modo==="manual")?"block":"none"
-
 }
 
 function liquido(valor,taxa){
@@ -48,25 +23,9 @@ return valor*(1-(taxa/100))
 
 }
 
-function formatarTaxa(taxa){
-
-if(!taxa && taxa!==0) return "Não se aplica"
-
-return parseFloat(taxa).toFixed(2)+"%"
-
-}
-
 function simular(){
 
 let valor=parseFloat(document.getElementById("valor").value)
-
-if(!valor){
-
-alert("Informe o valor da venda")
-
-return
-
-}
 
 mp["pix"]=parseFloat(document.getElementById("mp_pix").value)
 mp["debito"]=parseFloat(document.getElementById("mp_debito").value)
@@ -78,22 +37,6 @@ mp[i]=parseFloat(document.getElementById("mp"+i).value)
 
 }
 
-let modo=document.querySelector('input[name="modoOutras"]:checked').value
-
-if(modo==="manual"){
-
-outras["pix"]=parseFloat(document.getElementById("manual_pix").value)
-outras["debito"]=parseFloat(document.getElementById("manual_debito").value)
-outras[1]=parseFloat(document.getElementById("manual1").value)
-
-for(let i=2;i<=21;i++){
-
-outras[i]=parseFloat(document.getElementById("manual"+i).value)
-
-}
-
-}else{
-
 outras["pix"]=parseFloat(document.getElementById("out_pix").value)
 outras["debito"]=parseFloat(document.getElementById("out_debito").value)
 outras[1]=parseFloat(document.getElementById("out1").value)
@@ -101,19 +44,24 @@ outras[1]=parseFloat(document.getElementById("out1").value)
 let mdr1=parseFloat(document.getElementById("mdr1").value)
 let mdr2=parseFloat(document.getElementById("mdr2").value)
 let mdr3=parseFloat(document.getElementById("mdr3").value)
+
 let ant=parseFloat(document.getElementById("antecipacao").value)
 
 for(let i=2;i<=6;i++){
+
 outras[i]=mdr1+(ant*(i-1))
+
 }
 
 for(let i=7;i<=12;i++){
+
 outras[i]=mdr2+(ant*(i-1))
+
 }
 
 for(let i=13;i<=21;i++){
+
 outras[i]=mdr3+(ant*(i-1))
-}
 
 }
 
@@ -137,10 +85,6 @@ let html=`<table>
 <th>R$ Outros</th>
 </tr>`
 
-let somaMP=0
-let somaOut=0
-let cont=0
-
 parcelas.forEach(p=>{
 
 let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x"
@@ -151,44 +95,33 @@ let taxaOut=outras[p]
 let valorMP=liquido(valor,taxaMP)
 let valorOut=liquido(valor,taxaOut)
 
-if(valorMP && valorOut){
+let classe=""
 
-somaMP+=valorMP
-somaOut+=valorOut
-cont++
-
-}
+if(valorOut>valorMP) classe="taxaRuim"
 
 html+=`<tr>
 
 <td>${nome}</td>
-<td>${formatarTaxa(taxaMP)}</td>
+<td>${taxaMP??"Não se aplica"}%</td>
 <td>${valorMP? "R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
-<td>${formatarTaxa(taxaOut)}</td>
-<td>${valorOut? "R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+<td class="${classe}">${taxaOut??"Não se aplica"}%</td>
+<td class="${classe}">${valorOut? "R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
 </tr>`
 
 })
 
 html+="</table>"
 
-let mediaMP=somaMP/cont
-let mediaOut=somaOut/cont
-
-html+=`
-
-<h3>Resultado</h3>
-
-Média líquida MP: R$ ${mediaMP.toFixed(2)}<br>
-Média líquida Outros: R$ ${mediaOut.toFixed(2)}
-
-<br><br>
-
-<button onclick="abrirFaturamento()">Simular faturamento</button>
-
-`
-
 document.getElementById("resultado").innerHTML=html
+
+document.getElementById("perguntaFaturamento").style.display="block"
+
+}
+
+function agradecer(){
+
+document.getElementById("balao").innerHTML=
+`<div class="balao">Obrigado por usar a Calculadora Falcões BA21 🦅</div>`
 
 }
 
@@ -223,24 +156,11 @@ outTotal+=faturamento*share1*(1-(outras[1]/100))
 outTotal+=faturamento*share26*(1-(outras[4]/100))
 outTotal+=faturamento*share712*(1-(outras[10]/100))
 
-let mpCustos=
-(parseFloat(document.getElementById("mp_cesta").value)||0)+
-(parseFloat(document.getElementById("mp_maquina").value)||0)+
-(parseFloat(document.getElementById("mp_sistema").value)||0)
-
-let outCustos=
-(parseFloat(document.getElementById("out_cesta").value)||0)+
-(parseFloat(document.getElementById("out_maquina").value)||0)+
-(parseFloat(document.getElementById("out_sistema").value)||0)
-
-mpTotal-=mpCustos
-outTotal-=outCustos
-
 let economia=(outTotal-mpTotal)*12
 
-document.getElementById("resultadoFaturamento").innerHTML=`
+document.getElementById("resultadoFaturamento").innerHTML=
 
-<h3>Economia anual estimada</h3>
+`<h3>Economia anual estimada</h3>
 
 Mercado Pago anual: R$ ${(mpTotal*12).toFixed(2)}<br>
 Outros anual: R$ ${(outTotal*12).toFixed(2)}
@@ -248,7 +168,48 @@ Outros anual: R$ ${(outTotal*12).toFixed(2)}
 <br><br>
 
 <b>Economia anual: R$ ${economia.toFixed(2)}</b>
-
 `
+
+criarGrafico(mpTotal,outTotal)
+
+}
+
+function criarGrafico(mp,out){
+
+new Chart(document.getElementById("grafico"),{
+
+type:"bar",
+
+data:{
+
+labels:["Mercado Pago","Outros"],
+
+datasets:[{
+
+label:"Resultado anual",
+
+data:[mp*12,out*12]
+
+}]
+
+}
+
+})
+
+}
+
+function exportar(){
+
+html2canvas(document.body).then(canvas=>{
+
+let link=document.createElement("a")
+
+link.download="simulacao.png"
+
+link.href=canvas.toDataURL()
+
+link.click()
+
+})
 
 }
