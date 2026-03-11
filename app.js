@@ -58,11 +58,9 @@ return parseFloat(taxa).toFixed(2)+"%";
 
 function liquido(valor,taxa){
 
-if(!taxa || isNaN(taxa)) return "NÃO DISPONÍVEL";
+if(!taxa || isNaN(taxa)) return null;
 
-let v=valor*(1-(taxa/100));
-
-return "R$ "+v.toFixed(2);
+return valor*(1-(taxa/100));
 
 }
 
@@ -126,7 +124,9 @@ gerarTabela(valor,mp,outras);
 
 function gerarTabela(valor,mp,outras){
 
-let html=`<table>
+let html=`<div id="relatorio">
+
+<table style="font-size:11px">
 
 <tr>
 <th>Parcela</th>
@@ -136,6 +136,13 @@ let html=`<table>
 <th>R$ Outros</th>
 </tr>`;
 
+let somaMP=0;
+let somaOut=0;
+let count=0;
+
+let vitoriasMP=0;
+let vitoriasOut=0;
+
 for(let i=0;i<=21;i++){
 
 let nome=i==0?"Pix":i+"x";
@@ -143,17 +150,27 @@ let nome=i==0?"Pix":i+"x";
 let taxaMP=mp[i];
 let taxaOut=outras[i];
 
+let valorMP=liquido(valor,taxaMP);
+let valorOut=liquido(valor,taxaOut);
+
 let classeMP="";
 let classeOut="";
 
-if(taxaMP && taxaOut){
+if(valorMP && valorOut){
 
-if(taxaMP>taxaOut){
-classeMP="taxaRuim";
+count++;
+
+somaMP+=valorMP;
+somaOut+=valorOut;
+
+if(valorMP>valorOut){
+vitoriasMP++;
+classeOut="taxaRuim";
 }
 
-if(taxaOut>taxaMP){
-classeOut="taxaRuim";
+if(valorOut>valorMP){
+vitoriasOut++;
+classeMP="taxaRuim";
 }
 
 }
@@ -164,11 +181,11 @@ html+=`<tr>
 
 <td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
 
-<td class="mp">${liquido(valor,taxaMP)}</td>
+<td>R$ ${valorMP?valorMP.toFixed(2):"-"}</td>
 
 <td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
 
-<td class="outras">${liquido(valor,taxaOut)}</td>
+<td>R$ ${valorOut?valorOut.toFixed(2):"-"}</td>
 
 </tr>`;
 
@@ -176,13 +193,44 @@ html+=`<tr>
 
 html+="</table>";
 
+let mediaMP=somaMP/count;
+let mediaOut=somaOut/count;
+
+let melhor="";
+
+if(mediaMP>mediaOut){
+
+melhor="🏆 Melhor opção geral: MERCADO PAGO";
+
+}else{
+
+melhor="🏆 Melhor opção geral: OUTRAS ADQUIRÊNCIAS";
+
+}
+
+html+=`<div style="margin-top:15px;font-size:14px">
+
+<b>${melhor}</b><br><br>
+
+Vitórias Mercado Pago: ${vitoriasMP}<br>
+Vitórias Outros: ${vitoriasOut}<br><br>
+
+Média líquida MP: R$ ${mediaMP.toFixed(2)}<br>
+Média líquida Outros: R$ ${mediaOut.toFixed(2)}
+
+</div></div>`;
+
 document.getElementById("resultado").innerHTML=html;
 
 }
 
 function exportar(){
 
-html2canvas(document.getElementById("resultado")).then(canvas=>{
+html2canvas(document.getElementById("relatorio"),{
+
+scale:2
+
+}).then(canvas=>{
 
 let link=document.createElement("a");
 
