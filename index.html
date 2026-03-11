@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Comparador de Taxas</title>
+<title>Calculadora de Taxas Falcões BA21</title>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -17,18 +17,8 @@
 
 <style>
 
-<script>
-
-if ("serviceWorker" in navigator) {
-navigator.serviceWorker.register("service-worker.js")
-.then(() => console.log("Service Worker registrado"));
-}
-
-</script>
-
-
 body{
-font-family:Segoe UI,Arial;
+font-family:Arial;
 background:#f4f6fa;
 margin:0;
 }
@@ -57,15 +47,15 @@ box-shadow:0 4px 10px rgba(0,0,0,0.08);
 
 input{
 width:100%;
-padding:8px;
-margin-bottom:10px;
+padding:6px;
+margin-bottom:8px;
 border:1px solid #ccc;
 border-radius:5px;
 }
 
 button{
 width:100%;
-padding:12px;
+padding:10px;
 margin-top:10px;
 border:none;
 border-radius:6px;
@@ -73,10 +63,6 @@ background:#2c7be5;
 color:white;
 font-weight:bold;
 cursor:pointer;
-}
-
-button:hover{
-background:#1a5edb;
 }
 
 table{
@@ -89,10 +75,6 @@ td,th{
 border:1px solid #ddd;
 padding:4px;
 text-align:center;
-}
-
-th{
-background:#f0f2f6;
 }
 
 .taxaRuim{
@@ -109,7 +91,6 @@ gap:15px;
 .opcoes{
 display:flex;
 gap:10px;
-font-size:14px;
 }
 
 </style>
@@ -119,7 +100,7 @@ font-size:14px;
 <body>
 
 <header>
-🦅 Comparador de Taxas
+🦅 CALCULADORA DE TAXAS FALCÕES DA BA21
 </header>
 
 <div class="container">
@@ -140,7 +121,7 @@ font-size:14px;
 
 <label>Crédito 1x (%)</label> <input id="mp1">
 
-<h4>Importar taxas por imagem</h4>
+<h4>Importar taxas do print</h4>
 
 <input type="file" id="uploadOCR">
 
@@ -207,6 +188,60 @@ font-size:14px;
 <div class="card">
 
 <div id="resultado"></div>
+
+</div>
+
+<div class="card" id="simulacaoFaturamento" style="display:none">
+
+<h3>📊 Simulação de faturamento</h3>
+
+<label>Faturamento médio mensal</label> <input id="faturamentoMensal">
+
+<h4>Concentração de vendas (%)</h4>
+
+<label>Pix</label> <input id="share_pix" value="20">
+
+<label>Débito</label> <input id="share_debito" value="20">
+
+<label>Crédito 1x</label> <input id="share_1x" value="20">
+
+<label>Parcelado 2-6x</label> <input id="share_2_6" value="20">
+
+<label>Parcelado 7-12x</label> <input id="share_7_12" value="20">
+
+<h4>Custos mensais</h4>
+
+<table>
+
+<tr>
+<th></th>
+<th>Mercado Pago</th>
+<th>Outros</th>
+</tr>
+
+<tr>
+<td>Cesta de serviços</td>
+<td><input id="mp_cesta"></td>
+<td><input id="out_cesta"></td>
+</tr>
+
+<tr>
+<td>Aluguel máquina</td>
+<td><input id="mp_maquina"></td>
+<td><input id="out_maquina"></td>
+</tr>
+
+<tr>
+<td>Sistema integrado</td>
+<td><input id="mp_sistema"></td>
+<td><input id="out_sistema"></td>
+</tr>
+
+</table>
+
+<button onclick="calcularFaturamento()">Calcular economia anual</button>
+
+<div id="resultadoFaturamento"></div>
 
 </div>
 
