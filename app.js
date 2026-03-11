@@ -12,15 +12,15 @@ document.getElementById("mpParcelas").innerHTML=html;
 
 let manualHTML="";
 
-manualHTML+=`<label>Pix (%)</label> <input id="manual_pix" type="number">`;
+manualHTML+=`<label>Pix (%)</label> <input id="manual_pix">`;
 
-manualHTML+=`<label>Débito (%)</label> <input id="manual_debito" type="number">`;
+manualHTML+=`<label>Débito (%)</label> <input id="manual_debito">`;
 
-manualHTML+=`<label>Crédito 1x (%)</label> <input id="manual1" type="number">`;
+manualHTML+=`<label>Crédito 1x (%)</label> <input id="manual1">`;
 
 for(let i=2;i<=21;i++){
 
-manualHTML+=`<label>${i}x (%)</label> <input id="manual${i}" type="number">`;
+manualHTML+=`<label>${i}x (%)</label> <input id="manual${i}">`;
 
 }
 
@@ -34,23 +34,15 @@ function alternarModo(){
 
 let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
-if(modo==="faixa"){
-
-document.getElementById("modoFaixa").style.display="block";
-document.getElementById("modoManual").style.display="none";
-
-}else{
-
-document.getElementById("modoFaixa").style.display="none";
-document.getElementById("modoManual").style.display="block";
-
-}
+document.getElementById("modoFaixa").style.display=(modo==="faixa")?"block":"none";
+document.getElementById("modoManual").style.display=(modo==="manual")?"block":"none";
 
 }
 
 function formatarTaxa(taxa){
 
-if(!taxa || isNaN(taxa)) return "-";
+if(taxa === "" || taxa === null || taxa === undefined || isNaN(taxa))
+return "Não se aplica";
 
 return parseFloat(taxa).toFixed(2)+"%";
 
@@ -58,7 +50,8 @@ return parseFloat(taxa).toFixed(2)+"%";
 
 function liquido(valor,taxa){
 
-if(!taxa || isNaN(taxa)) return null;
+if(taxa === "" || taxa === null || taxa === undefined || isNaN(taxa))
+return null;
 
 return valor*(1-(taxa/100));
 
@@ -71,7 +64,8 @@ let valor=parseFloat(document.getElementById("valor").value);
 let mp={};
 let outras={};
 
-mp[0]=parseFloat(document.getElementById("mp_pix").value);
+mp["pix"]=parseFloat(document.getElementById("mp_pix").value);
+mp["debito"]=parseFloat(document.getElementById("mp_debito").value);
 mp[1]=parseFloat(document.getElementById("mp1").value);
 
 for(let i=2;i<=21;i++){
@@ -82,26 +76,23 @@ let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
 if(modo==="manual"){
 
-outras[0]=parseFloat(document.getElementById("manual_pix").value);
+outras["pix"]=parseFloat(document.getElementById("manual_pix").value);
 outras["debito"]=parseFloat(document.getElementById("manual_debito").value);
 outras[1]=parseFloat(document.getElementById("manual1").value);
 
 for(let i=2;i<=21;i++){
-
 outras[i]=parseFloat(document.getElementById("manual"+i).value);
-
 }
 
 }else{
 
-outras[0]=parseFloat(document.getElementById("out_pix").value);
+outras["pix"]=parseFloat(document.getElementById("out_pix").value);
 outras["debito"]=parseFloat(document.getElementById("out_debito").value);
 outras[1]=parseFloat(document.getElementById("out1").value);
 
 let mdr1=parseFloat(document.getElementById("mdr1").value);
 let mdr2=parseFloat(document.getElementById("mdr2").value);
 let mdr3=parseFloat(document.getElementById("mdr3").value);
-
 let ant=parseFloat(document.getElementById("antecipacao").value);
 
 for(let i=2;i<=6;i++){
@@ -124,9 +115,11 @@ gerarTabela(valor,mp,outras);
 
 function gerarTabela(valor,mp,outras){
 
-let html=`<div id="relatorio">
+let parcelas=["pix","debito",1];
 
-<table style="font-size:11px">
+for(let i=2;i<=21;i++) parcelas.push(i);
+
+let html=`<table>
 
 <tr>
 <th>Parcela</th>
@@ -136,19 +129,12 @@ let html=`<div id="relatorio">
 <th>R$ Outros</th>
 </tr>`;
 
-let somaMP=0;
-let somaOut=0;
-let count=0;
+parcelas.forEach(p=>{
 
-let vitoriasMP=0;
-let vitoriasOut=0;
+let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
 
-for(let i=0;i<=21;i++){
-
-let nome=i==0?"Pix":i+"x";
-
-let taxaMP=mp[i];
-let taxaOut=outras[i];
+let taxaMP=mp[p];
+let taxaOut=outras[p];
 
 let valorMP=liquido(valor,taxaMP);
 let valorOut=liquido(valor,taxaOut);
@@ -156,20 +142,13 @@ let valorOut=liquido(valor,taxaOut);
 let classeMP="";
 let classeOut="";
 
-if(valorMP && valorOut){
-
-count++;
-
-somaMP+=valorMP;
-somaOut+=valorOut;
+if(valorMP!==null && valorOut!==null){
 
 if(valorMP>valorOut){
-vitoriasMP++;
 classeOut="taxaRuim";
 }
 
 if(valorOut>valorMP){
-vitoriasOut++;
 classeMP="taxaRuim";
 }
 
@@ -181,44 +160,17 @@ html+=`<tr>
 
 <td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
 
-<td>R$ ${valorMP?valorMP.toFixed(2):"-"}</td>
+<td>${valorMP!==null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
 
 <td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
 
-<td>R$ ${valorOut?valorOut.toFixed(2):"-"}</td>
+<td>${valorOut!==null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
 
 </tr>`;
 
-}
+});
 
 html+="</table>";
-
-let mediaMP=somaMP/count;
-let mediaOut=somaOut/count;
-
-let melhor="";
-
-if(mediaMP>mediaOut){
-
-melhor="🏆 Melhor opção geral: MERCADO PAGO";
-
-}else{
-
-melhor="🏆 Melhor opção geral: OUTRAS ADQUIRÊNCIAS";
-
-}
-
-html+=`<div style="margin-top:15px;font-size:14px">
-
-<b>${melhor}</b><br><br>
-
-Vitórias Mercado Pago: ${vitoriasMP}<br>
-Vitórias Outros: ${vitoriasOut}<br><br>
-
-Média líquida MP: R$ ${mediaMP.toFixed(2)}<br>
-Média líquida Outros: R$ ${mediaOut.toFixed(2)}
-
-</div></div>`;
 
 document.getElementById("resultado").innerHTML=html;
 
@@ -226,18 +178,12 @@ document.getElementById("resultado").innerHTML=html;
 
 function exportar(){
 
-html2canvas(document.getElementById("relatorio"),{
-
-scale:2
-
-}).then(canvas=>{
+html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
 
 let link=document.createElement("a");
 
 link.download="comparacao_taxas.png";
-
 link.href=canvas.toDataURL();
-
 link.click();
 
 });
@@ -247,16 +193,11 @@ link.click();
 async function processarOCR(event){
 
 let file=event.target.files[0];
-
 if(!file) return;
 
-document.getElementById("statusOCR").innerText="🔄 Carregando OCR...";
-
-try{
+document.getElementById("statusOCR").innerText="Lendo imagem...";
 
 const worker = await Tesseract.createWorker("eng");
-
-document.getElementById("statusOCR").innerText="🔎 Lendo taxas...";
 
 const { data } = await worker.recognize(file);
 
@@ -266,34 +207,19 @@ let texto=data.text;
 
 let numeros=texto.match(/[0-9]+[.,][0-9]+/g);
 
-if(!numeros){
-
-document.getElementById("statusOCR").innerText="❌ Não consegui identificar taxas.";
-
-return;
-
-}
-
-let campos=[];
+if(!numeros) return;
 
 for(let i=2;i<=21;i++){
-campos.push("mp"+i);
-}
 
-for(let i=0;i<numeros.length && i<campos.length;i++){
+if(numeros[i-2]){
 
-let valor=numeros[i].replace(",",".");
-
-document.getElementById(campos[i]).value=parseFloat(valor).toFixed(2);
+document.getElementById("mp"+i).value=
+parseFloat(numeros[i-2].replace(",",".")).toFixed(2);
 
 }
 
-document.getElementById("statusOCR").innerText="✅ Taxas carregadas com sucesso.";
-
-}catch(e){
-
-document.getElementById("statusOCR").innerText="❌ Erro ao processar imagem.";
-
 }
+
+document.getElementById("statusOCR").innerText="Taxas carregadas";
 
 }
