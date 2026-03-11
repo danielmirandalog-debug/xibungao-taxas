@@ -13,8 +13,6 @@
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="app.js" defer></script>
 
 <style>
@@ -39,11 +37,11 @@ font-weight:bold;
 }
 
 .sub{
-font-size:15px;
+font-size:14px;
 }
 
 .container{
-max-width:950px;
+max-width:1000px;
 margin:auto;
 padding:20px;
 }
@@ -58,10 +56,10 @@ box-shadow:0 4px 10px rgba(0,0,0,0.08);
 
 input{
 width:100%;
-padding:7px;
+padding:6px;
 margin-bottom:8px;
-border:1px solid #ccc;
 border-radius:6px;
+border:1px solid #ccc;
 }
 
 button{
@@ -72,6 +70,7 @@ background:#2D3277;
 color:white;
 font-weight:bold;
 cursor:pointer;
+margin-right:10px;
 }
 
 table{
@@ -80,7 +79,7 @@ border-collapse:collapse;
 font-size:12px;
 }
 
-td,th{
+th,td{
 border:1px solid #ddd;
 padding:6px;
 text-align:center;
@@ -149,15 +148,11 @@ text-align:center;
 
 <div class="card">
 
-<button onclick="simular()">SIMULAR</button> <button onclick="exportar()">EXPORTAR RELATÓRIO</button>
+<button onclick="simular()">SIMULAR</button> <button onclick="exportarTabela()">EXPORTAR RESULTADO</button>
 
 </div>
 
-<div class="card">
-
-<div id="resultado"></div>
-
-</div>
+<div class="card" id="resultado"></div>
 
 <div class="card" id="simulacaoFaturamento" style="display:none">
 
@@ -213,8 +208,6 @@ Concentração de vendas
 </table>
 
 <button onclick="calcularFaturamento()">Calcular economia anual</button>
-
-<canvas id="grafico"></canvas>
 
 <div id="resultadoFaturamento"></div>
 
