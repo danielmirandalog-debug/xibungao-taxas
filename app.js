@@ -26,6 +26,8 @@ document.getElementById("manualParcelas").innerHTML=manualHTML;
 
 document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
+document.getElementById("uploadOCRConcorrencia").addEventListener("change",processarOCRConcorrencia);
+
 };
 
 function alternarModo(){
@@ -239,10 +241,6 @@ link.click();
 
 }
 
-/* ========================= */
-/* OCR PROFISSIONAL */
-/* ========================= */
-
 async function processarOCR(event){
 
 let file=event.target.files[0];
@@ -258,20 +256,8 @@ await worker.terminate();
 
 let texto=data.text.toLowerCase();
 
-console.log("OCR TEXTO:",texto);
-
-/* limpeza de caracteres ruins */
-
-texto=texto
-.replace(/o/g,"0")
-.replace(/s/g,"5")
-.replace(/l/g,"1");
-
-/* regex inteligente */
-
 let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
 
-let encontrados=0;
 let match;
 
 while((match=regex.exec(texto))!==null){
@@ -281,42 +267,48 @@ let taxa=parseFloat(match[2].replace(",","."));
 
 if(parcela>=2 && parcela<=21){
 
-let campo=document.getElementById("mp"+parcela);
-
-if(campo){
-
-campo.value=taxa.toFixed(2);
-encontrados++;
+document.getElementById("mp"+parcela).value=taxa.toFixed(2);
 
 }
 
 }
 
-}
-
-/* fallback caso OCR não encontre parcelas */
-
-if(encontrados===0){
-
-let numeros=texto.match(/[0-9]+[.,][0-9]+/g);
-
-if(numeros){
-
-for(let i=2;i<=21;i++){
-
-if(numeros[i-2]){
-
-document.getElementById("mp"+i).value=
-parseFloat(numeros[i-2].replace(",",".")).toFixed(2);
+document.getElementById("statusOCR").innerText="Taxas carregadas";
 
 }
 
-}
+async function processarOCRConcorrencia(event){
+
+let file=event.target.files[0];
+if(!file) return;
+
+document.getElementById("statusOCRConc").innerText="Processando imagem...";
+
+const worker = await Tesseract.createWorker("eng");
+
+const { data } = await worker.recognize(file);
+
+await worker.terminate();
+
+let texto=data.text.toLowerCase();
+
+let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
+
+let match;
+
+while((match=regex.exec(texto))!==null){
+
+let parcela=parseInt(match[1]);
+let taxa=parseFloat(match[2].replace(",","."));
+
+if(parcela>=2 && parcela<=21){
+
+document.getElementById("manual"+parcela).value=taxa.toFixed(2);
 
 }
 
 }
 
-document.getElementById("statusOCR").innerText="Taxas carregadas com OCR PRO";
+document.getElementById("statusOCRConc").innerText="Taxas da concorrência carregadas";
 
 }
