@@ -10,9 +10,9 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
-document.getElementById("uploadOCR").addEventListener("change",lerOCR);
+document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
-}
+};
 
 function liquido(valor,taxa){
 
@@ -35,9 +35,7 @@ mp[0]=parseFloat(document.getElementById("mp_pix").value);
 mp[1]=parseFloat(document.getElementById("mp1").value);
 
 for(let i=2;i<=21;i++){
-
 mp[i]=parseFloat(document.getElementById("mp"+i).value);
-
 }
 
 outras[0]=parseFloat(document.getElementById("out_pix").value);
@@ -50,21 +48,15 @@ let mdr3=parseFloat(document.getElementById("mdr3").value);
 let ant=parseFloat(document.getElementById("antecipacao").value);
 
 for(let i=2;i<=6;i++){
-
 outras[i]=mdr1+(ant*(i-1));
-
 }
 
 for(let i=7;i<=12;i++){
-
 outras[i]=mdr2+(ant*(i-1));
-
 }
 
 for(let i=13;i<=21;i++){
-
 outras[i]=mdr3+(ant*(i-1));
-
 }
 
 gerarTabela(valor,mp,outras);
@@ -76,13 +68,11 @@ function gerarTabela(valor,mp,outras){
 let html=`<table>
 
 <tr>
-
 <th>Parcela</th>
 <th>Taxa MP</th>
 <th>R$ Mercado Pago</th>
 <th>Taxa Concorrência</th>
 <th>R$ Concorrência</th>
-
 </tr>`;
 
 for(let i=0;i<=21;i++){
@@ -98,15 +88,11 @@ let classeOut="";
 if(taxaMP && taxaOut){
 
 if(taxaMP>taxaOut){
-
 classeMP="taxaRuim";
-
 }
 
 if(taxaOut>taxaMP){
-
 classeOut="taxaRuim";
-
 }
 
 }
@@ -149,29 +135,27 @@ link.click();
 
 }
 
-function lerOCR(event){
+async function processarOCR(event){
 
 let file=event.target.files[0];
 
 if(!file) return;
 
-document.getElementById("statusOCR").innerText="🔎 Lendo imagem...";
+document.getElementById("statusOCR").innerText="🔄 Carregando OCR...";
 
-Tesseract.recognize(
+try{
 
-file,
+const worker = await Tesseract.createWorker("eng");
 
-"eng",
+document.getElementById("statusOCR").innerText="🔎 Lendo taxas...";
 
-{
+const { data } = await worker.recognize(file);
 
-tessedit_char_whitelist:"0123456789.,%"
+await worker.terminate();
 
-}
+let texto=data.text;
 
-).then(({data:{text}})=>{
-
-let numeros=text.match(/[0-9]+[.,][0-9]+/g);
+let numeros=texto.match(/[0-9]+[.,][0-9]+/g);
 
 if(!numeros){
 
@@ -184,20 +168,23 @@ return;
 let campos=[];
 
 for(let i=2;i<=21;i++){
-
 campos.push("mp"+i);
-
 }
 
 for(let i=0;i<numeros.length && i<campos.length;i++){
 
 let valor=numeros[i].replace(",",".");
+
 document.getElementById(campos[i]).value=valor;
 
 }
 
-document.getElementById("statusOCR").innerText="✅ Taxas carregadas automaticamente.";
+document.getElementById("statusOCR").innerText="✅ Taxas carregadas com sucesso.";
 
-});
+}catch(e){
+
+document.getElementById("statusOCR").innerText="❌ Erro ao processar imagem.";
+
+}
 
 }
