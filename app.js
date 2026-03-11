@@ -14,9 +14,17 @@ document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
 };
 
+function formatarTaxa(taxa){
+
+if(!taxa || isNaN(taxa)) return "-";
+
+return parseFloat(taxa).toFixed(2)+"%";
+
+}
+
 function liquido(valor,taxa){
 
-if(!taxa || isNaN(taxa)) return "NÃO SE APLICA";
+if(!taxa || isNaN(taxa)) return "NÃO DISPONÍVEL";
 
 let v=valor*(1-(taxa/100));
 
@@ -101,11 +109,11 @@ html+=`<tr>
 
 <td>${nome}</td>
 
-<td class="${classeMP}">${taxaMP?taxaMP+"%":"-"}</td>
+<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
 
 <td class="mp">${liquido(valor,taxaMP)}</td>
 
-<td class="${classeOut}">${taxaOut?taxaOut+"%":"-"}</td>
+<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
 
 <td class="outras">${liquido(valor,taxaOut)}</td>
 
@@ -175,7 +183,7 @@ for(let i=0;i<numeros.length && i<campos.length;i++){
 
 let valor=numeros[i].replace(",",".");
 
-document.getElementById(campos[i]).value=valor;
+document.getElementById(campos[i]).value=parseFloat(valor).toFixed(2);
 
 }
 
