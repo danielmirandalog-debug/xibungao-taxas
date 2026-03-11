@@ -10,9 +10,39 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
+let manualHTML="";
+
+for(let i=0;i<=21;i++){
+
+let nome=i==0?"Pix":i+"x";
+
+manualHTML+=`<label>${nome} (%)</label> <input id="manual${i}" type="number">`;
+
+}
+
+document.getElementById("manualParcelas").innerHTML=manualHTML;
+
 document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
 };
+
+function alternarModo(){
+
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="faixa"){
+
+document.getElementById("modoFaixa").style.display="block";
+document.getElementById("modoManual").style.display="none";
+
+}else{
+
+document.getElementById("modoFaixa").style.display="none";
+document.getElementById("modoManual").style.display="block";
+
+}
+
+}
 
 function formatarTaxa(taxa){
 
@@ -46,6 +76,18 @@ for(let i=2;i<=21;i++){
 mp[i]=parseFloat(document.getElementById("mp"+i).value);
 }
 
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+for(let i=0;i<=21;i++){
+
+outras[i]=parseFloat(document.getElementById("manual"+i).value);
+
+}
+
+}else{
+
 outras[0]=parseFloat(document.getElementById("out_pix").value);
 outras[1]=parseFloat(document.getElementById("out1").value);
 
@@ -65,6 +107,8 @@ outras[i]=mdr2+(ant*(i-1));
 
 for(let i=13;i<=21;i++){
 outras[i]=mdr3+(ant*(i-1));
+}
+
 }
 
 gerarTabela(valor,mp,outras);
