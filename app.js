@@ -139,6 +139,13 @@ let html=`<table>
 <th>R$ Outros</th>
 </tr>`;
 
+let somaMP=0;
+let somaOut=0;
+let cont=0;
+
+let vitoriaMP=0;
+let vitoriaOut=0;
+
 parcelas.forEach(p=>{
 
 let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
@@ -154,12 +161,19 @@ let classeOut="";
 
 if(valorMP!==null && valorOut!==null){
 
+cont++;
+
+somaMP+=valorMP;
+somaOut+=valorOut;
+
 if(valorMP>valorOut){
 classeOut="taxaRuim";
+vitoriaMP++;
 }
 
 if(valorOut>valorMP){
 classeMP="taxaRuim";
+vitoriaOut++;
 }
 
 }
@@ -181,6 +195,33 @@ html+=`<tr>
 });
 
 html+="</table>";
+
+let mediaMP=(cont>0)?(somaMP/cont):0;
+let mediaOut=(cont>0)?(somaOut/cont):0;
+
+let vencedor=(mediaMP>mediaOut)?"MERCADO PAGO":"OUTRAS ADQUIRÊNCIAS";
+
+html+=`
+
+<div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:8px">
+
+<h3>🏆 RESULTADO DA COMPARAÇÃO</h3>
+
+<b>Melhor opção geral: ${vencedor}</b>
+
+<br><br>
+
+Vitórias Mercado Pago: ${vitoriaMP}<br>
+Vitórias Outros: ${vitoriaOut}
+
+<br><br>
+
+Média líquida MP: R$ ${mediaMP.toFixed(2)}<br>
+Média líquida Outros: R$ ${mediaOut.toFixed(2)}
+
+</div>
+
+`;
 
 document.getElementById("resultado").innerHTML=html;
 
