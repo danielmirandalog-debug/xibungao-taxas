@@ -9,13 +9,9 @@
 
 <title>Comparador de Taxas</title>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
-<link rel="manifest" href="manifest.json">
 
 <script src="app.js" defer></script>
 
@@ -76,12 +72,12 @@ background:#1a5edb;
 table{
 width:100%;
 border-collapse:collapse;
-font-size:12px;
+font-size:11px;
 }
 
 td,th{
 border:1px solid #ddd;
-padding:5px;
+padding:4px;
 text-align:center;
 }
 
@@ -94,8 +90,16 @@ color:red;
 font-weight:bold;
 }
 
-canvas{
-margin-top:20px;
+.tituloModo{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.opcoes{
+display:flex;
+gap:10px;
+font-size:14px;
 }
 
 </style>
@@ -138,7 +142,11 @@ margin-top:20px;
 
 <div class="card">
 
+<div class="tituloModo">
+
 <h3>Outras adquirências</h3>
+
+<div class="opcoes">
 
 <label>
 <input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()"> Faixa MDR
@@ -147,6 +155,10 @@ margin-top:20px;
 <label>
 <input type="radio" name="modoOutras" value="manual" onclick="alternarModo()"> Manual
 </label>
+
+</div>
+
+</div>
 
 <div id="modoFaixa">
 
@@ -167,7 +179,9 @@ margin-top:20px;
 </div>
 
 <div id="modoManual" style="display:none">
+
 <div id="manualParcelas"></div>
+
 </div>
 
 </div>
@@ -183,8 +197,6 @@ margin-top:20px;
 <div class="card">
 
 <div id="resultado"></div>
-
-<canvas id="grafico"></canvas>
 
 </div>
 
