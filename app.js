@@ -79,8 +79,8 @@ let html=`<table>
 <th>Parcela</th>
 <th>Taxa MP</th>
 <th>R$ Mercado Pago</th>
-<th>Taxa Concorrência</th>
-<th>R$ Concorrência</th>
+<th>Taxa Outros</th>
+<th>R$ Outros</th>
 </tr>`;
 
 for(let i=0;i<=21;i++){
