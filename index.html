@@ -79,6 +79,10 @@ font-weight:bold;
 margin:10px 0;
 }
 
+.radioGroup{
+margin-bottom:10px;
+}
+
 </style>
 
 </head>
@@ -109,6 +113,22 @@ margin:10px 0;
 
 <h3>Outras adquirências</h3>
 
+<div class="radioGroup">
+
+<label>
+<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()">
+Inserção por Faixa MDR
+</label>
+
+<label>
+<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()">
+Inserção Manual
+</label>
+
+</div>
+
+<div id="modoFaixa">
+
 <label>Pix (%)</label> <input id="out_pix">
 
 <label>Débito (%)</label> <input id="out_debito">
@@ -122,6 +142,14 @@ margin:10px 0;
 <label>MDR 13-21x</label> <input id="mdr3">
 
 <label>Antecipação mensal (%)</label> <input id="antecipacao">
+
+</div>
+
+<div id="modoManual" style="display:none">
+
+<div id="manualParcelas"></div>
+
+</div>
 
 <button onclick="simular()">SIMULAR</button>
 
