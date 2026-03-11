@@ -79,8 +79,17 @@ font-weight:bold;
 margin:10px 0;
 }
 
+.tituloModo{
+display:flex;
+align-items:center;
+gap:15px;
+margin-top:20px;
+}
+
 .radioGroup{
-margin-bottom:10px;
+display:flex;
+gap:10px;
+font-size:14px;
 }
 
 </style>
@@ -111,19 +120,23 @@ margin-bottom:10px;
 
 <div id="mpParcelas"></div>
 
+<div class="tituloModo">
+
 <h3>Outras adquirências</h3>
 
 <div class="radioGroup">
 
 <label>
 <input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()">
-Inserção por Faixa MDR
+Faixa MDR
 </label>
 
 <label>
 <input type="radio" name="modoOutras" value="manual" onclick="alternarModo()">
-Inserção Manual
+Manual
 </label>
+
+</div>
 
 </div>
 
