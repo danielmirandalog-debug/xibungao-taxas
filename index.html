@@ -90,6 +90,35 @@ gap:20px;
 margin-bottom:15px;
 }
 
+.tituloFat{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.contador{
+font-weight:bold;
+font-size:18px;
+color:#2c7be5;
+}
+
+.barraContainer{
+width:100%;
+height:22px;
+background:#ddd;
+border-radius:12px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.barraProgresso{
+height:100%;
+width:0%;
+background:#2c7be5;
+transition:width 0.3s;
+}
+
 </style>
 
 </head>
@@ -103,10 +132,8 @@ margin-bottom:15px;
 <div class="container">
 
 <div class="card">
-
 <label>Valor da venda</label>
 <input id="valor" type="number">
-
 </div>
 
 <div class="card">
@@ -123,7 +150,6 @@ margin-bottom:15px;
 <input id="mp1">
 
 <h4>Importar taxas por imagem</h4>
-
 <input type="file" id="uploadOCR">
 <div id="statusOCR"></div>
 
@@ -186,7 +212,6 @@ Preencher manualmente
 <input id="out1_manual">
 
 <h4>Importar taxas por imagem</h4>
-
 <input type="file" id="uploadOCRConc">
 <div id="statusOCRConc"></div>
 
@@ -207,6 +232,50 @@ Preencher manualmente
 <div class="card">
 
 <button onclick="exportar()">EXPORTAR RELATÓRIO</button>
+
+</div>
+
+<div class="card">
+
+<div class="tituloFat">
+
+<h3>Simulação de faturamento</h3>
+
+<div class="contador" id="contador">0%</div>
+
+</div>
+
+<div class="barraContainer">
+<div class="barraProgresso" id="barra"></div>
+</div>
+
+<label>Faturamento mensal</label>
+<input id="faturamento">
+
+<label>Pix (%)</label>
+<input id="share_pix" oninput="atualizarBarra()">
+
+<label>Débito (%)</label>
+<input id="share_debito" oninput="atualizarBarra()">
+
+<label>Crédito à vista (%)</label>
+<input id="share_1x" oninput="atualizarBarra()">
+
+<label>Crédito 2x (%)</label>
+<input id="share_2x" oninput="atualizarBarra()">
+
+<label>Crédito 4x (%)</label>
+<input id="share_4x" oninput="atualizarBarra()">
+
+<label>Crédito 6x (%)</label>
+<input id="share_6x" oninput="atualizarBarra()">
+
+<label>Crédito 10x (%)</label>
+<input id="share_10x" oninput="atualizarBarra()">
+
+<button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
+
+<div id="resultadoFaturamento"></div>
 
 </div>
 
