@@ -121,7 +121,7 @@ document.getElementById("resultado").innerHTML=html;
 
 function atualizarBarra(){
 
-let campos=[
+let ids=[
 "share_pix",
 "share_debito",
 "share_1x",
@@ -133,29 +133,43 @@ let campos=[
 
 let total=0;
 
-campos.forEach(id=>{
-let valor=parseFloat(document.getElementById(id).value);
-if(!isNaN(valor)) total+=valor;
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
 });
 
 if(total>100){
 
 alert("A soma dos percentuais não pode ultrapassar 100%.");
 
-let ativo=document.activeElement;
-ativo.value="";
+document.activeElement.value="";
 
 total=0;
 
-campos.forEach(id=>{
-let valor=parseFloat(document.getElementById(id).value);
-if(!isNaN(valor)) total+=valor;
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
 });
 
 }
 
-document.getElementById("barra").style.width=total+"%";
 document.getElementById("contador").innerText=total+"%";
+
+document.getElementById("barra").style.width=total+"%";
 
 }
 
@@ -239,7 +253,11 @@ while((match=regex.exec(texto))!==null){
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",","."));
 
-document.getElementById("mp"+parcela).value=taxa.toFixed(2);
+let campo=document.getElementById("mp"+parcela);
+
+if(campo){
+campo.value=taxa.toFixed(2);
+}
 
 }
 
