@@ -90,18 +90,26 @@ color:red;
 font-weight:bold;
 }
 
-.tituloFaturamento{
+.tituloFat{
 display:flex;
+justify-content:space-between;
 align-items:center;
-gap:15px;
+margin-bottom:10px;
+}
+
+.contador{
+font-weight:bold;
+font-size:18px;
+color:#2c7be5;
 }
 
 .barraContainer{
-flex:1;
-height:10px;
+width:100%;
+height:22px;
 background:#ddd;
-border-radius:10px;
+border-radius:12px;
 overflow:hidden;
+margin-bottom:20px;
 }
 
 .barraProgresso{
@@ -179,13 +187,17 @@ transition:width 0.3s;
 
 <div class="card">
 
-<div class="tituloFaturamento">
+<div class="tituloFat">
 
 <h3>Simulação de faturamento</h3>
 
-<div class="barraContainer">
-<div class="barraProgresso" id="barra"></div>
+<div class="contador" id="contador">0%</div>
+
 </div>
+
+<div class="barraContainer">
+
+<div class="barraProgresso" id="barra"></div>
 
 </div>
 
