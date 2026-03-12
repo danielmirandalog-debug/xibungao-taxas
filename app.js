@@ -12,6 +12,9 @@ document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
 }
 
+let taxasMP={}
+let taxasOutras={}
+
 function liquido(valor,taxa){
 
 if(taxa===undefined || taxa===null || taxa==="") return null;
@@ -60,6 +63,9 @@ let ant=parseFloat(document.getElementById("antecipacao").value);
 for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1));
+
+taxasMP=mp
+taxasOutras=outras
 
 gerarTabela(valor,mp,outras);
 
@@ -119,150 +125,85 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
-function atualizarBarra(){
-
-let ids=[
-"share_pix",
-"share_debito",
-"share_1x",
-"share_2x",
-"share_4x",
-"share_6x",
-"share_10x"
-];
-
-let total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-if(total>100){
-
-alert("A soma dos percentuais não pode ultrapassar 100%.");
-
-document.activeElement.value="";
-
-total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-}
-
-document.getElementById("contador").innerText=total+"%";
-
-document.getElementById("barra").style.width=total+"%";
-
-}
-
 function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
 
-let shares=[
-parseFloat(share_pix.value),
-parseFloat(share_debito.value),
-parseFloat(share_1x.value),
-parseFloat(share_2x.value),
-parseFloat(share_4x.value),
-parseFloat(share_6x.value),
-parseFloat(share_10x.value)
-];
-
-if(shares.some(isNaN)){
-alert("Preencha todos os percentuais");
-return;
+let shares={
+pix:parseFloat(share_pix.value),
+debito:parseFloat(share_debito.value),
+1:parseFloat(share_1x.value),
+2:parseFloat(share_2x.value),
+4:parseFloat(share_4x.value),
+6:parseFloat(share_6x.value),
+10:parseFloat(share_10x.value)
 }
 
-let total=shares.reduce((a,b)=>a+b,0);
+let total=0
+
+for(let k in shares){
+if(isNaN(shares[k])){
+alert("Preencha todos os percentuais")
+return
+}
+total+=shares[k]
+}
 
 if(total!==100){
-alert("A soma deve ser exatamente 100%");
-return;
+alert("A soma deve ser exatamente 100%")
+return
 }
 
-document.getElementById("resultadoFaturamento").innerHTML=
-`<div style="padding:15px;border:1px solid #ddd;border-radius:8px">
+let custoMP=0
+let custoOut=0
 
-Faturamento analisado: <b>R$ ${faturamento.toFixed(2)}</b>
+let html=`<table>
 
-<br><br>
+<tr>
+<th>Forma</th>
+<th>Faturamento</th>
+<th>Custo MP (ano)</th>
+<th>Custo Concorrência (ano)</th>
+</tr>`
 
-Distribuição completa (100%)
+for(let forma in shares){
 
-</div>`;
+let percentual=shares[forma]/100
+let fat=faturamento*percentual
 
-}
+let taxaMP=taxasMP[forma]
+let taxaOut=taxasOutras[forma]
 
-function exportar(){
+let custoAnoMP=(fat*(taxaMP/100))*12
+let custoAnoOut=(fat*(taxaOut/100))*12
 
-html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+custoMP+=custoAnoMP
+custoOut+=custoAnoOut
 
-let link=document.createElement("a");
+let nome=forma=="pix"?"Pix":forma=="debito"?"Débito":forma+"x"
 
-link.download="comparacao_taxas.png";
+html+=`<tr>
 
-link.href=canvas.toDataURL();
+<td>${nome}</td>
+<td>R$ ${fat.toFixed(2)}</td>
+<td>R$ ${custoAnoMP.toFixed(2)}</td>
+<td>R$ ${custoAnoOut.toFixed(2)}</td>
 
-link.click();
-
-alert("Relatório exportado com sucesso!");
-
-});
-
-}
-
-async function processarOCR(event){
-
-let file=event.target.files[0];
-
-if(!file) return;
-
-document.getElementById("statusOCR").innerText="Processando imagem...";
-
-const worker = await Tesseract.createWorker("eng");
-
-const { data } = await worker.recognize(file);
-
-await worker.terminate();
-
-let texto=data.text.toLowerCase();
-
-let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
-
-let match;
-
-while((match=regex.exec(texto))!==null){
-
-let parcela=parseInt(match[1]);
-let taxa=parseFloat(match[2].replace(",","."));
-
-let campo=document.getElementById("mp"+parcela);
-
-if(campo){
-campo.value=taxa.toFixed(2);
-}
+</tr>`
 
 }
 
-document.getElementById("statusOCR").innerText="Taxas carregadas";
+html+=`</table>`
+
+let economia=custoOut-custoMP
+
+html+=`<br>
+
+<b>Custo anual Mercado Pago:</b> R$ ${custoMP.toFixed(2)}<br> <b>Custo anual Concorrência:</b> R$ ${custoOut.toFixed(2)}<br><br>
+
+<b>ECONOMIA ANUAL:</b> R$ ${economia.toFixed(2)}
+`
+
+document.getElementById("resultadoFaturamento").innerHTML=html
 
 }
