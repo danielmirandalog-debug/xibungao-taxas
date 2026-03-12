@@ -231,125 +231,18 @@ function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
 
-if(!faturamento){
-alert("Informe o faturamento mensal");
-return;
-}
-
-let shares={
-pix:parseFloat(document.getElementById("share_pix").value)||0,
-debito:parseFloat(document.getElementById("share_debito").value)||0,
-c1:parseFloat(document.getElementById("share_1x").value)||0,
-c2:parseFloat(document.getElementById("share_2x").value)||0,
-c4:parseFloat(document.getElementById("share_4x").value)||0,
-c6:parseFloat(document.getElementById("share_6x").value)||0,
-c10:parseFloat(document.getElementById("share_10x").value)||0
-};
-
-let total=0;
-
-for(let k in shares){
-total+=shares[k];
-}
-
-if(total!=100){
-alert("A soma dos percentuais precisa ser exatamente 100%");
-return;
-}
-
-function taxa(id){
-let el=document.getElementById(id);
-if(!el || el.value==="") return 0;
-return parseFloat(el.value);
-}
-
-let mp={
-pix:taxa("mp_pix"),
-debito:taxa("mp_debito"),
-c1:taxa("mp1"),
-c2:taxa("mp2"),
-c4:taxa("mp4"),
-c6:taxa("mp6"),
-c10:taxa("mp10")
-};
-
-let modo=document.querySelector('input[name="modoOutras"]:checked').value;
-
-let out={};
-
-if(modo==="manual"){
-
-out={
-pix:taxa("out_pix_manual"),
-debito:taxa("out_debito_manual"),
-c1:taxa("out1_manual"),
-c2:taxa("out2_manual"),
-c4:taxa("out4_manual"),
-c6:taxa("out6_manual"),
-c10:taxa("out10_manual")
-};
-
-}else{
-
-let mdr1=parseFloat(document.getElementById("mdr1").value)||0;
-let mdr2=parseFloat(document.getElementById("mdr2").value)||0;
-let ant=parseFloat(document.getElementById("antecipacao").value)||0;
-
-out={
-pix:taxa("out_pix"),
-debito:taxa("out_debito"),
-c1:taxa("out1"),
-c2:mdr1+(ant*1),
-c4:mdr1+(ant*3),
-c6:mdr1+(ant*5),
-c10:mdr2+(ant*9)
-};
-
-}
-
-let economia=0;
-
-function calcular(parcela,share){
-
-let valor=faturamento*(share/100);
-
-let custoMP=valor*(mp[parcela]/100);
-let custoOUT=valor*(out[parcela]/100);
-
-economia+=custoOUT-custoMP;
-
-}
-
-calcular("pix",shares.pix);
-calcular("debito",shares.debito);
-calcular("c1",shares.c1);
-calcular("c2",shares.c2);
-calcular("c4",shares.c4);
-calcular("c6",shares.c6);
-calcular("c10",shares.c10);
-
-let mensal=economia;
-let anual=economia*12;
-let cinco=anual*5;
-
 document.getElementById("resultadoFaturamento").innerHTML=
+`<div style="padding:15px;border:1px solid #ddd;border-radius:8px">
 
-`
-<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
+Faturamento analisado: <b>R$ ${faturamento.toFixed(2)}</b>
 
-<h3>Resultado da simulação</h3>
+<br><br>
 
-Economia mensal: <b>R$ ${mensal.toFixed(2)}</b><br><br>
+Distribuição completa (100%)
 
-Economia anual: <b>R$ ${anual.toFixed(2)}</b><br><br>
+</div>`;
 
-Economia em 5 anos: <b>R$ ${cinco.toFixed(2)}</b>
-
-</div>
-`;
-
-}
-function exportar(){
+}function exportar(){
 
 html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
 
