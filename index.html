@@ -7,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Comparador de Taxas</title>
+<title>Comparador profissional de taxas</title>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -90,16 +90,25 @@ color:red;
 font-weight:bold;
 }
 
-.tituloModo{
+.tituloFaturamento{
 display:flex;
 align-items:center;
 gap:15px;
 }
 
-.opcoes{
-display:flex;
-gap:10px;
-font-size:14px;
+.barraContainer{
+flex:1;
+height:10px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+}
+
+.barraProgresso{
+height:100%;
+width:0%;
+background:#2c7be5;
+transition:width 0.3s;
 }
 
 </style>
@@ -142,25 +151,7 @@ font-size:14px;
 
 <div class="card">
 
-<div class="tituloModo">
-
 <h3>Outras adquirências</h3>
-
-<div class="opcoes">
-
-<label>
-<input type="radio" name="modoOutras" value="faixa" checked onclick="alternarModo()"> Faixa MDR
-</label>
-
-<label>
-<input type="radio" name="modoOutras" value="manual" onclick="alternarModo()"> Manual
-</label>
-
-</div>
-
-</div>
-
-<div id="modoFaixa">
 
 <label>Pix (%)</label> <input id="out_pix">
 
@@ -178,20 +169,6 @@ font-size:14px;
 
 </div>
 
-<div id="modoManual" style="display:none">
-
-<h4>Importar taxas da concorrência por imagem</h4>
-
-<input type="file" id="uploadOCRConcorrencia">
-
-<div id="statusOCRConc"></div>
-
-<div id="manualParcelas"></div>
-
-</div>
-
-</div>
-
 <div class="card">
 
 <button onclick="simular()">SIMULAR PARCELAS</button>
@@ -202,21 +179,31 @@ font-size:14px;
 
 <div class="card">
 
+<div class="tituloFaturamento">
+
 <h3>Simulação de faturamento</h3>
+
+<div class="barraContainer">
+<div class="barraProgresso" id="barra"></div>
+</div>
+
+</div>
 
 <label>Faturamento mensal</label> <input id="faturamento">
 
-<label>Pix (%)</label> <input id="share_pix">
+<label>Pix (%)</label> <input id="share_pix" oninput="atualizarBarra()">
 
-<label>Débito (%)</label> <input id="share_debito">
+<label>Débito (%)</label> <input id="share_debito" oninput="atualizarBarra()">
 
-<label>Crédito 1x (%)</label> <input id="share_1x">
+<label>Crédito à vista (%)</label> <input id="share_1x" oninput="atualizarBarra()">
 
-<label>Crédito 2-6x (%)</label> <input id="share_2_6">
+<label>Crédito 2x (%)</label> <input id="share_2x" oninput="atualizarBarra()">
 
-<label>Crédito 7-12x (%)</label> <input id="share_7_12">
+<label>Crédito 4x (%)</label> <input id="share_4x" oninput="atualizarBarra()">
 
-<label>Crédito 13-21x (%)</label> <input id="share_13_21">
+<label>Crédito 6x (%)</label> <input id="share_6x" oninput="atualizarBarra()">
+
+<label>Crédito 10x (%)</label> <input id="share_10x" oninput="atualizarBarra()">
 
 <button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
 
