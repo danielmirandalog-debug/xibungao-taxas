@@ -227,7 +227,7 @@ document.getElementById("contador").innerText = total + "%";
 // atualiza barra
 document.getElementById("barra").style.width = total + "%";
 
-function simularFaturamento(){
+}function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
 
@@ -242,7 +242,9 @@ Distribuição completa (100%)
 
 </div>`;
 
-}function exportar(){
+}
+
+function exportar(){
 
 html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
 
