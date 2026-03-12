@@ -121,7 +121,7 @@ document.getElementById("resultado").innerHTML=html;
 
 function atualizarBarra(){
 
-let ids=[
+let campos=[
 "share_pix",
 "share_debito",
 "share_1x",
@@ -133,43 +133,29 @@ let ids=[
 
 let total=0;
 
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
+campos.forEach(id=>{
+let valor=parseFloat(document.getElementById(id).value);
+if(!isNaN(valor)) total+=valor;
 });
 
 if(total>100){
 
 alert("A soma dos percentuais não pode ultrapassar 100%.");
 
-document.activeElement.value="";
+let ativo=document.activeElement;
+ativo.value="";
 
 total=0;
 
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
+campos.forEach(id=>{
+let valor=parseFloat(document.getElementById(id).value);
+if(!isNaN(valor)) total+=valor;
 });
 
 }
 
-document.getElementById("contador").innerText=total+"%";
-
 document.getElementById("barra").style.width=total+"%";
+document.getElementById("contador").innerText=total+"%";
 
 }
 
@@ -224,8 +210,6 @@ link.href=canvas.toDataURL();
 
 link.click();
 
-alert("Relatório exportado com sucesso!");
-
 });
 
 }
@@ -255,11 +239,7 @@ while((match=regex.exec(texto))!==null){
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",","."));
 
-let campo=document.getElementById("mp"+parcela);
-
-if(campo){
-campo.value=taxa.toFixed(2);
-}
+document.getElementById("mp"+parcela).value=taxa.toFixed(2);
 
 }
 
