@@ -332,20 +332,35 @@ let mensal=economia;
 let anual=economia*12;
 let cinco=anual*5;
 
+let campeao="";
+
+if(economia>0){
+campeao="🏆 Campeão: Mercado Pago (menor custo)";
+}
+else if(economia<0){
+campeao="🏆 Campeão: Outras adquirências (menor custo)";
+}
+else{
+campeao="⚖️ Empate técnico";
+}
+
 document.getElementById("resultadoFaturamento").innerHTML=
 
 `<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
 
 <h3>Resultado da simulação</h3>
 
-Economia mensal: <b>R$ ${mensal.toFixed(2)}</b><br><br>
+<h2 style="color:#2c7be5">${campeao}</h2>
 
-Economia anual: <b>R$ ${anual.toFixed(2)}</b><br><br>
+<br>
 
-Economia em 5 anos: <b>R$ ${cinco.toFixed(2)}</b>
+Economia mensal: <b>R$ ${Math.abs(mensal).toFixed(2)}</b><br><br>
+
+Economia anual: <b>R$ ${Math.abs(anual).toFixed(2)}</b><br><br>
+
+Economia em 5 anos: <b>R$ ${Math.abs(cinco).toFixed(2)}</b>
 
 </div>`;
-
 }
 
 function exportar(){
