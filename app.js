@@ -186,6 +186,8 @@ ids.forEach(function(id){
 
 let campo=document.getElementById(id);
 
+if(!campo) return;
+
 let valor=parseFloat(campo.value);
 
 if(!isNaN(valor)){
@@ -194,23 +196,38 @@ total+=valor;
 
 });
 
+// bloqueio acima de 100%
 if(total>100){
 
 alert("A soma dos percentuais não pode ultrapassar 100%.");
 
+if(document.activeElement && document.activeElement.tagName==="INPUT"){
 document.activeElement.value="";
+}
 
-return atualizarBarra();
+total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
 
 }
 
-document.getElementById("contador").innerText=total+"%";
+// atualiza contador
+document.getElementById("contador").innerText = total + "%";
 
-document.getElementById("barra").style.width=total+"%";
+// atualiza barra
+document.getElementById("barra").style.width = total + "%";
 
-}
-
-function simularFaturamento(){
+}function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
 
