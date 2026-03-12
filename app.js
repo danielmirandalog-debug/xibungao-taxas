@@ -8,17 +8,46 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
-document.getElementById("uploadOCR").addEventListener("change",processarOCR_MP);
+let btnMP=document.getElementById("uploadOCR");
+if(btnMP){
+btnMP.addEventListener("change",processarOCR_MP);
+}
 
 let btnConc=document.getElementById("uploadOCRConc");
 if(btnConc){
 btnConc.addEventListener("change",processarOCR_CONC);
 }
 
+let seletor=document.getElementById("modoConcorrencia");
+if(seletor){
+seletor.addEventListener("change",alternarConcorrencia);
+}
+
 }
 
 let taxasMP={}
 let taxasOutras={}
+
+function alternarConcorrencia(){
+
+let modo=document.getElementById("modoConcorrencia").value;
+
+let manual=document.getElementById("concManual");
+let ocr=document.getElementById("concOCR");
+
+if(modo==="manual"){
+
+manual.style.display="block";
+ocr.style.display="none";
+
+}else{
+
+manual.style.display="none";
+ocr.style.display="block";
+
+}
+
+}
 
 function liquido(valor,taxa){
 
@@ -130,147 +159,6 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
-function atualizarBarra(){
-
-let ids=[
-"share_pix",
-"share_debito",
-"share_1x",
-"share_2x",
-"share_4x",
-"share_6x",
-"share_10x"
-];
-
-let total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-if(total>100){
-
-alert("A soma não pode ultrapassar 100%");
-
-document.activeElement.value="";
-
-total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-}
-
-document.getElementById("contador").innerText=total+"%";
-
-document.getElementById("barra").style.width=total+"%";
-
-}
-
-function simularFaturamento(){
-
-let faturamento=parseFloat(document.getElementById("faturamento").value);
-
-let shares={
-pix:parseFloat(share_pix.value),
-debito:parseFloat(share_debito.value),
-1:parseFloat(share_1x.value),
-2:parseFloat(share_2x.value),
-4:parseFloat(share_4x.value),
-6:parseFloat(share_6x.value),
-10:parseFloat(share_10x.value)
-}
-
-let total=0
-
-for(let k in shares){
-
-if(isNaN(shares[k])){
-alert("Preencha todos os percentuais")
-return
-}
-
-total+=shares[k]
-
-}
-
-if(total!==100){
-alert("A soma deve ser exatamente 100%")
-return
-}
-
-let custoMP=0
-let custoOut=0
-
-let html=`<table>
-
-<tr>
-<th>Forma</th>
-<th>Faturamento</th>
-<th>Custo MP (ano)</th>
-<th>Custo Concorrência (ano)</th>
-</tr>`
-
-for(let forma in shares){
-
-let percentual=shares[forma]/100
-let fat=faturamento*percentual
-
-let taxaMP=taxasMP[forma]
-let taxaOut=taxasOutras[forma]
-
-let custoAnoMP=(fat*(taxaMP/100))*12
-let custoAnoOut=(fat*(taxaOut/100))*12
-
-custoMP+=custoAnoMP
-custoOut+=custoAnoOut
-
-let nome=forma=="pix"?"Pix":forma=="debito"?"Débito":forma+"x"
-
-html+=`<tr>
-
-<td>${nome}</td>
-<td>R$ ${fat.toFixed(2)}</td>
-<td>R$ ${custoAnoMP.toFixed(2)}</td>
-<td>R$ ${custoAnoOut.toFixed(2)}</td>
-
-</tr>`
-
-}
-
-html+=`</table>`
-
-let economia=custoOut-custoMP
-let economia5= economia*5
-
-html+=`<br>
-
-<b>Custo anual Mercado Pago:</b> R$ ${custoMP.toFixed(2)}<br> <b>Custo anual Concorrência:</b> R$ ${custoOut.toFixed(2)}<br><br>
-
-<b>Economia anual:</b> R$ ${economia.toFixed(2)}<br> <b>Economia em 5 anos:</b> R$ ${economia5.toFixed(2)}
-`
-
-document.getElementById("resultadoFaturamento").innerHTML=html
-
-}
-
 function exportar(){
 
 html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
@@ -298,7 +186,6 @@ let img=new Image();
 img.onload=function(){
 
 let canvas=document.createElement("canvas");
-
 let ctx=canvas.getContext("2d");
 
 canvas.width=img.width*2;
@@ -338,8 +225,6 @@ async function processarOCR_MP(event){
 let file=event.target.files[0];
 if(!file) return;
 
-document.getElementById("statusOCR").innerText="Lendo taxas Mercado Pago...";
-
 let canvas=await preprocessarImagem(file);
 
 const worker=await Tesseract.createWorker("eng");
@@ -369,16 +254,12 @@ if(campo) campo.value=taxa.toFixed(2);
 
 }
 
-document.getElementById("statusOCR").innerText="Taxas Mercado Pago carregadas";
-
 }
 
 async function processarOCR_CONC(event){
 
 let file=event.target.files[0];
 if(!file) return;
-
-document.getElementById("statusOCR").innerText="Lendo taxas concorrência...";
 
 let canvas=await preprocessarImagem(file);
 
@@ -408,7 +289,5 @@ if(campo) campo.value=taxa.toFixed(2);
 }
 
 }
-
-document.getElementById("statusOCR").innerText="Taxas concorrência carregadas";
 
 }
