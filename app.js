@@ -224,6 +224,8 @@ link.href=canvas.toDataURL();
 
 link.click();
 
+alert("Relatório exportado com sucesso!");
+
 });
 
 }
