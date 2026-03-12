@@ -8,44 +8,7 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
-let btnMP=document.getElementById("uploadOCR");
-if(btnMP){
-btnMP.addEventListener("change",processarOCR_MP);
-}
-
-let btnConc=document.getElementById("uploadOCRConc");
-if(btnConc){
-btnConc.addEventListener("change",processarOCR_CONC);
-}
-
-let seletor=document.getElementById("modoConcorrencia");
-if(seletor){
-seletor.addEventListener("change",alternarConcorrencia);
-}
-
-}
-
-let taxasMP={}
-let taxasOutras={}
-
-function alternarConcorrencia(){
-
-let modo=document.getElementById("modoConcorrencia").value;
-
-let manual=document.getElementById("concManual");
-let ocr=document.getElementById("concOCR");
-
-if(modo==="manual"){
-
-manual.style.display="block";
-ocr.style.display="none";
-
-}else{
-
-manual.style.display="none";
-ocr.style.display="block";
-
-}
+document.getElementById("uploadOCR").addEventListener("change",processarOCR);
 
 }
 
@@ -97,9 +60,6 @@ let ant=parseFloat(document.getElementById("antecipacao").value);
 for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1));
-
-taxasMP=mp
-taxasOutras=outras
 
 gerarTabela(valor,mp,outras);
 
@@ -159,6 +119,99 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
+function atualizarBarra(){
+
+let ids=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
+];
+
+let total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
+
+if(total>100){
+
+alert("A soma dos percentuais não pode ultrapassar 100%.");
+
+document.activeElement.value="";
+
+total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
+
+}
+
+document.getElementById("contador").innerText=total+"%";
+
+document.getElementById("barra").style.width=total+"%";
+
+}
+
+function simularFaturamento(){
+
+let faturamento=parseFloat(document.getElementById("faturamento").value);
+
+let shares=[
+parseFloat(share_pix.value),
+parseFloat(share_debito.value),
+parseFloat(share_1x.value),
+parseFloat(share_2x.value),
+parseFloat(share_4x.value),
+parseFloat(share_6x.value),
+parseFloat(share_10x.value)
+];
+
+if(shares.some(isNaN)){
+alert("Preencha todos os percentuais");
+return;
+}
+
+let total=shares.reduce((a,b)=>a+b,0);
+
+if(total!==100){
+alert("A soma deve ser exatamente 100%");
+return;
+}
+
+document.getElementById("resultadoFaturamento").innerHTML=
+`<div style="padding:15px;border:1px solid #ddd;border-radius:8px">
+
+Faturamento analisado: <b>R$ ${faturamento.toFixed(2)}</b>
+
+<br><br>
+
+Distribuição completa (100%)
+
+</div>`;
+
+}
+
 function exportar(){
 
 html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
@@ -177,59 +230,17 @@ alert("Relatório exportado com sucesso!");
 
 }
 
-async function preprocessarImagem(file){
-
-return new Promise(resolve=>{
-
-let img=new Image();
-
-img.onload=function(){
-
-let canvas=document.createElement("canvas");
-let ctx=canvas.getContext("2d");
-
-canvas.width=img.width*2;
-canvas.height=img.height*2;
-
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-let data=imgData.data;
-
-for(let i=0;i<data.length;i+=4){
-
-let avg=(data[i]+data[i+1]+data[i+2])/3;
-
-avg=avg>160?255:0;
-
-data[i]=avg;
-data[i+1]=avg;
-data[i+2]=avg;
-
-}
-
-ctx.putImageData(imgData,0,0);
-
-resolve(canvas);
-
-}
-
-img.src=URL.createObjectURL(file);
-
-});
-
-}
-
-async function processarOCR_MP(event){
+async function processarOCR(event){
 
 let file=event.target.files[0];
+
 if(!file) return;
 
-let canvas=await preprocessarImagem(file);
+document.getElementById("statusOCR").innerText="Processando imagem...";
 
-const worker=await Tesseract.createWorker("eng");
+const worker = await Tesseract.createWorker("eng");
 
-const {data}=await worker.recognize(canvas);
+const { data } = await worker.recognize(file);
 
 await worker.terminate();
 
@@ -243,51 +254,15 @@ while((match=regex.exec(texto))!==null){
 
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",","."));
-
-if(parcela>=2){
 
 let campo=document.getElementById("mp"+parcela);
 
-if(campo) campo.value=taxa.toFixed(2);
-
+if(campo){
+campo.value=taxa.toFixed(2);
 }
 
 }
 
-}
-
-async function processarOCR_CONC(event){
-
-let file=event.target.files[0];
-if(!file) return;
-
-let canvas=await preprocessarImagem(file);
-
-const worker=await Tesseract.createWorker("eng");
-
-const {data}=await worker.recognize(canvas);
-
-await worker.terminate();
-
-let texto=data.text.toLowerCase();
-
-let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
-
-let match;
-
-while((match=regex.exec(texto))!==null){
-
-let parcela=parseInt(match[1]);
-let taxa=parseFloat(match[2].replace(",","."));
-
-if(parcela>=2){
-
-let campo=document.getElementById("out"+parcela);
-
-if(campo) campo.value=taxa.toFixed(2);
-
-}
-
-}
+document.getElementById("statusOCR").innerText="Taxas carregadas";
 
 }
