@@ -8,7 +8,12 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
-document.getElementById("uploadOCR").addEventListener("change",processarOCR);
+document.getElementById("uploadOCR").addEventListener("change",processarOCR_MP);
+
+let btnConc=document.getElementById("uploadOCRConc");
+if(btnConc){
+btnConc.addEventListener("change",processarOCR_CONC);
+}
 
 }
 
@@ -125,6 +130,60 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
+function atualizarBarra(){
+
+let ids=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
+];
+
+let total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
+
+if(total>100){
+
+alert("A soma não pode ultrapassar 100%");
+
+document.activeElement.value="";
+
+total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
+
+}
+
+document.getElementById("contador").innerText=total+"%";
+
+document.getElementById("barra").style.width=total+"%";
+
+}
+
 function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
@@ -142,11 +201,14 @@ debito:parseFloat(share_debito.value),
 let total=0
 
 for(let k in shares){
+
 if(isNaN(shares[k])){
 alert("Preencha todos os percentuais")
 return
 }
+
 total+=shares[k]
+
 }
 
 if(total!==100){
@@ -196,14 +258,157 @@ html+=`<tr>
 html+=`</table>`
 
 let economia=custoOut-custoMP
+let economia5= economia*5
 
 html+=`<br>
 
 <b>Custo anual Mercado Pago:</b> R$ ${custoMP.toFixed(2)}<br> <b>Custo anual Concorrência:</b> R$ ${custoOut.toFixed(2)}<br><br>
 
-<b>ECONOMIA ANUAL:</b> R$ ${economia.toFixed(2)}
+<b>Economia anual:</b> R$ ${economia.toFixed(2)}<br> <b>Economia em 5 anos:</b> R$ ${economia5.toFixed(2)}
 `
 
 document.getElementById("resultadoFaturamento").innerHTML=html
+
+}
+
+function exportar(){
+
+html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="comparacao_taxas.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+alert("Relatório exportado com sucesso!");
+
+});
+
+}
+
+async function preprocessarImagem(file){
+
+return new Promise(resolve=>{
+
+let img=new Image();
+
+img.onload=function(){
+
+let canvas=document.createElement("canvas");
+
+let ctx=canvas.getContext("2d");
+
+canvas.width=img.width*2;
+canvas.height=img.height*2;
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+let data=imgData.data;
+
+for(let i=0;i<data.length;i+=4){
+
+let avg=(data[i]+data[i+1]+data[i+2])/3;
+
+avg=avg>160?255:0;
+
+data[i]=avg;
+data[i+1]=avg;
+data[i+2]=avg;
+
+}
+
+ctx.putImageData(imgData,0,0);
+
+resolve(canvas);
+
+}
+
+img.src=URL.createObjectURL(file);
+
+});
+
+}
+
+async function processarOCR_MP(event){
+
+let file=event.target.files[0];
+if(!file) return;
+
+document.getElementById("statusOCR").innerText="Lendo taxas Mercado Pago...";
+
+let canvas=await preprocessarImagem(file);
+
+const worker=await Tesseract.createWorker("eng");
+
+const {data}=await worker.recognize(canvas);
+
+await worker.terminate();
+
+let texto=data.text.toLowerCase();
+
+let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
+
+let match;
+
+while((match=regex.exec(texto))!==null){
+
+let parcela=parseInt(match[1]);
+let taxa=parseFloat(match[2].replace(",","."));
+
+if(parcela>=2){
+
+let campo=document.getElementById("mp"+parcela);
+
+if(campo) campo.value=taxa.toFixed(2);
+
+}
+
+}
+
+document.getElementById("statusOCR").innerText="Taxas Mercado Pago carregadas";
+
+}
+
+async function processarOCR_CONC(event){
+
+let file=event.target.files[0];
+if(!file) return;
+
+document.getElementById("statusOCR").innerText="Lendo taxas concorrência...";
+
+let canvas=await preprocessarImagem(file);
+
+const worker=await Tesseract.createWorker("eng");
+
+const {data}=await worker.recognize(canvas);
+
+await worker.terminate();
+
+let texto=data.text.toLowerCase();
+
+let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
+
+let match;
+
+while((match=regex.exec(texto))!==null){
+
+let parcela=parseInt(match[1]);
+let taxa=parseFloat(match[2].replace(",","."));
+
+if(parcela>=2){
+
+let campo=document.getElementById("out"+parcela);
+
+if(campo) campo.value=taxa.toFixed(2);
+
+}
+
+}
+
+document.getElementById("statusOCR").innerText="Taxas concorrência carregadas";
 
 }
