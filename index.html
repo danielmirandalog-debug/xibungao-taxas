@@ -1,51 +1,122 @@
 <!DOCTYPE html>
 
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
 
 <meta charset="UTF-8">
-<title>Simulador de Taxas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<title>Comparador profissional de taxas</title>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
-<script src="app.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script src="app.js" defer></script>
 
 <style>
 
 body{
-font-family:Arial;
-margin:40px;
+font-family:Segoe UI,Arial;
+background:#f4f6fa;
+margin:0;
+}
+
+header{
+background:#111;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:white;
+padding:20px;
+margin-bottom:20px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 }
 
 input{
-margin:4px;
-padding:5px;
+width:100%;
+padding:8px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:6px;
+background:#2c7be5;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+button:hover{
+background:#1a5edb;
 }
 
 table{
+width:100%;
 border-collapse:collapse;
-margin-top:20px;
+font-size:11px;
 }
 
 td,th{
-border:1px solid #ccc;
-padding:8px;
+border:1px solid #ddd;
+padding:4px;
+text-align:center;
 }
 
-#barraContainer{
-width:400px;
-height:20px;
+th{
+background:#f0f2f6;
+}
+
+.taxaRuim{
+color:red;
+font-weight:bold;
+}
+
+.tituloFat{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
+.contador{
+font-weight:bold;
+font-size:18px;
+color:#2c7be5;
+}
+
+.barraContainer{
+width:100%;
+height:22px;
 background:#ddd;
-margin-top:10px;
+border-radius:12px;
+overflow:hidden;
+margin-bottom:20px;
 }
 
-#barra{
+.barraProgresso{
 height:100%;
 width:0%;
-background:#007bff;
+background:#2c7be5;
+transition:width 0.3s;
 }
 
 </style>
@@ -54,115 +125,109 @@ background:#007bff;
 
 <body>
 
-<h2>Simulador de Taxas</h2>
+<header>
+🦅 Comparador profissional de taxas
+</header>
+
+<div class="container">
+
+<div class="card">
 
 <label>Valor da venda</label> <input id="valor" type="number">
 
-<hr>
+</div>
 
-<h3>Taxas Mercado Pago</h3>
+<div class="card">
 
-<label>Pix (%)</label> <input id="mp_pix" type="number">
+<h3>Mercado Pago</h3>
 
-<label>Débito (%)</label> <input id="mp_debito" type="number">
+<label>Pix (%)</label> <input id="mp_pix">
 
-<label>Crédito 1x (%)</label> <input id="mp1" type="number">
+<label>Débito (%)</label> <input id="mp_debito">
 
-<br><br>
+<label>Crédito 1x (%)</label> <input id="mp1">
 
-<label>Importar taxas por imagem</label> <input type="file" id="uploadOCR" accept="image/*">
+<h4>Importar taxas por imagem</h4>
 
-<br><br>
+<input type="file" id="uploadOCR">
+
+<div id="statusOCR"></div>
 
 <div id="mpParcelas"></div>
 
-<hr>
+</div>
+
+<div class="card">
 
 <h3>Outras adquirências</h3>
 
-<select id="modoConcorrencia">
+<label>Pix (%)</label> <input id="out_pix">
 
-<option value="manual">Inserir manualmente</option>
-<option value="ocr">Importar taxas por imagem</option>
+<label>Débito (%)</label> <input id="out_debito">
 
-</select>
+<label>Crédito 1x (%)</label> <input id="out1">
 
-<br><br>
+<label>MDR 2-6x</label> <input id="mdr1">
 
-<div id="concManual">
+<label>MDR 7-12x</label> <input id="mdr2">
 
-<label>Pix (%)</label> <input id="out_pix" type="number">
+<label>MDR 13-21x</label> <input id="mdr3">
 
-<label>Débito (%)</label> <input id="out_debito" type="number">
-
-<label>Crédito 1x (%)</label> <input id="out1" type="number">
-
-<br><br>
-
-<label>MDR 2x a 6x (%)</label> <input id="mdr1" type="number">
-
-<label>MDR 7x a 12x (%)</label> <input id="mdr2" type="number">
-
-<label>MDR 13x a 21x (%)</label> <input id="mdr3" type="number">
-
-<label>Antecipação (%)</label> <input id="antecipacao" type="number">
+<label>Antecipação mensal (%)</label> <input id="antecipacao">
 
 </div>
 
-<div id="concOCR" style="display:none">
+<div class="card">
 
-<label>Buscar imagem da concorrência</label> <input type="file" id="uploadOCRConc" accept="image/*">
-
-</div>
-
-<hr>
-
-<button onclick="simular()">Simular Parcelas</button>
-
-<button onclick="exportar()">Exportar relatório</button>
+<button onclick="simular()">SIMULAR PARCELAS</button>
 
 <div id="resultado"></div>
 
-<hr>
+</div>
+
+<div class="card">
+
+<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
+
+</div>
+
+<div class="card">
+
+<div class="tituloFat">
 
 <h3>Simulação de faturamento</h3>
 
-<label>Faturamento mensal</label> <input id="faturamento" type="number">
+<div class="contador" id="contador">0%</div>
 
-<br><br>
-
-Pix % <input id="share_pix" type="number">
-
-Débito % <input id="share_debito" type="number">
-
-1x % <input id="share_1x" type="number">
-
-2x % <input id="share_2x" type="number">
-
-4x % <input id="share_4x" type="number">
-
-6x % <input id="share_6x" type="number">
-
-10x % <input id="share_10x" type="number">
-
-<br><br>
-
-<div id="barraContainer">
-<div id="barra"></div>
 </div>
 
-<span id="contador">0%</span>
+<div class="barraContainer">
+<div class="barraProgresso" id="barra"></div>
+</div>
 
-<br><br>
+<label>Faturamento mensal</label> <input id="faturamento">
 
-<button onclick="simularFaturamento()">
+<label>Pix (%)</label> <input id="share_pix" oninput="atualizarBarra()">
 
-Simular faturamento
+<label>Débito (%)</label> <input id="share_debito" oninput="atualizarBarra()">
 
-</button>
+<label>Crédito à vista (%)</label> <input id="share_1x" oninput="atualizarBarra()">
+
+<label>Crédito 2x (%)</label> <input id="share_2x" oninput="atualizarBarra()">
+
+<label>Crédito 4x (%)</label> <input id="share_4x" oninput="atualizarBarra()">
+
+<label>Crédito 6x (%)</label> <input id="share_6x" oninput="atualizarBarra()">
+
+<label>Crédito 10x (%)</label> <input id="share_10x" oninput="atualizarBarra()">
+
+<button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
 
 <div id="resultadoFaturamento"></div>
 
-</body>
+</div>
 
+</div>
+
+</body>
 </html>
