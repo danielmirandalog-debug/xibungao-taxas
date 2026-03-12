@@ -39,83 +39,75 @@ document.getElementById("modoManual").style.display=(modo==="manual")?"block":"n
 
 }
 
-function formatarTaxa(taxa){
-
-if(taxa === "" || taxa === null || taxa === undefined || isNaN(taxa))
-return "Não se aplica";
-
-return parseFloat(taxa).toFixed(2)+"%";
-
-}
-
 function liquido(valor,taxa){
 
-if(taxa === "" || taxa === null || taxa === undefined || isNaN(taxa))
-return null;
+if(!taxa && taxa!==0) return null;
 
 return valor*(1-(taxa/100));
 
 }
 
+function formatarTaxa(taxa){
+
+if(!taxa && taxa!==0) return "Não se aplica";
+
+return taxa.toFixed(2)+"%";
+
+}
+
 function simular(){
 
-let valorCampo=document.getElementById("valor").value;
+let valor=parseFloat(document.getElementById("valor").value);
 
-if(valorCampo === "" || parseFloat(valorCampo) <= 0){
+if(!valor){
 
-alert("Informe o valor da venda para realizar a simulação.");
+alert("Informe o valor da venda");
 
 return;
 
 }
 
-let valor=parseFloat(valorCampo);
-
 let mp={};
 let outras={};
 
-mp["pix"]=parseFloat(document.getElementById("mp_pix").value);
-mp["debito"]=parseFloat(document.getElementById("mp_debito").value);
-mp[1]=parseFloat(document.getElementById("mp1").value);
+mp["pix"]=parseFloat(mp_pix.value);
+mp["debito"]=parseFloat(mp_debito.value);
+mp[1]=parseFloat(mp1.value);
 
 for(let i=2;i<=21;i++){
+
 mp[i]=parseFloat(document.getElementById("mp"+i).value);
+
 }
 
 let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
 if(modo==="manual"){
 
-outras["pix"]=parseFloat(document.getElementById("manual_pix").value);
-outras["debito"]=parseFloat(document.getElementById("manual_debito").value);
-outras[1]=parseFloat(document.getElementById("manual1").value);
+outras["pix"]=parseFloat(manual_pix.value);
+outras["debito"]=parseFloat(manual_debito.value);
+outras[1]=parseFloat(manual1.value);
 
 for(let i=2;i<=21;i++){
+
 outras[i]=parseFloat(document.getElementById("manual"+i).value);
+
 }
 
 }else{
 
-outras["pix"]=parseFloat(document.getElementById("out_pix").value);
-outras["debito"]=parseFloat(document.getElementById("out_debito").value);
-outras[1]=parseFloat(document.getElementById("out1").value);
+outras["pix"]=parseFloat(out_pix.value);
+outras["debito"]=parseFloat(out_debito.value);
+outras[1]=parseFloat(out1.value);
 
-let mdr1=parseFloat(document.getElementById("mdr1").value);
-let mdr2=parseFloat(document.getElementById("mdr2").value);
-let mdr3=parseFloat(document.getElementById("mdr3").value);
-let ant=parseFloat(document.getElementById("antecipacao").value);
+let mdr1=parseFloat(mdr1.value);
+let mdr2=parseFloat(mdr2.value);
+let mdr3=parseFloat(mdr3.value);
+let ant=parseFloat(antecipacao.value);
 
-for(let i=2;i<=6;i++){
-outras[i]=mdr1+(ant*(i-1));
-}
-
-for(let i=7;i<=12;i++){
-outras[i]=mdr2+(ant*(i-1));
-}
-
-for(let i=13;i<=21;i++){
-outras[i]=mdr3+(ant*(i-1));
-}
+for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
+for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
+for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1));
 
 }
 
@@ -139,13 +131,6 @@ let html=`<table>
 <th>R$ Outros</th>
 </tr>`;
 
-let somaMP=0;
-let somaOut=0;
-let cont=0;
-
-let vitoriaMP=0;
-let vitoriaOut=0;
-
 parcelas.forEach(p=>{
 
 let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
@@ -156,39 +141,17 @@ let taxaOut=outras[p];
 let valorMP=liquido(valor,taxaMP);
 let valorOut=liquido(valor,taxaOut);
 
-let classeMP="";
-let classeOut="";
-
-if(valorMP!==null && valorOut!==null){
-
-cont++;
-
-somaMP+=valorMP;
-somaOut+=valorOut;
-
-if(valorMP>valorOut){
-classeOut="taxaRuim";
-vitoriaMP++;
-}
-
-if(valorOut>valorMP){
-classeMP="taxaRuim";
-vitoriaOut++;
-}
-
-}
-
 html+=`<tr>
 
 <td>${nome}</td>
 
-<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
+<td>${formatarTaxa(taxaMP)}</td>
 
-<td>${valorMP!==null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
+<td>${valorMP?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
 
-<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
+<td>${formatarTaxa(taxaOut)}</td>
 
-<td>${valorOut!==null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+<td>${valorOut?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
 
 </tr>`;
 
@@ -196,54 +159,64 @@ html+=`<tr>
 
 html+="</table>";
 
-let mediaMP=(cont>0)?(somaMP/cont):0;
-let mediaOut=(cont>0)?(somaOut/cont):0;
-
-let vencedor=(mediaMP>mediaOut)?"MERCADO PAGO":"OUTRAS ADQUIRÊNCIAS";
-
-html+=`
-
-<div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:8px">
-
-<h3>🏆 RESULTADO DA COMPARAÇÃO</h3>
-
-<b>Melhor opção geral: ${vencedor}</b>
-
-<br><br>
-
-Vitórias Mercado Pago: ${vitoriaMP}<br>
-Vitórias Outros: ${vitoriaOut}
-
-<br><br>
-
-Média líquida MP: R$ ${mediaMP.toFixed(2)}<br>
-Média líquida Outros: R$ ${mediaOut.toFixed(2)}
-
-</div>
-
-`;
-
 document.getElementById("resultado").innerHTML=html;
 
 }
 
-function exportar(){
+function simularFaturamento(){
 
-html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+let faturamento=parseFloat(document.getElementById("faturamento").value);
 
-let link=document.createElement("a");
+let shares=[
+parseFloat(share_pix.value),
+parseFloat(share_debito.value),
+parseFloat(share_1x.value),
+parseFloat(share_2_6.value),
+parseFloat(share_7_12.value),
+parseFloat(share_13_21.value)
+];
 
-link.download="comparacao_taxas.png";
-link.href=canvas.toDataURL();
-link.click();
+if(shares.some(isNaN)){
 
-});
+alert("Preencha todos os shares");
+
+return;
+
+}
+
+let total=shares.reduce((a,b)=>a+b,0);
+
+if(total!==100){
+
+alert("A soma dos shares precisa ser 100%");
+
+return;
+
+}
+
+let html=`
+
+<div style="margin-top:20px;padding:15px;border:1px solid #ddd;border-radius:8px">
+
+<h3>Simulação de faturamento</h3>
+
+Faturamento mensal analisado: <b>R$ ${faturamento.toFixed(2)}</b>
+
+<br><br>
+
+Distribuição informada totalizando <b>100%</b>.
+
+</div>
+`;
+
+document.getElementById("resultadoFaturamento").innerHTML=html;
 
 }
 
 async function processarOCR(event){
 
 let file=event.target.files[0];
+
 if(!file) return;
 
 document.getElementById("statusOCR").innerText="Processando imagem...";
@@ -265,11 +238,7 @@ while((match=regex.exec(texto))!==null){
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",","."));
 
-if(parcela>=2 && parcela<=21){
-
 document.getElementById("mp"+parcela).value=taxa.toFixed(2);
-
-}
 
 }
 
@@ -280,6 +249,7 @@ document.getElementById("statusOCR").innerText="Taxas carregadas";
 async function processarOCRConcorrencia(event){
 
 let file=event.target.files[0];
+
 if(!file) return;
 
 document.getElementById("statusOCRConc").innerText="Processando imagem...";
@@ -301,14 +271,26 @@ while((match=regex.exec(texto))!==null){
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",","."));
 
-if(parcela>=2 && parcela<=21){
-
 document.getElementById("manual"+parcela).value=taxa.toFixed(2);
 
 }
 
+document.getElementById("statusOCRConc").innerText="Taxas concorrência carregadas";
+
 }
 
-document.getElementById("statusOCRConc").innerText="Taxas da concorrência carregadas";
+function exportar(){
+
+html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="comparacao_taxas.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
 
 }
