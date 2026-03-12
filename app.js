@@ -8,7 +8,40 @@ html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 
 document.getElementById("mpParcelas").innerHTML=html;
 
+gerarCamposManual();
+
 document.getElementById("uploadOCR").addEventListener("change",processarOCR);
+document.getElementById("uploadOCRConc").addEventListener("change",processarOCRConc);
+
+}
+
+function gerarCamposManual(){
+
+let html="";
+
+for(let i=2;i<=21;i++){
+html+=`<label>${i}x (%)</label> <input id="out${i}_manual" type="number">`;
+}
+
+document.getElementById("outrasParcelas").innerHTML=html;
+
+}
+
+function trocarModoOutras(){
+
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+document.getElementById("modoMDR").style.display="none";
+document.getElementById("modoManual").style.display="block";
+
+}else{
+
+document.getElementById("modoMDR").style.display="block";
+document.getElementById("modoManual").style.display="none";
+
+}
 
 }
 
@@ -48,18 +81,34 @@ for(let i=2;i<=21;i++){
 mp[i]=parseFloat(document.getElementById("mp"+i).value);
 }
 
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+outras["pix"]=parseFloat(out_pix_manual.value);
+outras["debito"]=parseFloat(out_debito_manual.value);
+outras[1]=parseFloat(out1_manual.value);
+
+for(let i=2;i<=21;i++){
+outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
+}
+
+}else{
+
 outras["pix"]=parseFloat(out_pix.value);
 outras["debito"]=parseFloat(out_debito.value);
 outras[1]=parseFloat(out1.value);
 
-let mdr1=parseFloat(document.getElementById("mdr1").value);
-let mdr2=parseFloat(document.getElementById("mdr2").value);
-let mdr3=parseFloat(document.getElementById("mdr3").value);
-let ant=parseFloat(document.getElementById("antecipacao").value);
+let mdr1=parseFloat(mdr1.value);
+let mdr2=parseFloat(mdr2.value);
+let mdr3=parseFloat(mdr3.value);
+let ant=parseFloat(antecipacao.value);
 
 for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1));
+
+}
 
 gerarTabela(valor,mp,outras);
 
@@ -119,115 +168,6 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
-function atualizarBarra(){
-
-let ids=[
-"share_pix",
-"share_debito",
-"share_1x",
-"share_2x",
-"share_4x",
-"share_6x",
-"share_10x"
-];
-
-let total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-if(total>100){
-
-alert("A soma dos percentuais não pode ultrapassar 100%.");
-
-document.activeElement.value="";
-
-total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
-
-}
-
-document.getElementById("contador").innerText=total+"%";
-
-document.getElementById("barra").style.width=total+"%";
-
-}
-
-function simularFaturamento(){
-
-let faturamento=parseFloat(document.getElementById("faturamento").value);
-
-let shares=[
-parseFloat(share_pix.value),
-parseFloat(share_debito.value),
-parseFloat(share_1x.value),
-parseFloat(share_2x.value),
-parseFloat(share_4x.value),
-parseFloat(share_6x.value),
-parseFloat(share_10x.value)
-];
-
-if(shares.some(isNaN)){
-alert("Preencha todos os percentuais");
-return;
-}
-
-let total=shares.reduce((a,b)=>a+b,0);
-
-if(total!==100){
-alert("A soma deve ser exatamente 100%");
-return;
-}
-
-document.getElementById("resultadoFaturamento").innerHTML=
-`<div style="padding:15px;border:1px solid #ddd;border-radius:8px">
-
-Faturamento analisado: <b>R$ ${faturamento.toFixed(2)}</b>
-
-<br><br>
-
-Distribuição completa (100%)
-
-</div>`;
-
-}
-
-function exportar(){
-
-html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
-
-let link=document.createElement("a");
-
-link.download="comparacao_taxas.png";
-
-link.href=canvas.toDataURL();
-
-link.click();
-
-});
-
-}
-
 async function processarOCR(event){
 
 let file=event.target.files[0];
@@ -251,7 +191,7 @@ let match;
 while((match=regex.exec(texto))!==null){
 
 let parcela=parseInt(match[1]);
-let taxa=parseFloat(match[2].replace(",","."));
+let taxa=parseFloat(match[2].replace(",",".")); 
 
 let campo=document.getElementById("mp"+parcela);
 
@@ -265,38 +205,7 @@ document.getElementById("statusOCR").innerText="Taxas carregadas";
 
 }
 
-
-function alternarModoConcorrencia(){
-
-let modo=document.getElementById("modoConcorrencia").value;
-
-if(modo==="manual"){
-
-document.getElementById("blocoManual").style.display="block";
-document.getElementById("blocoOCR").style.display="none";
-
-}else{
-
-document.getElementById("blocoManual").style.display="none";
-document.getElementById("blocoOCR").style.display="block";
-
-}
-
-}
-
-document.addEventListener("DOMContentLoaded",function(){
-
-let inputConc=document.getElementById("uploadOCRConc");
-
-if(inputConc){
-
-inputConc.addEventListener("change",processarOCRConcorrencia);
-
-}
-
-});
-
-async function processarOCRConcorrencia(event){
+async function processarOCRConc(event){
 
 let file=event.target.files[0];
 
@@ -321,20 +230,30 @@ while((match=regex.exec(texto))!==null){
 let parcela=parseInt(match[1]);
 let taxa=parseFloat(match[2].replace(",",".")); 
 
-if(parcela>=2 && parcela<=6){
-document.getElementById("mdr1").value=taxa.toFixed(2);
-}
+let campo=document.getElementById("out"+parcela+"_manual");
 
-if(parcela>=7 && parcela<=12){
-document.getElementById("mdr2").value=taxa.toFixed(2);
-}
-
-if(parcela>=13){
-document.getElementById("mdr3").value=taxa.toFixed(2);
+if(campo){
+campo.value=taxa.toFixed(2);
 }
 
 }
 
 document.getElementById("statusOCRConc").innerText="Taxas carregadas";
+
+}
+
+function exportar(){
+
+html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="comparacao_taxas.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
 
 }
