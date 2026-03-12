@@ -99,14 +99,14 @@ outras["pix"]=parseFloat(out_pix.value);
 outras["debito"]=parseFloat(out_debito.value);
 outras[1]=parseFloat(out1.value);
 
-let mdr1=parseFloat(mdr1.value);
-let mdr2=parseFloat(mdr2.value);
-let mdr3=parseFloat(mdr3.value);
-let ant=parseFloat(antecipacao.value);
+let mdrA=parseFloat(document.getElementById("mdr1").value);
+let mdrB=parseFloat(document.getElementById("mdr2").value);
+let mdrC=parseFloat(document.getElementById("mdr3").value);
+let ant=parseFloat(document.getElementById("antecipacao").value);
 
-for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
-for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
-for(let i=13;i<=21;i++) outras[i]=mdr3+(ant*(i-1));
+for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
+for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
+for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
 
 }
 
@@ -165,6 +165,81 @@ html+=`<tr>
 html+="</table>";
 
 document.getElementById("resultado").innerHTML=html;
+
+}
+
+function atualizarBarra(){
+
+let ids=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
+];
+
+let total=0;
+
+ids.forEach(function(id){
+
+let campo=document.getElementById(id);
+
+let valor=parseFloat(campo.value);
+
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
+
+if(total>100){
+
+alert("A soma dos percentuais não pode ultrapassar 100%.");
+
+document.activeElement.value="";
+
+return atualizarBarra();
+
+}
+
+document.getElementById("contador").innerText=total+"%";
+
+document.getElementById("barra").style.width=total+"%";
+
+}
+
+function simularFaturamento(){
+
+let faturamento=parseFloat(document.getElementById("faturamento").value);
+
+document.getElementById("resultadoFaturamento").innerHTML=
+`<div style="padding:15px;border:1px solid #ddd;border-radius:8px">
+
+Faturamento analisado: <b>R$ ${faturamento.toFixed(2)}</b>
+
+<br><br>
+
+Distribuição completa (100%)
+
+</div>`;
+
+}
+
+function exportar(){
+
+html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="comparacao_taxas.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
 
 }
 
@@ -239,21 +314,5 @@ campo.value=taxa.toFixed(2);
 }
 
 document.getElementById("statusOCRConc").innerText="Taxas carregadas";
-
-}
-
-function exportar(){
-
-html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
-
-let link=document.createElement("a");
-
-link.download="comparacao_taxas.png";
-
-link.href=canvas.toDataURL();
-
-link.click();
-
-});
 
 }
