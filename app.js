@@ -264,3 +264,77 @@ campo.value=taxa.toFixed(2);
 document.getElementById("statusOCR").innerText="Taxas carregadas";
 
 }
+
+
+function alternarModoConcorrencia(){
+
+let modo=document.getElementById("modoConcorrencia").value;
+
+if(modo==="manual"){
+
+document.getElementById("blocoManual").style.display="block";
+document.getElementById("blocoOCR").style.display="none";
+
+}else{
+
+document.getElementById("blocoManual").style.display="none";
+document.getElementById("blocoOCR").style.display="block";
+
+}
+
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+
+let inputConc=document.getElementById("uploadOCRConc");
+
+if(inputConc){
+
+inputConc.addEventListener("change",processarOCRConcorrencia);
+
+}
+
+});
+
+async function processarOCRConcorrencia(event){
+
+let file=event.target.files[0];
+
+if(!file) return;
+
+document.getElementById("statusOCRConc").innerText="Processando imagem...";
+
+const worker = await Tesseract.createWorker("eng");
+
+const { data } = await worker.recognize(file);
+
+await worker.terminate();
+
+let texto=data.text.toLowerCase();
+
+let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
+
+let match;
+
+while((match=regex.exec(texto))!==null){
+
+let parcela=parseInt(match[1]);
+let taxa=parseFloat(match[2].replace(",",".")); 
+
+if(parcela>=2 && parcela<=6){
+document.getElementById("mdr1").value=taxa.toFixed(2);
+}
+
+if(parcela>=7 && parcela<=12){
+document.getElementById("mdr2").value=taxa.toFixed(2);
+}
+
+if(parcela>=13){
+document.getElementById("mdr3").value=taxa.toFixed(2);
+}
+
+}
+
+document.getElementById("statusOCRConc").innerText="Taxas carregadas";
+
+}
