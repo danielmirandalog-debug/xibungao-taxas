@@ -194,7 +194,29 @@ font-size:14px;
 
 <div class="card">
 
-<button onclick="simular()">SIMULAR</button>
+<h3>Simulação de faturamento</h3>
+
+<label>Faturamento mensal</label> <input id="faturamento">
+
+<label>Pix (%)</label> <input id="share_pix">
+
+<label>Débito (%)</label> <input id="share_debito">
+
+<label>Crédito 1x (%)</label> <input id="share_1x">
+
+<label>Crédito 2-6x (%)</label> <input id="share_2_6">
+
+<label>Crédito 7-12x (%)</label> <input id="share_7_12">
+
+<label>Crédito 13-21x (%)</label> <input id="share_13_21">
+
+<button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
+
+</div>
+
+<div class="card">
+
+<button onclick="simular()">SIMULAR PARCELAS</button>
 
 <button onclick="exportar()">EXPORTAR RELATÓRIO</button>
 
@@ -203,6 +225,8 @@ font-size:14px;
 <div class="card">
 
 <div id="resultado"></div>
+
+<div id="resultadoFaturamento"></div>
 
 </div>
 
