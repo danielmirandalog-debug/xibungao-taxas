@@ -161,6 +161,15 @@ transition:width 0.3s;
 
 <h3>Outras adquirências</h3>
 
+<label>Forma de inserção das taxas</label>
+
+<select id="modoConcorrencia" onchange="alternarModoConcorrencia()">
+<option value="manual">Inserção manual</option>
+<option value="ocr">Importar taxas por imagem</option>
+</select>
+
+<div id="blocoManual">
+
 <label>Pix (%)</label> <input id="out_pix">
 
 <label>Débito (%)</label> <input id="out_debito">
@@ -174,6 +183,18 @@ transition:width 0.3s;
 <label>MDR 13-21x</label> <input id="mdr3">
 
 <label>Antecipação mensal (%)</label> <input id="antecipacao">
+
+</div>
+
+<div id="blocoOCR" style="display:none">
+
+<h4>Importar taxas da concorrência</h4>
+
+<input type="file" id="uploadOCRConc">
+
+<div id="statusOCRConc"></div>
+
+</div>
 
 </div>
 
