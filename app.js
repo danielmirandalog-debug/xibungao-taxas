@@ -52,10 +52,10 @@ outras["pix"]=parseFloat(out_pix.value);
 outras["debito"]=parseFloat(out_debito.value);
 outras[1]=parseFloat(out1.value);
 
-let mdr1=parseFloat(mdr1.value);
-let mdr2=parseFloat(mdr2.value);
-let mdr3=parseFloat(mdr3.value);
-let ant=parseFloat(antecipacao.value);
+let mdr1=parseFloat(document.getElementById("mdr1").value);
+let mdr2=parseFloat(document.getElementById("mdr2").value);
+let mdr3=parseFloat(document.getElementById("mdr3").value);
+let ant=parseFloat(document.getElementById("antecipacao").value);
 
 for(let i=2;i<=6;i++) outras[i]=mdr1+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdr2+(ant*(i-1));
@@ -121,25 +121,41 @@ document.getElementById("resultado").innerHTML=html;
 
 function atualizarBarra(){
 
-let valores=[
-share_pix.value,
-share_debito.value,
-share_1x.value,
-share_2x.value,
-share_4x.value,
-share_6x.value,
-share_10x.value
+let campos=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
 ];
 
 let total=0;
 
-valores.forEach(v=>{
-if(v) total+=parseFloat(v);
+campos.forEach(id=>{
+let valor=parseFloat(document.getElementById(id).value);
+if(!isNaN(valor)) total+=valor;
 });
 
-if(total>100) total=100;
+if(total>100){
+
+alert("A soma dos percentuais não pode ultrapassar 100%.");
+
+let ativo=document.activeElement;
+ativo.value="";
+
+total=0;
+
+campos.forEach(id=>{
+let valor=parseFloat(document.getElementById(id).value);
+if(!isNaN(valor)) total+=valor;
+});
+
+}
 
 document.getElementById("barra").style.width=total+"%";
+document.getElementById("contador").innerText=total+"%";
 
 }
 
@@ -165,7 +181,7 @@ return;
 let total=shares.reduce((a,b)=>a+b,0);
 
 if(total!==100){
-alert("A soma deve ser 100%");
+alert("A soma deve ser exatamente 100%");
 return;
 }
 
