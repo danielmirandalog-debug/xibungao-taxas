@@ -108,8 +108,6 @@ for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
 
-/* CONVERSÃO AUTOMÁTICA PARA MANUAL */
-
 document.getElementById("out_pix_manual").value=outras["pix"];
 document.getElementById("out_debito_manual").value=outras["debito"];
 document.getElementById("out1_manual").value=outras[1];
@@ -120,8 +118,6 @@ if(campo){
 campo.value=outras[i].toFixed(2);
 }
 }
-
-/* TROCA VISUAL PARA MANUAL */
 
 document.querySelector('input[value="manual"]').checked=true;
 trocarModoOutras();
@@ -203,9 +199,6 @@ let total=0;
 ids.forEach(function(id){
 
 let campo=document.getElementById(id);
-
-if(!campo) return;
-
 let valor=parseFloat(campo.value);
 
 if(!isNaN(valor)){
@@ -216,25 +209,10 @@ total+=valor;
 
 if(total>100){
 
-alert("A soma dos percentuais não pode ultrapassar 100%.");
-
-if(document.activeElement && document.activeElement.tagName==="INPUT"){
+alert("A soma dos percentuais não pode ultrapassar 100%");
 document.activeElement.value="";
-}
 
-total=0;
-
-ids.forEach(function(id){
-
-let campo=document.getElementById(id);
-
-let valor=parseFloat(campo.value);
-
-if(!isNaN(valor)){
-total+=valor;
-}
-
-});
+return;
 
 }
 
@@ -251,6 +229,12 @@ if(!faturamento){
 alert("Informe o faturamento mensal");
 return;
 }
+
+let custosFixos=
+(parseFloat(custo_sistema.value)||0)+
+(parseFloat(custo_maquina.value)||0)+
+(parseFloat(custo_cesta.value)||0)+
+(parseFloat(custo_manutencao.value)||0);
 
 let shares={
 pix:parseFloat(share_pix.value)||0,
@@ -322,6 +306,8 @@ calcular("c4",shares.c4);
 calcular("c6",shares.c6);
 calcular("c10",shares.c10);
 
+economia+=custosFixos;
+
 let mensal=economia;
 let anual=economia*12;
 let cinco=anual*5;
@@ -348,6 +334,8 @@ document.getElementById("resultadoFaturamento").innerHTML=
 
 <br>
 
+Custos fixos da concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
+
 Economia mensal: <b>R$ ${Math.abs(mensal).toFixed(2)}</b><br><br>
 
 Economia anual: <b>R$ ${Math.abs(anual).toFixed(2)}</b><br><br>
@@ -355,94 +343,4 @@ Economia anual: <b>R$ ${Math.abs(anual).toFixed(2)}</b><br><br>
 Economia em 5 anos: <b>R$ ${Math.abs(cinco).toFixed(2)}</b>
 
 </div>`;
-}
-
-function exportar(){
-
-html2canvas(document.getElementById("resultado"),{scale:2}).then(canvas=>{
-
-let link=document.createElement("a");
-
-link.download="comparacao_taxas.png";
-
-link.href=canvas.toDataURL();
-
-link.click();
-
-});
-
-}
-
-async function processarOCR(event){
-
-let file=event.target.files[0];
-
-if(!file) return;
-
-document.getElementById("statusOCR").innerText="Processando imagem...";
-
-const worker = await Tesseract.createWorker("eng");
-
-const { data } = await worker.recognize(file);
-
-await worker.terminate();
-
-let texto=data.text.toLowerCase();
-
-let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
-
-let match;
-
-while((match=regex.exec(texto))!==null){
-
-let parcela=parseInt(match[1]);
-let taxa=parseFloat(match[2].replace(",",".")); 
-
-let campo=document.getElementById("mp"+parcela);
-
-if(campo){
-campo.value=taxa.toFixed(2);
-}
-
-}
-
-document.getElementById("statusOCR").innerText="Taxas carregadas";
-
-}
-
-async function processarOCRConc(event){
-
-let file=event.target.files[0];
-
-if(!file) return;
-
-document.getElementById("statusOCRConc").innerText="Processando imagem...";
-
-const worker = await Tesseract.createWorker("eng");
-
-const { data } = await worker.recognize(file);
-
-await worker.terminate();
-
-let texto=data.text.toLowerCase();
-
-let regex=/([2-9]|1[0-9]|2[01])\s*x?\s*([0-9]+[.,][0-9]+)/g;
-
-let match;
-
-while((match=regex.exec(texto))!==null){
-
-let parcela=parseInt(match[1]);
-let taxa=parseFloat(match[2].replace(",",".")); 
-
-let campo=document.getElementById("out"+parcela+"_manual");
-
-if(campo){
-campo.value=taxa.toFixed(2);
-}
-
-}
-
-document.getElementById("statusOCRConc").innerText="Taxas carregadas";
-
 }
