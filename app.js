@@ -108,6 +108,24 @@ for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
 
+/* CONVERSÃO AUTOMÁTICA PARA MANUAL */
+
+document.getElementById("out_pix_manual").value=outras["pix"];
+document.getElementById("out_debito_manual").value=outras["debito"];
+document.getElementById("out1_manual").value=outras[1];
+
+for(let i=2;i<=21;i++){
+let campo=document.getElementById("out"+i+"_manual");
+if(campo){
+campo.value=outras[i].toFixed(2);
+}
+}
+
+/* TROCA VISUAL PARA MANUAL */
+
+document.querySelector('input[value="manual"]').checked=true;
+trocarModoOutras();
+
 }
 
 gerarTabela(valor,mp,outras);
@@ -273,13 +291,7 @@ c6:taxa("mp6"),
 c10:taxa("mp10")
 };
 
-let modo=document.querySelector('input[name="modoOutras"]:checked').value;
-
-let out={};
-
-if(modo==="manual"){
-
-out={
+let out={
 pix:taxa("out_pix_manual"),
 debito:taxa("out_debito_manual"),
 c1:taxa("out1_manual"),
@@ -288,24 +300,6 @@ c4:taxa("out4_manual"),
 c6:taxa("out6_manual"),
 c10:taxa("out10_manual")
 };
-
-}else{
-
-let mdr1=parseFloat(mdr1.value)||0;
-let mdr2=parseFloat(mdr2.value)||0;
-let ant=parseFloat(antecipacao.value)||0;
-
-out={
-pix:taxa("out_pix"),
-debito:taxa("out_debito"),
-c1:taxa("out1"),
-c2:mdr1+(ant*1),
-c4:mdr1+(ant*3),
-c6:mdr1+(ant*5),
-c10:mdr2+(ant*9)
-};
-
-}
 
 let economia=0;
 
