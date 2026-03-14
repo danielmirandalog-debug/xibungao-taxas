@@ -258,6 +258,42 @@ document.getElementById("resultadoFaturamento").innerHTML=
 
 <hr>
 
+<h4>Custos fixos da concorrência</h4>
+
+Custos fixos mensais: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
+
+Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
+
+Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
+
+Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
+
+<hr>
+
+<h4>Rendimento do cofrinho</h4>
+
+Rendimento mensal: <b>R$ ${(reserva*taxaMensal).toFixed(2)}</b><br><br>
+
+Rendimento anual: <b>R$ ${(reserva*taxaMensal*12).toFixed(2)}</b><br><br>
+
+Rendimento em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b><br><br>
+
+<hr>
+
+Saldo acumulado em 1 ano: <b>R$ ${(reserva*12+(reserva*taxaMensal*12)).toFixed(2)}</b><br><br>
+
+Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b>
+
+</div>`;
+
+`<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
+
+<h3>${vencedor}</h3>
+
+<h2>Economia total em 5 anos: R$ ${economia5anos.toFixed(2)}</h2>
+
+<hr>
+
 <h4>Rendimento do cofrinho</h4>
 
 Rendimento em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
