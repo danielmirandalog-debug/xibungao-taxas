@@ -1,4 +1,3 @@
-// CDI médio usado no cálculo
 const CDI_ANUAL = 10.65;
 
 window.onload=function(){
@@ -35,33 +34,23 @@ function trocarModoOutras(){
 let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
 if(modo==="manual"){
-
 document.getElementById("modoMDR").style.display="none";
 document.getElementById("modoManual").style.display="block";
-
 }else{
-
 document.getElementById("modoMDR").style.display="block";
 document.getElementById("modoManual").style.display="none";
-
 }
 
 }
 
 function liquido(valor,taxa){
-
 if(taxa===undefined || taxa===null || taxa==="") return null;
-
 return valor*(1-(taxa/100));
-
 }
 
 function formatarTaxa(taxa){
-
 if(taxa===undefined || taxa===null || taxa==="") return "Não se aplica";
-
 return parseFloat(taxa).toFixed(2)+"%";
-
 }
 
 function simular(){
@@ -200,11 +189,9 @@ total+=valor;
 });
 
 if(total>100){
-
 alert("A soma não pode ultrapassar 100%");
 document.activeElement.value="";
 return;
-
 }
 
 document.getElementById("contador").innerText = total + "%";
@@ -251,11 +238,12 @@ rendimentoTotal+=rendimento;
 }
 
 let rendimentoMensal=reserva*taxaMensal;
+let rendimentoAnual=rendimentoMensal*12;
+let rendimento5anos=rendimentoTotal;
 
-let economia=custosFixos+rendimentoMensal;
-
-let anual=economia*12;
-let cinco=anual*5;
+let economiaMensal=custosFixos;
+let economiaAnual=economiaMensal*12;
+let economia5anos=economiaAnual*5;
 
 document.getElementById("resultadoFaturamento").innerHTML=
 
@@ -263,19 +251,31 @@ document.getElementById("resultadoFaturamento").innerHTML=
 
 <h3>Resultado da simulação</h3>
 
-Custos fixos concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
+<h4>Custos da concorrência</h4>
 
-Rendimento mensal cofrinho: <b>R$ ${rendimentoMensal.toFixed(2)}</b><br><br>
+Custos fixos da concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
 
-Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b><br><br>
+Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
 
-Rendimento total em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b><br><br>
+Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
 
-Economia mensal: <b>R$ ${economia.toFixed(2)}</b><br><br>
+Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 
-Economia anual: <b>R$ ${anual.toFixed(2)}</b><br><br>
+<hr>
 
-Economia em 5 anos: <b>R$ ${cinco.toFixed(2)}</b>
+<h4>Rendimento do cofrinho</h4>
+
+Rendimento mensal: <b>R$ ${rendimentoMensal.toFixed(2)}</b><br><br>
+
+Rendimento anual: <b>R$ ${rendimentoAnual.toFixed(2)}</b><br><br>
+
+Rendimento em 5 anos: <b>R$ ${rendimento5anos.toFixed(2)}</b><br><br>
+
+<hr>
+
+Saldo acumulado em 1 ano: <b>R$ ${(reserva*12+rendimentoAnual).toFixed(2)}</b><br><br>
+
+Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b>
 
 </div>`;
 
