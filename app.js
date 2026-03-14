@@ -280,3 +280,11 @@ Economia em 5 anos: <b>R$ ${cinco.toFixed(2)}</b>
 </div>`;
 
 }
+
+function processarOCR(){
+console.log("OCR Mercado Pago ainda não configurado.");
+}
+
+function processarOCRConc(){
+console.log("OCR concorrência ainda não configurado.");
+}
