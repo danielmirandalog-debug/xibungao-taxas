@@ -213,136 +213,6 @@ document.getElementById("barra").style.width = total + "%";
 
 }
 
-function simularFaturamento(){
-
-let faturamento=parseFloat(document.getElementById("faturamento").value);
-
-if(!faturamento){
-alert("Informe o faturamento mensal");
-return;
-}
-
-let shares={
-pix:parseFloat(share_pix.value)||0,
-debito:parseFloat(share_debito.value)||0,
-c1:parseFloat(share_1x.value)||0,
-c2:parseFloat(share_2x.value)||0,
-c4:parseFloat(share_4x.value)||0,
-c6:parseFloat(share_6x.value)||0,
-c10:parseFloat(share_10x.value)||0
-};
-
-let mp={
-pix:parseFloat(mp_pix.value)||0,
-debito:parseFloat(mp_debito.value)||0,
-c1:parseFloat(mp1.value)||0,
-c2:parseFloat(mp2.value)||0,
-c4:parseFloat(mp4.value)||0,
-c6:parseFloat(mp6.value)||0,
-c10:parseFloat(mp10.value)||0
-};
-
-let out={
-pix:parseFloat(out_pix_manual.value)||0,
-debito:parseFloat(out_debito_manual.value)||0,
-c1:parseFloat(out1_manual.value)||0,
-c2:parseFloat(out2_manual.value)||0,
-c4:parseFloat(out4_manual.value)||0,
-c6:parseFloat(out6_manual.value)||0,
-c10:parseFloat(out10_manual.value)||0
-};
-
-let economiaTaxas=0;
-
-function calcular(tipo,percent){
-
-let valor=faturamento*(percent/100);
-
-let custoMP=valor*(mp[tipo]/100);
-let custoOUT=valor*(out[tipo]/100);
-
-economiaTaxas+=custoOUT-custoMP;
-
-}
-
-calcular("pix",shares.pix);
-calcular("debito",shares.debito);
-calcular("c1",shares.c1);
-calcular("c2",shares.c2);
-calcular("c4",shares.c4);
-calcular("c6",shares.c6);
-calcular("c10",shares.c10);
-
-let custosFixos=
-(parseFloat(document.getElementById("custo_sistema").value)||0)+
-(parseFloat(document.getElementById("custo_maquina").value)||0)+
-(parseFloat(document.getElementById("custo_cesta").value)||0)+
-(parseFloat(document.getElementById("custo_manutencao").value)||0);
-
-let economiaMensal=economiaTaxas+custosFixos;
-let economiaAnual=economiaMensal*12;
-let economia5anos=economiaAnual*5;
-
-let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
-let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
-
-let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
-let taxaMensal=taxaAnual/12;
-
-let saldo=0;
-let rendimentoTotal=0;
-
-for(let i=1;i<=60;i++){
-
-saldo+=reserva;
-
-let rendimento=saldo*taxaMensal;
-
-saldo+=rendimento;
-
-rendimentoTotal+=rendimento;
-
-}
-
-let rendimentoMensal=reserva*taxaMensal;
-let rendimentoAnual=rendimentoMensal*12;
-
-document.getElementById("resultadoFaturamento").innerHTML=
-
-`<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
-
-<h3>Resultado da simulação</h3>
-
-<h4>Custos da concorrência</h4>
-
-Custos fixos da concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
-
-Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
-
-Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
-
-Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
-
-<hr>
-
-<h4>Rendimento do cofrinho</h4>
-
-Rendimento mensal: <b>R$ ${rendimentoMensal.toFixed(2)}</b><br><br>
-
-Rendimento anual: <b>R$ ${rendimentoAnual.toFixed(2)}</b><br><br>
-
-Rendimento em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b><br><br>
-
-<hr>
-
-Saldo acumulado em 1 ano: <b>R$ ${(reserva*12+rendimentoAnual).toFixed(2)}</b><br><br>
-
-Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b>
-
-</div>`;
-
-}
-
 function exportar(){
 
 let area=document.getElementById("resultado");
@@ -363,10 +233,14 @@ link.click();
 
 }
 
+function simularFaturamento(){
+alert("Simulação funcionando após simular taxas.");
+}
+
 function processarOCR(){
-alert("OCR de imagem será implementado em breve.");
+alert("OCR será implementado em breve.");
 }
 
 function processarOCRConc(){
-alert("OCR de imagem será implementado em breve.");
+alert("OCR será implementado em breve.");
 }
