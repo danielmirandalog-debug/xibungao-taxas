@@ -11,6 +11,8 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script src="app.js" defer></script>
 
 <style>
@@ -119,6 +121,17 @@ background:#2c7be5;
 transition:width 0.3s;
 }
 
+canvas{
+margin-top:20px;
+}
+
+.rodape{
+margin-top:20px;
+font-size:11px;
+color:#777;
+text-align:center;
+}
+
 </style>
 
 </head>
@@ -150,10 +163,6 @@ Comparador profissional de taxas
 
 <label>Crédito 1x (%)</label>
 <input id="mp1">
-
-<h4>Importar taxas por imagem</h4>
-<input type="file" id="uploadOCR">
-<div id="statusOCR"></div>
 
 <div id="mpParcelas"></div>
 
@@ -213,10 +222,6 @@ Preencher manualmente
 <label>Crédito 1x (%)</label>
 <input id="out1_manual">
 
-<h4>Importar taxas por imagem</h4>
-<input type="file" id="uploadOCRConc">
-<div id="statusOCRConc"></div>
-
 <div id="outrasParcelas"></div>
 
 </div>
@@ -228,12 +233,6 @@ Preencher manualmente
 <button onclick="simular()">SIMULAR PARCELAS</button>
 
 <div id="resultado"></div>
-
-</div>
-
-<div class="card">
-
-<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
 
 </div>
 
@@ -300,6 +299,13 @@ Preencher manualmente
 <button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
 
 <div id="resultadoFaturamento"></div>
+
+<canvas id="graficoComparacao"></canvas>
+<canvas id="graficoDistribuicao"></canvas>
+
+<div class="rodape">
+Esta simulação possui caráter ilustrativo e baseia-se nos dados informados no momento do cálculo. Valores, taxas e condições comerciais podem sofrer alterações sem aviso prévio.
+</div>
 
 </div>
 
