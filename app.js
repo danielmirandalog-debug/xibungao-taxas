@@ -1,3 +1,6 @@
+// CDI médio usado no cálculo
+const CDI_ANUAL = 10.65;
+
 window.onload=function(){
 
 let html="";
@@ -108,17 +111,6 @@ for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
 for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
 for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
 
-document.getElementById("out_pix_manual").value=outras["pix"];
-document.getElementById("out_debito_manual").value=outras["debito"];
-document.getElementById("out1_manual").value=outras[1];
-
-for(let i=2;i<=21;i++){
-let campo=document.getElementById("out"+i+"_manual");
-if(campo){
-campo.value=outras[i].toFixed(2);
-}
-}
-
 document.querySelector('input[value="manual"]').checked=true;
 trocarModoOutras();
 
@@ -209,9 +201,8 @@ total+=valor;
 
 if(total>100){
 
-alert("A soma dos percentuais não pode ultrapassar 100%");
+alert("A soma não pode ultrapassar 100%");
 document.activeElement.value="";
-
 return;
 
 }
@@ -223,7 +214,7 @@ document.getElementById("barra").style.width = total + "%";
 
 function simularFaturamento(){
 
-let faturamento=parseFloat(document.getElementById("faturamento").value);
+let faturamento=parseFloat(faturamento.value);
 
 if(!faturamento){
 alert("Informe o faturamento mensal");
@@ -236,93 +227,35 @@ let custosFixos=
 (parseFloat(custo_cesta.value)||0)+
 (parseFloat(custo_manutencao.value)||0);
 
-let shares={
-pix:parseFloat(share_pix.value)||0,
-debito:parseFloat(share_debito.value)||0,
-c1:parseFloat(share_1x.value)||0,
-c2:parseFloat(share_2x.value)||0,
-c4:parseFloat(share_4x.value)||0,
-c6:parseFloat(share_6x.value)||0,
-c10:parseFloat(share_10x.value)||0
-};
+// COFRINHO
 
-let total=0;
+let reserva=parseFloat(cofrinho_reserva.value)||0;
+let percentual=parseFloat(cofrinho_percentual.value)||0;
 
-for(let k in shares){
-total+=shares[k];
-}
+let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
+let taxaMensal=taxaAnual/12;
 
-if(total!==100){
-alert("A soma dos percentuais precisa ser 100%");
-return;
-}
+let saldo=0;
+let rendimentoTotal=0;
 
-function taxa(id){
-let el=document.getElementById(id);
-if(!el) return 0;
-let v=parseFloat(el.value);
-if(isNaN(v)) return 0;
-return v;
-}
+for(let i=1;i<=60;i++){
 
-let mp={
-pix:taxa("mp_pix"),
-debito:taxa("mp_debito"),
-c1:taxa("mp1"),
-c2:taxa("mp2"),
-c4:taxa("mp4"),
-c6:taxa("mp6"),
-c10:taxa("mp10")
-};
+saldo+=reserva;
 
-let out={
-pix:taxa("out_pix_manual"),
-debito:taxa("out_debito_manual"),
-c1:taxa("out1_manual"),
-c2:taxa("out2_manual"),
-c4:taxa("out4_manual"),
-c6:taxa("out6_manual"),
-c10:taxa("out10_manual")
-};
+let rendimento=saldo*taxaMensal;
 
-let economia=0;
+saldo+=rendimento;
 
-function calcular(tipo,percent){
-
-let valor=faturamento*(percent/100);
-
-let custoMP=valor*(mp[tipo]/100);
-let custoOUT=valor*(out[tipo]/100);
-
-economia+=custoOUT-custoMP;
+rendimentoTotal+=rendimento;
 
 }
 
-calcular("pix",shares.pix);
-calcular("debito",shares.debito);
-calcular("c1",shares.c1);
-calcular("c2",shares.c2);
-calcular("c4",shares.c4);
-calcular("c6",shares.c6);
-calcular("c10",shares.c10);
+let rendimentoMensal=reserva*taxaMensal;
 
-economia+=custosFixos;
+let economia=custosFixos+rendimentoMensal;
 
-let mensal=economia;
 let anual=economia*12;
 let cinco=anual*5;
-
-let campeao="";
-
-if(economia>0){
-campeao="🏆 Campeão: Mercado Pago (menor custo)";
-}
-else if(economia<0){
-campeao="🏆 Campeão: Outras adquirências (menor custo)";
-}
-else{
-campeao="⚖️ Empate técnico";
-}
 
 document.getElementById("resultadoFaturamento").innerHTML=
 
@@ -330,17 +263,20 @@ document.getElementById("resultadoFaturamento").innerHTML=
 
 <h3>Resultado da simulação</h3>
 
-<h2 style="color:#2c7be5">${campeao}</h2>
+Custos fixos concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
 
-<br>
+Rendimento mensal cofrinho: <b>R$ ${rendimentoMensal.toFixed(2)}</b><br><br>
 
-Custos fixos da concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
+Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b><br><br>
 
-Economia mensal: <b>R$ ${Math.abs(mensal).toFixed(2)}</b><br><br>
+Rendimento total em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b><br><br>
 
-Economia anual: <b>R$ ${Math.abs(anual).toFixed(2)}</b><br><br>
+Economia mensal: <b>R$ ${economia.toFixed(2)}</b><br><br>
 
-Economia em 5 anos: <b>R$ ${Math.abs(cinco).toFixed(2)}</b>
+Economia anual: <b>R$ ${anual.toFixed(2)}</b><br><br>
+
+Economia em 5 anos: <b>R$ ${cinco.toFixed(2)}</b>
 
 </div>`;
+
 }
