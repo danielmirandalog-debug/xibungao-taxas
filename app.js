@@ -214,7 +214,7 @@ document.getElementById("barra").style.width = total + "%";
 
 function simularFaturamento(){
 
-let faturamento=parseFloat(faturamento.value);
+let faturamento=parseFloat(document.getElementById("faturamento").value);
 
 if(!faturamento){
 alert("Informe o faturamento mensal");
@@ -222,15 +222,15 @@ return;
 }
 
 let custosFixos=
-(parseFloat(custo_sistema.value)||0)+
-(parseFloat(custo_maquina.value)||0)+
-(parseFloat(custo_cesta.value)||0)+
-(parseFloat(custo_manutencao.value)||0);
+(parseFloat(document.getElementById("custo_sistema").value)||0)+
+(parseFloat(document.getElementById("custo_maquina").value)||0)+
+(parseFloat(document.getElementById("custo_cesta").value)||0)+
+(parseFloat(document.getElementById("custo_manutencao").value)||0);
 
 // COFRINHO
 
-let reserva=parseFloat(cofrinho_reserva.value)||0;
-let percentual=parseFloat(cofrinho_percentual.value)||0;
+let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
+let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
 
 let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
 let taxaMensal=taxaAnual/12;
