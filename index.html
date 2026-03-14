@@ -1,299 +1,346 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+window.onload=function(){
 
-<head>
+let html="";
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Comparador profissional de taxas</title>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-
-<script src="app.js" defer></script>
-
-<style>
-
-body{
-font-family:Segoe UI,Arial;
-background:#f4f6fa;
-margin:0;
+for(let i=2;i<=21;i++){
+html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
 }
 
-header{
-background:#111;
-color:white;
-padding:15px;
-text-align:center;
-font-size:22px;
+document.getElementById("mpParcelas").innerHTML=html;
+
+gerarCamposManual();
+
+document.getElementById("uploadOCR").addEventListener("change",processarOCR);
+document.getElementById("uploadOCRConc").addEventListener("change",processarOCRConc);
+
 }
 
-.container{
-max-width:900px;
-margin:auto;
-padding:20px;
+function gerarCamposManual(){
+
+let html="";
+
+for(let i=2;i<=21;i++){
+html+=`<label>${i}x (%)</label> <input id="out${i}_manual" type="number">`;
 }
 
-.card{
-background:white;
-padding:20px;
-margin-bottom:20px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
+document.getElementById("outrasParcelas").innerHTML=html;
+
 }
 
-input{
-width:100%;
-padding:8px;
-margin-bottom:10px;
-border:1px solid #ccc;
-border-radius:5px;
+function trocarModoOutras(){
+
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+document.getElementById("modoMDR").style.display="none";
+document.getElementById("modoManual").style.display="block";
+
+}else{
+
+document.getElementById("modoMDR").style.display="block";
+document.getElementById("modoManual").style.display="none";
+
 }
 
-button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:6px;
-background:#2c7be5;
-color:white;
-font-weight:bold;
-cursor:pointer;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-font-size:11px;
+function liquido(valor,taxa){
+
+if(taxa===undefined || taxa===null || taxa==="") return null;
+
+return valor*(1-(taxa/100));
+
 }
 
-td,th{
-border:1px solid #ddd;
-padding:4px;
-text-align:center;
+function formatarTaxa(taxa){
+
+if(taxa===undefined || taxa===null || taxa==="") return "Não se aplica";
+
+return parseFloat(taxa).toFixed(2)+"%";
+
 }
 
-th{
-background:#f0f2f6;
+function simular(){
+
+let valor=parseFloat(document.getElementById("valor").value);
+
+if(!valor){
+alert("Informe o valor da venda");
+return;
 }
 
-.taxaRuim{
-color:red;
-font-weight:bold;
+let mp={};
+let outras={};
+
+mp["pix"]=parseFloat(mp_pix.value);
+mp["debito"]=parseFloat(mp_debito.value);
+mp[1]=parseFloat(mp1.value);
+
+for(let i=2;i<=21;i++){
+mp[i]=parseFloat(document.getElementById("mp"+i).value);
 }
 
-.radioLinha{
-display:flex;
-gap:20px;
-margin-bottom:15px;
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+outras["pix"]=parseFloat(out_pix_manual.value);
+outras["debito"]=parseFloat(out_debito_manual.value);
+outras[1]=parseFloat(out1_manual.value);
+
+for(let i=2;i<=21;i++){
+outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
 }
 
-.tituloFat{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
+}else{
+
+outras["pix"]=parseFloat(out_pix.value);
+outras["debito"]=parseFloat(out_debito.value);
+outras[1]=parseFloat(out1.value);
+
+let mdrA=parseFloat(document.getElementById("mdr1").value);
+let mdrB=parseFloat(document.getElementById("mdr2").value);
+let mdrC=parseFloat(document.getElementById("mdr3").value);
+let ant=parseFloat(document.getElementById("antecipacao").value);
+
+for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
+for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
+for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
+
+document.getElementById("out_pix_manual").value=outras["pix"];
+document.getElementById("out_debito_manual").value=outras["debito"];
+document.getElementById("out1_manual").value=outras[1];
+
+for(let i=2;i<=21;i++){
+let campo=document.getElementById("out"+i+"_manual");
+if(campo){
+campo.value=outras[i].toFixed(2);
+}
 }
 
-.contador{
-font-weight:bold;
-font-size:18px;
-color:#2c7be5;
+document.querySelector('input[value="manual"]').checked=true;
+trocarModoOutras();
+
 }
 
-.barraContainer{
-width:100%;
-height:22px;
-background:#ddd;
-border-radius:12px;
-overflow:hidden;
-margin-bottom:20px;
+gerarTabela(valor,mp,outras);
+
 }
 
-.barraProgresso{
-height:100%;
-width:0%;
-background:#2c7be5;
-transition:width 0.3s;
+function gerarTabela(valor,mp,outras){
+
+let parcelas=["pix","debito",1];
+
+for(let i=2;i<=21;i++) parcelas.push(i);
+
+let html=`<table>
+
+<tr>
+<th>Parcela</th>
+<th>Taxa MP</th>
+<th>R$ Mercado Pago</th>
+<th>Taxa Outros</th>
+<th>R$ Outros</th>
+</tr>`;
+
+parcelas.forEach(p=>{
+
+let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
+
+let taxaMP=mp[p];
+let taxaOut=outras[p];
+
+let valorMP=liquido(valor,taxaMP);
+let valorOut=liquido(valor,taxaOut);
+
+let classeMP="";
+let classeOut="";
+
+if(taxaMP>taxaOut) classeMP="taxaRuim";
+if(taxaOut>taxaMP) classeOut="taxaRuim";
+
+html+=`<tr>
+
+<td>${nome}</td>
+
+<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
+
+<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
+
+<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
+
+<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+
+</tr>`;
+
+});
+
+html+="</table>";
+
+document.getElementById("resultado").innerHTML=html;
+
 }
 
-</style>
+function atualizarBarra(){
+
+let ids=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
+];
+
+let total=0;
+
+ids.forEach(function(id){
 
-</head>
+let campo=document.getElementById(id);
+let valor=parseFloat(campo.value);
 
-<body>
+if(!isNaN(valor)){
+total+=valor;
+}
+
+});
 
-<header>
-🦅 Comparador profissional de taxas
-</header>
+if(total>100){
 
-<div class="container">
+alert("A soma dos percentuais não pode ultrapassar 100%");
+document.activeElement.value="";
+
+return;
 
-<div class="card">
-<label>Valor da venda</label>
-<input id="valor" type="number">
-</div>
+}
 
-<div class="card">
+document.getElementById("contador").innerText = total + "%";
+document.getElementById("barra").style.width = total + "%";
 
-<h3>Mercado Pago</h3>
+}
+
+function simularFaturamento(){
+
+let faturamento=parseFloat(document.getElementById("faturamento").value);
+
+if(!faturamento){
+alert("Informe o faturamento mensal");
+return;
+}
 
-<label>Pix (%)</label>
-<input id="mp_pix">
+let custosFixos=
+(parseFloat(custo_sistema.value)||0)+
+(parseFloat(custo_maquina.value)||0)+
+(parseFloat(custo_cesta.value)||0)+
+(parseFloat(custo_manutencao.value)||0);
 
-<label>Débito (%)</label>
-<input id="mp_debito">
+let shares={
+pix:parseFloat(share_pix.value)||0,
+debito:parseFloat(share_debito.value)||0,
+c1:parseFloat(share_1x.value)||0,
+c2:parseFloat(share_2x.value)||0,
+c4:parseFloat(share_4x.value)||0,
+c6:parseFloat(share_6x.value)||0,
+c10:parseFloat(share_10x.value)||0
+};
 
-<label>Crédito 1x (%)</label>
-<input id="mp1">
+let total=0;
 
-<h4>Importar taxas por imagem</h4>
-<input type="file" id="uploadOCR">
-<div id="statusOCR"></div>
+for(let k in shares){
+total+=shares[k];
+}
 
-<div id="mpParcelas"></div>
+if(total!==100){
+alert("A soma dos percentuais precisa ser 100%");
+return;
+}
 
-</div>
+function taxa(id){
+let el=document.getElementById(id);
+if(!el) return 0;
+let v=parseFloat(el.value);
+if(isNaN(v)) return 0;
+return v;
+}
 
-<div class="card">
+let mp={
+pix:taxa("mp_pix"),
+debito:taxa("mp_debito"),
+c1:taxa("mp1"),
+c2:taxa("mp2"),
+c4:taxa("mp4"),
+c6:taxa("mp6"),
+c10:taxa("mp10")
+};
 
-<h3>Outras adquirências</h3>
+let out={
+pix:taxa("out_pix_manual"),
+debito:taxa("out_debito_manual"),
+c1:taxa("out1_manual"),
+c2:taxa("out2_manual"),
+c4:taxa("out4_manual"),
+c6:taxa("out6_manual"),
+c10:taxa("out10_manual")
+};
 
-<div class="radioLinha">
+let economia=0;
 
-<label>
-<input type="radio" name="modoOutras" value="mdr" checked onchange="trocarModoOutras()">
-Preencher com MDR e Antecipação
-</label>
+function calcular(tipo,percent){
 
-<label>
-<input type="radio" name="modoOutras" value="manual" onchange="trocarModoOutras()">
-Preencher manualmente
-</label>
+let valor=faturamento*(percent/100);
 
-</div>
+let custoMP=valor*(mp[tipo]/100);
+let custoOUT=valor*(out[tipo]/100);
 
-<div id="modoMDR">
+economia+=custoOUT-custoMP;
 
-<label>Pix (%)</label>
-<input id="out_pix">
+}
 
-<label>Débito (%)</label>
-<input id="out_debito">
+calcular("pix",shares.pix);
+calcular("debito",shares.debito);
+calcular("c1",shares.c1);
+calcular("c2",shares.c2);
+calcular("c4",shares.c4);
+calcular("c6",shares.c6);
+calcular("c10",shares.c10);
 
-<label>Crédito 1x (%)</label>
-<input id="out1">
+economia+=custosFixos;
 
-<label>MDR 2-6x</label>
-<input id="mdr1">
+let mensal=economia;
+let anual=economia*12;
+let cinco=anual*5;
 
-<label>MDR 7-12x</label>
-<input id="mdr2">
+let campeao="";
 
-<label>MDR 13-21x</label>
-<input id="mdr3">
+if(economia>0){
+campeao="🏆 Campeão: Mercado Pago (menor custo)";
+}
+else if(economia<0){
+campeao="🏆 Campeão: Outras adquirências (menor custo)";
+}
+else{
+campeao="⚖️ Empate técnico";
+}
 
-<label>Antecipação mensal (%)</label>
-<input id="antecipacao">
+document.getElementById("resultadoFaturamento").innerHTML=
 
-</div>
+`<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
 
-<div id="modoManual" style="display:none">
+<h3>Resultado da simulação</h3>
 
-<label>Pix (%)</label>
-<input id="out_pix_manual">
+<h2 style="color:#2c7be5">${campeao}</h2>
 
-<label>Débito (%)</label>
-<input id="out_debito_manual">
+<br>
 
-<label>Crédito 1x (%)</label>
-<input id="out1_manual">
+Custos fixos da concorrência: <b>R$ ${custosFixos.toFixed(2)}</b><br><br>
 
-<h4>Importar taxas por imagem</h4>
-<input type="file" id="uploadOCRConc">
-<div id="statusOCRConc"></div>
+Economia mensal: <b>R$ ${Math.abs(mensal).toFixed(2)}</b><br><br>
 
-<div id="outrasParcelas"></div>
+Economia anual: <b>R$ ${Math.abs(anual).toFixed(2)}</b><br><br>
 
-</div>
+Economia em 5 anos: <b>R$ ${Math.abs(cinco).toFixed(2)}</b>
 
-</div>
-
-<div class="card">
-
-<button onclick="simular()">SIMULAR PARCELAS</button>
-
-<div id="resultado"></div>
-
-</div>
-
-<div class="card">
-
-<button onclick="exportar()">EXPORTAR RELATÓRIO</button>
-
-</div>
-
-<div class="card">
-
-<div class="tituloFat">
-
-<h3>Simulação de faturamento</h3>
-
-<div class="contador" id="contador">0%</div>
-
-</div>
-
-<div class="barraContainer">
-<div class="barraProgresso" id="barra"></div>
-</div>
-
-<label>Faturamento mensal</label>
-<input id="faturamento">
-
-<label>Pix (%)</label>
-<input id="share_pix" oninput="atualizarBarra()">
-
-<label>Débito (%)</label>
-<input id="share_debito" oninput="atualizarBarra()">
-
-<label>Crédito à vista (%)</label>
-<input id="share_1x" oninput="atualizarBarra()">
-
-<label>Crédito 2x (%)</label>
-<input id="share_2x" oninput="atualizarBarra()">
-
-<label>Crédito 4x (%)</label>
-<input id="share_4x" oninput="atualizarBarra()">
-
-<label>Crédito 6x (%)</label>
-<input id="share_6x" oninput="atualizarBarra()">
-
-<label>Crédito 10x (%)</label>
-<input id="share_10x" oninput="atualizarBarra()">
-
-<h3>CUSTOS DA CONCORRÊNCIA</h3>
-
-<label>Sistema (mensal)</label>
-<input id="custo_sistema" type="number">
-
-<label>Aluguel de máquina (mensal)</label>
-<input id="custo_maquina" type="number">
-
-<label>Cesta de serviços do banco</label>
-<input id="custo_cesta" type="number">
-
-<label>Taxa de manutenção da conta</label>
-<input id="custo_manutencao" type="number">
-
-<button onclick="simularFaturamento()">SIMULAR FATURAMENTO</button>
-
-<div id="resultadoFaturamento"></div>
-
-</div>
-
-</div>
-
-</body>
-</html>
+</div>`;
+}
