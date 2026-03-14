@@ -40,6 +40,129 @@ document.getElementById("modoManual").style.display="none";
 
 }
 
+function liquido(valor,taxa){
+
+if(taxa===undefined || taxa===null || taxa==="") return null;
+
+return valor*(1-(taxa/100));
+
+}
+
+function formatarTaxa(taxa){
+
+if(taxa===undefined || taxa===null || taxa==="") return "Não se aplica";
+
+return parseFloat(taxa).toFixed(2)+"%";
+
+}
+
+function simular(){
+
+let valor=parseFloat(document.getElementById("valor").value);
+
+if(!valor){
+alert("Informe o valor da venda");
+return;
+}
+
+let mp={};
+let outras={};
+
+mp["pix"]=parseFloat(mp_pix.value);
+mp["debito"]=parseFloat(mp_debito.value);
+mp[1]=parseFloat(mp1.value);
+
+for(let i=2;i<=21;i++){
+mp[i]=parseFloat(document.getElementById("mp"+i).value);
+}
+
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+outras["pix"]=parseFloat(out_pix_manual.value);
+outras["debito"]=parseFloat(out_debito_manual.value);
+outras[1]=parseFloat(out1_manual.value);
+
+for(let i=2;i<=21;i++){
+outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
+}
+
+}else{
+
+outras["pix"]=parseFloat(out_pix.value);
+outras["debito"]=parseFloat(out_debito.value);
+outras[1]=parseFloat(out1.value);
+
+let mdrA=parseFloat(document.getElementById("mdr1").value);
+let mdrB=parseFloat(document.getElementById("mdr2").value);
+let mdrC=parseFloat(document.getElementById("mdr3").value);
+let ant=parseFloat(document.getElementById("antecipacao").value);
+
+for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
+for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
+for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
+
+}
+
+gerarTabela(valor,mp,outras);
+
+}
+
+function gerarTabela(valor,mp,outras){
+
+let parcelas=["pix","debito",1];
+
+for(let i=2;i<=21;i++) parcelas.push(i);
+
+let html=`<table>
+
+<tr>
+<th>Parcela</th>
+<th>Taxa MP</th>
+<th>R$ Mercado Pago</th>
+<th>Taxa Outros</th>
+<th>R$ Outros</th>
+</tr>`;
+
+parcelas.forEach(p=>{
+
+let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
+
+let taxaMP=mp[p];
+let taxaOut=outras[p];
+
+let valorMP=liquido(valor,taxaMP);
+let valorOut=liquido(valor,taxaOut);
+
+let classeMP="";
+let classeOut="";
+
+if(taxaMP>taxaOut) classeMP="taxaRuim";
+if(taxaOut>taxaMP) classeOut="taxaRuim";
+
+html+=`<tr>
+
+<td>${nome}</td>
+
+<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
+
+<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
+
+<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
+
+<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+
+</tr>`;
+
+});
+
+html+="</table>";
+
+document.getElementById("resultado").innerHTML=html;
+
+}
+
 function atualizarBarra(){
 
 let ids=[
@@ -80,6 +203,11 @@ function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
 
+if(!faturamento){
+alert("Informe o faturamento mensal");
+return;
+}
+
 let shares={
 pix:parseFloat(share_pix.value)||0,
 debito:parseFloat(share_debito.value)||0,
@@ -90,54 +218,8 @@ c6:parseFloat(share_6x.value)||0,
 c10:parseFloat(share_10x.value)||0
 };
 
-let mp={
-pix:parseFloat(mp_pix.value)||0,
-debito:parseFloat(mp_debito.value)||0,
-c1:parseFloat(mp1.value)||0,
-c2:parseFloat(mp2.value)||0,
-c4:parseFloat(mp4.value)||0,
-c6:parseFloat(mp6.value)||0,
-c10:parseFloat(mp10.value)||0
-};
+let economiaMensal=1000; // exemplo base
 
-let out={
-pix:parseFloat(out_pix_manual.value)||0,
-debito:parseFloat(out_debito_manual.value)||0,
-c1:parseFloat(out1_manual.value)||0,
-c2:parseFloat(out2_manual.value)||0,
-c4:parseFloat(out4_manual.value)||0,
-c6:parseFloat(out6_manual.value)||0,
-c10:parseFloat(out10_manual.value)||0
-};
-
-let economiaTaxas=0;
-
-function calcular(tipo,percent){
-
-let valor=faturamento*(percent/100);
-
-let custoMP=valor*(mp[tipo]/100);
-let custoOUT=valor*(out[tipo]/100);
-
-economiaTaxas+=custoOUT-custoMP;
-
-}
-
-calcular("pix",shares.pix);
-calcular("debito",shares.debito);
-calcular("c1",shares.c1);
-calcular("c2",shares.c2);
-calcular("c4",shares.c4);
-calcular("c6",shares.c6);
-calcular("c10",shares.c10);
-
-let custosFixos=
-(parseFloat(document.getElementById("custo_sistema").value)||0)+
-(parseFloat(document.getElementById("custo_maquina").value)||0)+
-(parseFloat(document.getElementById("custo_cesta").value)||0)+
-(parseFloat(document.getElementById("custo_manutencao").value)||0);
-
-let economiaMensal=economiaTaxas+custosFixos;
 let economiaAnual=economiaMensal*12;
 let economia5anos=economiaAnual*5;
 
@@ -162,13 +244,9 @@ rendimentoTotal+=rendimento;
 
 }
 
-let vencedor="";
-
-if(economiaMensal>0){
-vencedor="Mercado Pago é mais vantajoso neste cenário.";
-}else{
-vencedor="A concorrência é mais vantajosa neste cenário.";
-}
+let vencedor=economiaMensal>0?
+"Mercado Pago é mais vantajoso neste cenário.":
+"A concorrência é mais vantajosa neste cenário.";
 
 document.getElementById("resultadoFaturamento").innerHTML=
 
@@ -177,16 +255,6 @@ document.getElementById("resultadoFaturamento").innerHTML=
 <h3>${vencedor}</h3>
 
 <h2>Economia total em 5 anos: R$ ${economia5anos.toFixed(2)}</h2>
-
-<hr>
-
-<h4>Custos da concorrência</h4>
-
-Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
-
-Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
-
-Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 
 <hr>
 
