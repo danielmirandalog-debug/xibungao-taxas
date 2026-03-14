@@ -109,6 +109,14 @@ for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
 document.querySelector('input[value="manual"]').checked=true;
 trocarModoOutras();
 
+out_pix_manual.value=outras["pix"];
+out_debito_manual.value=outras["debito"];
+out1_manual.value=outras[1];
+
+for(let i=2;i<=21;i++){
+document.getElementById("out"+i+"_manual").value=outras[i];
+}
+
 }
 
 gerarTabela(valor,mp,outras);
@@ -127,8 +135,8 @@ let html=`<table>
 <th>Parcela</th>
 <th>Taxa MP</th>
 <th>R$ Mercado Pago</th>
-<th>Taxa Outros</th>
-<th>R$ Outros</th>
+<th>Taxa Concorrência</th>
+<th>R$ Concorrência</th>
 </tr>`;
 
 parcelas.forEach(p=>{
@@ -234,13 +242,7 @@ c6:parseFloat(mp6.value)||0,
 c10:parseFloat(mp10.value)||0
 };
 
-let modo=document.querySelector('input[name="modoOutras"]:checked').value;
-
-let out={};
-
-if(modo==="manual"){
-
-out={
+let out={
 pix:parseFloat(out_pix_manual.value)||0,
 debito:parseFloat(out_debito_manual.value)||0,
 c1:parseFloat(out1_manual.value)||0,
@@ -249,24 +251,6 @@ c4:parseFloat(out4_manual.value)||0,
 c6:parseFloat(out6_manual.value)||0,
 c10:parseFloat(out10_manual.value)||0
 };
-
-}else{
-
-let mdr1=parseFloat(document.getElementById("mdr1").value)||0;
-let mdr2=parseFloat(document.getElementById("mdr2").value)||0;
-let ant=parseFloat(document.getElementById("antecipacao").value)||0;
-
-out={
-pix:parseFloat(out_pix.value)||0,
-debito:parseFloat(out_debito.value)||0,
-c1:parseFloat(out1.value)||0,
-c2:mdr1+(ant*1),
-c4:mdr1+(ant*3),
-c6:mdr1+(ant*5),
-c10:mdr2+(ant*9)
-};
-
-}
 
 let economiaTaxas=0;
 
@@ -298,8 +282,6 @@ let custosFixos=
 let economiaMensal=economiaTaxas+custosFixos;
 let economiaAnual=economiaMensal*12;
 let economia5anos=economiaAnual*5;
-
-// COFRINHO
 
 let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
 let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
@@ -361,10 +343,30 @@ Saldo acumulado em 5 anos: <b>R$ ${saldo.toFixed(2)}</b>
 
 }
 
+function exportar(){
+
+let area=document.getElementById("resultado");
+
+if(!area.innerHTML){
+alert("Primeiro simule as taxas.");
+return;
+}
+
+html2canvas(area).then(canvas=>{
+
+let link=document.createElement("a");
+link.download="comparacao_taxas.png";
+link.href=canvas.toDataURL();
+link.click();
+
+});
+
+}
+
 function processarOCR(){
-console.log("OCR Mercado Pago ainda não configurado.");
+alert("OCR de imagem será implementado em breve.");
 }
 
 function processarOCRConc(){
-console.log("OCR concorrência ainda não configurado.");
+alert("OCR de imagem será implementado em breve.");
 }
