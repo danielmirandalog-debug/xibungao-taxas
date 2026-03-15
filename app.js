@@ -102,9 +102,9 @@ let mdrB=parseFloat(document.getElementById("mdr2").value);
 let mdrC=parseFloat(document.getElementById("mdr3").value);
 let ant=parseFloat(document.getElementById("antecipacao").value);
 
-for(let i=2;i<=6;i++) outras[i]=mdrA+(ant*(i-1));
-for(let i=7;i<=12;i++) outras[i]=mdrB+(ant*(i-1));
-for(let i=13;i<=21;i++) outras[i]=mdrC+(ant*(i-1));
+for(let i=2;i<=6;i++) outras[i]=parseFloat((mdrA+(ant*(i-1))).toFixed(2));
+for(let i=7;i<=12;i++) outras[i]=parseFloat((mdrB+(ant*(i-1))).toFixed(2));
+for(let i=13;i<=21;i++) outras[i]=parseFloat((mdrC+(ant*(i-1))).toFixed(2));
 
 document.querySelector('input[value="manual"]').checked=true;
 trocarModoOutras();
@@ -213,6 +213,112 @@ document.getElementById("barra").style.width = total + "%";
 
 }
 
+function simularFaturamento(){
+
+let faturamento=parseFloat(document.getElementById("faturamento").value);
+
+let shares={
+pix:parseFloat(share_pix.value)||0,
+debito:parseFloat(share_debito.value)||0,
+c1:parseFloat(share_1x.value)||0,
+c2:parseFloat(share_2x.value)||0,
+c4:parseFloat(share_4x.value)||0,
+c6:parseFloat(share_6x.value)||0,
+c10:parseFloat(share_10x.value)||0
+};
+
+let mp={
+pix:parseFloat(mp_pix.value)||0,
+debito:parseFloat(mp_debito.value)||0,
+c1:parseFloat(mp1.value)||0,
+c2:parseFloat(mp2.value)||0,
+c4:parseFloat(mp4.value)||0,
+c6:parseFloat(mp6.value)||0,
+c10:parseFloat(mp10.value)||0
+};
+
+let out={
+pix:parseFloat(out_pix_manual.value)||0,
+debito:parseFloat(out_debito_manual.value)||0,
+c1:parseFloat(out1_manual.value)||0,
+c2:parseFloat(out2_manual.value)||0,
+c4:parseFloat(out4_manual.value)||0,
+c6:parseFloat(out6_manual.value)||0,
+c10:parseFloat(out10_manual.value)||0
+};
+
+let economiaTaxas=0;
+
+function calcular(tipo,percent){
+
+let valor=faturamento*(percent/100);
+
+let custoMP=valor*(mp[tipo]/100);
+let custoOUT=valor*(out[tipo]/100);
+
+economiaTaxas+=custoOUT-custoMP;
+
+}
+
+calcular("pix",shares.pix);
+calcular("debito",shares.debito);
+calcular("c1",shares.c1);
+calcular("c2",shares.c2);
+calcular("c4",shares.c4);
+calcular("c6",shares.c6);
+calcular("c10",shares.c10);
+
+let custosFixos=
+(parseFloat(document.getElementById("custo_sistema").value)||0)+
+(parseFloat(document.getElementById("custo_maquina").value)||0)+
+(parseFloat(document.getElementById("custo_cesta").value)||0)+
+(parseFloat(document.getElementById("custo_manutencao").value)||0);
+
+let economiaMensal=economiaTaxas+custosFixos;
+let economiaAnual=economiaMensal*12;
+let economia5anos=economiaAnual*5;
+
+let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
+let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
+
+let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
+let taxaMensal=taxaAnual/12;
+
+let saldo=0;
+let rendimentoTotal=0;
+
+for(let i=1;i<=60;i++){
+
+saldo+=reserva;
+
+let rendimento=saldo*taxaMensal;
+
+saldo+=rendimento;
+
+rendimentoTotal+=rendimento;
+
+}
+
+document.getElementById("resultadoFaturamento").innerHTML=
+
+`<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
+
+<h3>Resultado da simulação</h3>
+
+Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
+
+Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
+
+Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
+
+<hr>
+
+Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
+
+</div>`;
+
+}
+
 function exportar(){
 
 let area=document.getElementById("resultado");
@@ -233,14 +339,26 @@ link.click();
 
 }
 
-function simularFaturamento(){
-alert("Simulação funcionando após simular taxas.");
+async function processarOCR(event){
+
+const file=event.target.files[0];
+
+const result=await Tesseract.recognize(file,'eng');
+
+alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+
+console.log(result.data.text);
+
 }
 
-function processarOCR(){
-alert("OCR será implementado em breve.");
-}
+async function processarOCRConc(event){
 
-function processarOCRConc(){
-alert("OCR será implementado em breve.");
+const file=event.target.files[0];
+
+const result=await Tesseract.recognize(file,'eng');
+
+alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+
+console.log(result.data.text);
+
 }
