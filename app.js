@@ -1,298 +1,224 @@
 const CDI_ANUAL = 10.65;
 
-window.onload=function(){
+/* ===========================
+GERAÇÃO DOS CAMPOS
+=========================== */
+
+window.onload = function(){
 
 let html="";
 
 for(let i=2;i<=21;i++){
-html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
-}
 
-document.getElementById("mpParcelas").innerHTML=html;
-
-gerarCamposManual();
-
-document.getElementById("uploadOCR").addEventListener("change",processarOCR);
-document.getElementById("uploadOCRConc").addEventListener("change",processarOCRConc);
+html+=`
+<label>${i}x (%)</label>
+<input id="mp${i}" type="number" step="0.01">
+`;
 
 }
 
-function gerarCamposManual(){
+let container=document.getElementById("taxasParceladas");
 
-let html="";
+if(container) container.innerHTML=html;
 
-for(let i=2;i<=21;i++){
-html+=`<label>${i}x (%)</label> <input id="out${i}_manual" type="number">`;
-}
+};
 
-document.getElementById("outrasParcelas").innerHTML=html;
+/* ===========================
+PRÉ PROCESSAMENTO DA IMAGEM
+=========================== */
 
-}
+function preprocessarImagemOCR(img){
 
-function trocarModoOutras(){
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
 
-let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+canvas.width=img.width*2;
+canvas.height=img.height*2;
 
-if(modo==="manual"){
-document.getElementById("modoMDR").style.display="none";
-document.getElementById("modoManual").style.display="block";
-}else{
-document.getElementById("modoMDR").style.display="block";
-document.getElementById("modoManual").style.display="none";
-}
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
 
-}
+let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+let data=imgData.data;
 
-function liquido(valor,taxa){
+for(let i=0;i<data.length;i+=4){
 
-if(taxa===undefined || taxa===null || taxa==="") return null;
+let r=data[i];
+let g=data[i+1];
+let b=data[i+2];
 
-return valor*(1-(taxa/100));
+let cinza=(r+g+b)/3;
 
-}
+let valor=cinza>180?255:0;
 
-function formatarTaxa(taxa){
-
-if(taxa===undefined || taxa===null || taxa==="") return "Não se aplica";
-
-return parseFloat(taxa).toFixed(2)+"%";
+data[i]=valor;
+data[i+1]=valor;
+data[i+2]=valor;
 
 }
 
-function simular(){
+ctx.putImageData(imgData,0,0);
 
-let valor=parseFloat(document.getElementById("valor").value);
-
-if(!valor){
-alert("Informe o valor da venda");
-return;
-}
-
-let mp={};
-let outras={};
-
-mp["pix"]=parseFloat(document.getElementById("mp_pix").value);
-mp["debito"]=parseFloat(document.getElementById("mp_debito").value);
-mp[1]=parseFloat(document.getElementById("mp1").value);
-
-for(let i=2;i<=21;i++){
-mp[i]=parseFloat(document.getElementById("mp"+i).value);
-}
-
-let modo=document.querySelector('input[name="modoOutras"]:checked').value;
-
-if(modo==="manual"){
-
-outras["pix"]=parseFloat(document.getElementById("out_pix_manual").value);
-outras["debito"]=parseFloat(document.getElementById("out_debito_manual").value);
-outras[1]=parseFloat(document.getElementById("out1_manual").value);
-
-for(let i=2;i<=21;i++){
-outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
-}
-
-}else{
-
-outras["pix"]=parseFloat(document.getElementById("out_pix").value);
-outras["debito"]=parseFloat(document.getElementById("out_debito").value);
-outras[1]=parseFloat(document.getElementById("out1").value);
-
-let mdrA=parseFloat(document.getElementById("mdr1").value);
-let mdrB=parseFloat(document.getElementById("mdr2").value);
-let mdrC=parseFloat(document.getElementById("mdr3").value);
-let ant=parseFloat(document.getElementById("antecipacao").value);
-
-for(let i=2;i<=6;i++) outras[i]=parseFloat((mdrA+(ant*(i-1))).toFixed(2));
-for(let i=7;i<=12;i++) outras[i]=parseFloat((mdrB+(ant*(i-1))).toFixed(2));
-for(let i=13;i<=21;i++) outras[i]=parseFloat((mdrC+(ant*(i-1))).toFixed(2));
-
-document.querySelector('input[value="manual"]').checked=true;
-trocarModoOutras();
-
-document.getElementById("out_pix_manual").value=outras["pix"];
-document.getElementById("out_debito_manual").value=outras["debito"];
-document.getElementById("out1_manual").value=outras[1];
-
-for(let i=2;i<=21;i++){
-document.getElementById("out"+i+"_manual").value=outras[i];
-}
+return canvas;
 
 }
 
-gerarTabela(valor,mp,outras);
+/* ===========================
+EXECUTAR OCR
+=========================== */
+
+async function executarOCR(file){
+
+const img=new Image();
+
+img.src=URL.createObjectURL(file);
+
+await new Promise(r=>img.onload=r);
+
+const canvas=preprocessarImagemOCR(img);
+
+const result=await Tesseract.recognize(
+canvas,
+"eng",
+{
+tessedit_char_whitelist:"0123456789.xX%"
+}
+);
+
+return result.data.text;
 
 }
 
-function gerarTabela(valor,mp,outras){
-
-let parcelas=["pix","debito",1];
-
-for(let i=2;i<=21;i++) parcelas.push(i);
-
-let html=`<table>
-
-<tr>
-<th>Parcela</th>
-<th>Taxa MP</th>
-<th>R$ Mercado Pago</th>
-<th>Taxa Concorrência</th>
-<th>R$ Concorrência</th>
-</tr>`;
-
-parcelas.forEach(p=>{
-
-let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
-
-let taxaMP=mp[p];
-let taxaOut=outras[p];
-
-let valorMP=liquido(valor,taxaMP);
-let valorOut=liquido(valor,taxaOut);
-
-let classeMP="";
-let classeOut="";
-
-if(taxaMP>taxaOut) classeMP="taxaRuim";
-if(taxaOut>taxaMP) classeOut="taxaRuim";
-
-html+=`<tr>
-
-<td>${nome}</td>
-
-<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
-
-<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
-
-<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
-
-<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
-
-</tr>`;
-
-});
-
-html+="</table>";
-
-document.getElementById("resultado").innerHTML=html;
-
-}
-
-/* OCR INTELIGENTE */
+/* ===========================
+EXTRAÇÃO INTELIGENTE DAS TAXAS
+=========================== */
 
 function extrairTaxasPorTexto(texto){
 
-let taxas = {};
-texto = texto.replace(/,/g,".");
+let taxas={};
 
-let linhas = texto.split(/\n|\r/);
+texto=texto
+.replace(/,/g,".")
+.replace(/%/g,"")
+.replace(/ +/g," ");
 
-let parcelaAtual = null;
+let linhas=texto
+.split(/\n|\r/)
+.map(l=>l.trim())
+.filter(l=>l);
 
-linhas.forEach(l => {
+let parcelaAtual=null;
 
-let linha = l.trim().toLowerCase();
+for(let linha of linhas){
 
-if(!linha) return;
+let parcelaMatch=linha.match(/(\d{1,2})\s*[xX]/);
 
-/* Detecta parcela */
-let p = linha.match(/^(\d+)\s*[x]/i);
+if(parcelaMatch){
 
-if(p){
-let numero = parseInt(p[1]);
+parcelaAtual=parseInt(parcelaMatch[1]);
 
-if(numero>=1 && numero<=21){
-parcelaAtual = numero;
-}
-return;
-}
+let resto=linha.replace(parcelaMatch[0],'');
 
-/* Detecta taxa */
-let t = linha.match(/(\d+\.\d+|\d+)/);
+let taxaMatch=resto.match(/(\d+\.\d+|\d+)/);
 
-if(t && parcelaAtual){
+if(taxaMatch){
 
-let taxa = parseFloat(t[1]);
+let taxa=parseFloat(taxaMatch[1]);
 
-taxas[parcelaAtual] = taxa;
+if(taxa>0 && taxa<100){
 
-parcelaAtual = null;
+taxas[parcelaAtual]=taxa;
+parcelaAtual=null;
 
-}
-
-/* Pix */
-if(linha.includes("pix")){
-let v = linha.match(/(\d+\.\d+|\d+)/);
-if(v) taxas["pix"] = parseFloat(v[1]);
 }
 
-/* Débito */
-if(linha.includes("deb")){
-let v = linha.match(/(\d+\.\d+|\d+)/);
-if(v) taxas["debito"] = parseFloat(v[1]);
 }
 
-});
+continue;
+
+}
+
+let taxaLinha=linha.match(/(\d+\.\d+|\d+)/);
+
+if(taxaLinha && parcelaAtual){
+
+let taxa=parseFloat(taxaLinha[1]);
+
+if(taxa>0 && taxa<100){
+
+taxas[parcelaAtual]=taxa;
+parcelaAtual=null;
+
+}
+
+}
+
+}
+
+/* fallback caso venha tudo na mesma linha */
+
+let pares=texto.match(/\d{1,2}\s*[xX]\s*\d+\.\d+/g);
+
+if(pares){
+
+for(let p of pares){
+
+let m=p.match(/(\d{1,2})\s*[xX]\s*(\d+\.\d+)/);
+
+if(m){
+
+let parcela=parseInt(m[1]);
+let taxa=parseFloat(m[2]);
+
+if(parcela>=1 && parcela<=21){
+
+taxas[parcela]=taxa;
+
+}
+
+}
+
+}
+
+}
 
 return taxas;
 
 }
 
-function preencherTaxasMP(taxas){
+/* ===========================
+PREENCHER CAMPOS AUTOMATICAMENTE
+=========================== */
 
-if(taxas.pix) document.getElementById("mp_pix").value=taxas.pix;
-if(taxas.debito) document.getElementById("mp_debito").value=taxas.debito;
-if(taxas[1]) document.getElementById("mp1").value=taxas[1];
+function preencherCamposTaxas(taxas){
 
-for(let i=2;i<=21;i++){
+for(let parcela in taxas){
 
-if(taxas[i]){
-document.getElementById("mp"+i).value=taxas[i];
-}
+let campo=document.getElementById("mp"+parcela);
 
-}
+if(campo){
 
-}
+campo.value=taxas[parcela];
 
-function preencherTaxasConc(taxas){
-
-if(taxas.pix) document.getElementById("out_pix_manual").value=taxas.pix;
-if(taxas.debito) document.getElementById("out_debito_manual").value=taxas.debito;
-if(taxas[1]) document.getElementById("out1_manual").value=taxas[1];
-
-for(let i=2;i<=21;i++){
-
-if(taxas[i]){
-document.getElementById("out"+i+"_manual").value=taxas[i];
 }
 
 }
 
 }
 
-async function processarOCR(event){
+/* ===========================
+UPLOAD DA IMAGEM
+=========================== */
 
-const file=event.target.files[0];
+async function processarImagem(input){
 
-const result=await Tesseract.recognize(file,'eng');
+let file=input.files[0];
 
-let taxas=extrairTaxasPorTexto(result.data.text);
+if(!file) return;
 
-preencherTaxasMP(taxas);
+let texto=await executarOCR(file);
 
-alert("OCR processado.");
+let taxas=extrairTaxasPorTexto(texto);
 
-}
-
-async function processarOCRConc(event){
-
-const file=event.target.files[0];
-
-const result=await Tesseract.recognize(file,'eng');
-
-let taxas=extrairTaxasPorTexto(result.data.text);
-
-preencherTaxasConc(taxas);
-
-alert("OCR processado.");
+preencherCamposTaxas(taxas);
 
 }
