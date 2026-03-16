@@ -1,224 +1,276 @@
 const CDI_ANUAL = 10.65;
 
-/* ===========================
-GERAÇÃO DOS CAMPOS
-=========================== */
-
-window.onload = function(){
+window.onload=function(){
 
 let html="";
 
 for(let i=2;i<=21;i++){
+html+=`<label>${i}x (%)</label> <input id="mp${i}" type="number">`;
+}
 
-html+=`
-<label>${i}x (%)</label>
-<input id="mp${i}" type="number" step="0.01">
-`;
+document.getElementById("mpParcelas").innerHTML=html;
+
+gerarCamposManual();
+
+document.getElementById("uploadOCR").addEventListener("change",processarOCR);
+document.getElementById("uploadOCRConc").addEventListener("change",processarOCRConc);
 
 }
 
-let container=document.getElementById("taxasParceladas");
+function gerarCamposManual(){
 
-if(container) container.innerHTML=html;
+let html="";
 
-};
+for(let i=2;i<=21;i++){
+html+=`<label>${i}x (%)</label> <input id="out${i}_manual" type="number">`;
+}
 
-/* ===========================
-PRÉ PROCESSAMENTO DA IMAGEM
-=========================== */
-
-function preprocessarImagemOCR(img){
-
-const canvas=document.createElement("canvas");
-const ctx=canvas.getContext("2d");
-
-canvas.width=img.width*2;
-canvas.height=img.height*2;
-
-ctx.drawImage(img,0,0,canvas.width,canvas.height);
-
-let imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
-let data=imgData.data;
-
-for(let i=0;i<data.length;i+=4){
-
-let r=data[i];
-let g=data[i+1];
-let b=data[i+2];
-
-let cinza=(r+g+b)/3;
-
-let valor=cinza>180?255:0;
-
-data[i]=valor;
-data[i+1]=valor;
-data[i+2]=valor;
+document.getElementById("outrasParcelas").innerHTML=html;
 
 }
 
-ctx.putImageData(imgData,0,0);
+function trocarModoOutras(){
 
-return canvas;
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+document.getElementById("modoMDR").style.display="none";
+document.getElementById("modoManual").style.display="block";
+}else{
+document.getElementById("modoMDR").style.display="block";
+document.getElementById("modoManual").style.display="none";
+}
 
 }
 
-/* ===========================
-EXECUTAR OCR
-=========================== */
+function liquido(valor,taxa){
 
-async function executarOCR(file){
+if(taxa===undefined || taxa===null || taxa==="") return null;
 
-const img=new Image();
-
-img.src=URL.createObjectURL(file);
-
-await new Promise(r=>img.onload=r);
-
-const canvas=preprocessarImagemOCR(img);
-
-const result=await Tesseract.recognize(
-canvas,
-"eng",
-{
-tessedit_char_whitelist:"0123456789.xX%"
-}
-);
-
-return result.data.text;
+return valor*(1-(taxa/100));
 
 }
 
-/* ===========================
-EXTRAÇÃO INTELIGENTE DAS TAXAS
-=========================== */
+function formatarTaxa(taxa){
 
-function extrairTaxasPorTexto(texto){
+if(taxa===undefined || taxa===null || taxa==="") return "Não se aplica";
+
+return parseFloat(taxa).toFixed(2)+"%";
+
+}
+
+function simular(){
+
+let valor=parseFloat(document.getElementById("valor").value);
+
+if(!valor){
+alert("Informe o valor da venda");
+return;
+}
+
+let mp={};
+let outras={};
+
+mp["pix"]=parseFloat(mp_pix.value);
+mp["debito"]=parseFloat(mp_debito.value);
+mp[1]=parseFloat(mp1.value);
+
+for(let i=2;i<=21;i++){
+mp[i]=parseFloat(document.getElementById("mp"+i).value);
+}
+
+let modo=document.querySelector('input[name="modoOutras"]:checked').value;
+
+if(modo==="manual"){
+
+outras["pix"]=parseFloat(out_pix_manual.value);
+outras["debito"]=parseFloat(out_debito_manual.value);
+outras[1]=parseFloat(out1_manual.value);
+
+for(let i=2;i<=21;i++){
+outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
+}
+
+}else{
+
+outras["pix"]=parseFloat(out_pix.value);
+outras["debito"]=parseFloat(out_debito.value);
+outras[1]=parseFloat(out1.value);
+
+let mdrA=parseFloat(document.getElementById("mdr1").value);
+let mdrB=parseFloat(document.getElementById("mdr2").value);
+let mdrC=parseFloat(document.getElementById("mdr3").value);
+let ant=parseFloat(document.getElementById("antecipacao").value);
+
+for(let i=2;i<=6;i++) outras[i]=parseFloat((mdrA+(ant*(i-1))).toFixed(2));
+for(let i=7;i<=12;i++) outras[i]=parseFloat((mdrB+(ant*(i-1))).toFixed(2));
+for(let i=13;i<=21;i++) outras[i]=parseFloat((mdrC+(ant*(i-1))).toFixed(2));
+
+document.querySelector('input[value="manual"]').checked=true;
+trocarModoOutras();
+
+out_pix_manual.value=outras["pix"];
+out_debito_manual.value=outras["debito"];
+out1_manual.value=outras[1];
+
+for(let i=2;i<=21;i++){
+document.getElementById("out"+i+"_manual").value=outras[i];
+}
+
+}
+
+gerarTabela(valor,mp,outras);
+
+}
+
+function gerarTabela(valor,mp,outras){
+
+let parcelas=["pix","debito",1];
+
+for(let i=2;i<=21;i++) parcelas.push(i);
+
+let html=`<table>
+
+<tr>
+<th>Parcela</th>
+<th>Taxa MP</th>
+<th>R$ Mercado Pago</th>
+<th>Taxa Concorrência</th>
+<th>R$ Concorrência</th>
+</tr>`;
+
+parcelas.forEach(p=>{
+
+let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
+
+let taxaMP=mp[p];
+let taxaOut=outras[p];
+
+let valorMP=liquido(valor,taxaMP);
+let valorOut=liquido(valor,taxaOut);
+
+let classeMP="";
+let classeOut="";
+
+if(taxaMP>taxaOut) classeMP="taxaRuim";
+if(taxaOut>taxaMP) classeOut="taxaRuim";
+
+html+=`<tr>
+
+<td>${nome}</td>
+
+<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
+
+<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
+
+<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
+
+<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+
+</tr>`;
+
+});
+
+html+="</table>";
+
+document.getElementById("resultado").innerHTML=html;
+
+}
+
+/* OCR INTELIGENTE */
+
+function extrairTaxas(texto){
+
+texto=texto.replace(/,/g,".");
+
+let linhas=texto.split("\n");
 
 let taxas={};
+let parcela=null;
 
-texto=texto
-.replace(/,/g,".")
-.replace(/%/g,"")
-.replace(/ +/g," ");
+linhas.forEach(l=>{
 
-let linhas=texto
-.split(/\n|\r/)
-.map(l=>l.trim())
-.filter(l=>l);
+let linha=l.toLowerCase().trim();
 
-let parcelaAtual=null;
+let p=linha.match(/(\d{1,2})\s*x/);
 
-for(let linha of linhas){
-
-let parcelaMatch=linha.match(/(\d{1,2})\s*[xX]/);
-
-if(parcelaMatch){
-
-parcelaAtual=parseInt(parcelaMatch[1]);
-
-let resto=linha.replace(parcelaMatch[0],'');
-
-let taxaMatch=resto.match(/(\d+\.\d+|\d+)/);
-
-if(taxaMatch){
-
-let taxa=parseFloat(taxaMatch[1]);
-
-if(taxa>0 && taxa<100){
-
-taxas[parcelaAtual]=taxa;
-parcelaAtual=null;
-
+if(p){
+parcela=parseInt(p[1]);
 }
 
+let t=linha.match(/(\d+\.\d+)/);
+
+if(t && parcela){
+taxas[parcela]=parseFloat(t[1]);
+parcela=null;
 }
 
-continue;
-
-}
-
-let taxaLinha=linha.match(/(\d+\.\d+|\d+)/);
-
-if(taxaLinha && parcelaAtual){
-
-let taxa=parseFloat(taxaLinha[1]);
-
-if(taxa>0 && taxa<100){
-
-taxas[parcelaAtual]=taxa;
-parcelaAtual=null;
-
-}
-
-}
-
-}
-
-/* fallback caso venha tudo na mesma linha */
-
-let pares=texto.match(/\d{1,2}\s*[xX]\s*\d+\.\d+/g);
-
-if(pares){
-
-for(let p of pares){
-
-let m=p.match(/(\d{1,2})\s*[xX]\s*(\d+\.\d+)/);
-
-if(m){
-
-let parcela=parseInt(m[1]);
-let taxa=parseFloat(m[2]);
-
-if(parcela>=1 && parcela<=21){
-
-taxas[parcela]=taxa;
-
-}
-
-}
-
-}
-
-}
+});
 
 return taxas;
 
 }
 
-/* ===========================
-PREENCHER CAMPOS AUTOMATICAMENTE
-=========================== */
+async function processarOCR(event){
 
-function preencherCamposTaxas(taxas){
+const file=event.target.files[0];
 
-for(let parcela in taxas){
+const result=await Tesseract.recognize(file,'eng');
 
-let campo=document.getElementById("mp"+parcela);
+let texto=result.data.text;
+
+let taxas=extrairTaxas(texto);
+
+for(let p in taxas){
+
+let campo=document.getElementById("mp"+p);
 
 if(campo){
-
-campo.value=taxas[parcela];
-
+campo.value=taxas[p];
 }
 
 }
 
 }
 
-/* ===========================
-UPLOAD DA IMAGEM
-=========================== */
+async function processarOCRConc(event){
 
-async function processarImagem(input){
+const file=event.target.files[0];
 
-let file=input.files[0];
+const result=await Tesseract.recognize(file,'eng');
 
-if(!file) return;
+let texto=result.data.text;
 
-let texto=await executarOCR(file);
+let taxas=extrairTaxas(texto);
 
-let taxas=extrairTaxasPorTexto(texto);
+for(let p in taxas){
 
-preencherCamposTaxas(taxas);
+let campo=document.getElementById("out"+p+"_manual");
+
+if(campo){
+campo.value=taxas[p];
+}
+
+}
+
+}
+
+function exportar(){
+
+let area=document.getElementById("resultado");
+
+if(!area.innerHTML){
+alert("Primeiro simule as taxas.");
+return;
+}
+
+html2canvas(area).then(canvas=>{
+
+let link=document.createElement("a");
+link.download="comparacao_taxas.png";
+link.href=canvas.toDataURL();
+link.click();
+
+});
 
 }
