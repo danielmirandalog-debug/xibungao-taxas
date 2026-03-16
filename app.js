@@ -123,57 +123,138 @@ gerarTabela(valor,mp,outras);
 
 }
 
-/* ================= OCR ================= */
+function gerarTabela(valor,mp,outras){
 
-function extrairNumeros(texto){
+let parcelas=["pix","debito",1];
 
-let encontrados=texto.match(/\d+[.,]?\d*/g);
+for(let i=2;i<=21;i++) parcelas.push(i);
 
-if(!encontrados) return [];
+let html=`<table>
 
-return encontrados.map(n=>parseFloat(n.replace(",",".")));
+<tr>
+<th>Parcela</th>
+<th>Taxa MP</th>
+<th>R$ Mercado Pago</th>
+<th>Taxa Concorrência</th>
+<th>R$ Concorrência</th>
+</tr>`;
+
+parcelas.forEach(p=>{
+
+let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
+
+let taxaMP=mp[p];
+let taxaOut=outras[p];
+
+let valorMP=liquido(valor,taxaMP);
+let valorOut=liquido(valor,taxaOut);
+
+let classeMP="";
+let classeOut="";
+
+if(taxaMP>taxaOut) classeMP="taxaRuim";
+if(taxaOut>taxaMP) classeOut="taxaRuim";
+
+html+=`<tr>
+
+<td>${nome}</td>
+
+<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
+
+<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
+
+<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
+
+<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
+
+</tr>`;
+
+});
+
+html+="</table>";
+
+document.getElementById("resultado").innerHTML=html;
 
 }
 
-function preencherTaxasMP(numeros){
+/* OCR INTELIGENTE */
 
-document.getElementById("mp_pix").value=numeros[0]||"";
-document.getElementById("mp_debito").value=numeros[1]||"";
-document.getElementById("mp1").value=numeros[2]||"";
+function extrairTaxasPorTexto(texto){
 
-let index=3;
+let taxas={};
+
+texto=texto.replace(/,/g,".");
+
+let linhas=texto.split("\n");
+
+linhas.forEach(l=>{
+
+let linha=l.toLowerCase().trim();
+
+let parcela=linha.match(/(\d+)\s*[x]/i);
+
+let taxa=linha.match(/(\d+.\d+|\d+)/);
+
+if(parcela && taxa){
+
+let p=parseInt(parcela[1]);
+let t=parseFloat(taxa[1]);
+
+if(p>=1 && p<=21){
+taxas[p]=t;
+}
+
+}
+
+if(linha.includes("pix")){
+
+let t=linha.match(/(\d+.\d+|\d+)/);
+
+if(t) taxas["pix"]=parseFloat(t[1]);
+
+}
+
+if(linha.includes("deb")){
+
+let t=linha.match(/(\d+.\d+|\d+)/);
+
+if(t) taxas["debito"]=parseFloat(t[1]);
+
+}
+
+});
+
+return taxas;
+
+}
+
+function preencherTaxasMP(taxas){
+
+if(taxas.pix) document.getElementById("mp_pix").value=taxas.pix;
+if(taxas.debito) document.getElementById("mp_debito").value=taxas.debito;
+if(taxas[1]) document.getElementById("mp1").value=taxas[1];
 
 for(let i=2;i<=21;i++){
 
-let campo=document.getElementById("mp"+i);
-
-if(numeros[index]!=undefined){
-campo.value=numeros[index];
+if(taxas[i]){
+document.getElementById("mp"+i).value=taxas[i];
 }
-
-index++;
 
 }
 
 }
 
-function preencherTaxasConc(numeros){
+function preencherTaxasConc(taxas){
 
-document.getElementById("out_pix_manual").value=numeros[0]||"";
-document.getElementById("out_debito_manual").value=numeros[1]||"";
-document.getElementById("out1_manual").value=numeros[2]||"";
-
-let index=3;
+if(taxas.pix) document.getElementById("out_pix_manual").value=taxas.pix;
+if(taxas.debito) document.getElementById("out_debito_manual").value=taxas.debito;
+if(taxas[1]) document.getElementById("out1_manual").value=taxas[1];
 
 for(let i=2;i<=21;i++){
 
-let campo=document.getElementById("out"+i+"_manual");
-
-if(numeros[index]!=undefined){
-campo.value=numeros[index];
+if(taxas[i]){
+document.getElementById("out"+i+"_manual").value=taxas[i];
 }
-
-index++;
 
 }
 
@@ -185,13 +266,11 @@ const file=event.target.files[0];
 
 const result=await Tesseract.recognize(file,'eng');
 
-let texto=result.data.text;
+let taxas=extrairTaxasPorTexto(result.data.text);
 
-let numeros=extrairNumeros(texto);
+preencherTaxasMP(taxas);
 
-preencherTaxasMP(numeros);
-
-alert("OCR processado e taxas preenchidas.");
+alert("OCR processado.");
 
 }
 
@@ -201,12 +280,10 @@ const file=event.target.files[0];
 
 const result=await Tesseract.recognize(file,'eng');
 
-let texto=result.data.text;
+let taxas=extrairTaxasPorTexto(result.data.text);
 
-let numeros=extrairNumeros(texto);
+preencherTaxasConc(taxas);
 
-preencherTaxasConc(numeros);
-
-alert("OCR processado e taxas preenchidas.");
+alert("OCR processado.");
 
 }
