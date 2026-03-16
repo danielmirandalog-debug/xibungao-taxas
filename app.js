@@ -275,6 +275,7 @@ let custosFixos=
 (parseFloat(document.getElementById("custo_manutencao").value)||0);
 
 let economiaMensal=economiaTaxas+custosFixos;
+
 let economiaAnual=economiaMensal*12;
 let economia5anos=economiaAnual*5;
 
@@ -286,6 +287,7 @@ let taxaMensal=taxaAnual/12;
 
 let saldo=0;
 let rendimentoTotal=0;
+let rendimento1ano=0;
 
 for(let i=1;i<=60;i++){
 
@@ -296,6 +298,10 @@ let rendimento=saldo*taxaMensal;
 saldo+=rendimento;
 
 rendimentoTotal+=rendimento;
+
+if(i<=12){
+rendimento1ano+=rendimento;
+}
 
 }
 
@@ -313,12 +319,15 @@ Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 
 <hr>
 
+Rendimento do cofrinho em 1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br><br>
+
 Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
 
 </div>`;
 
-}
+gerarGrafico(economiaAnual,economia5anos,rendimentoTotal);
 
+}
 function exportar(){
 
 let area=document.getElementById("resultado");
@@ -360,5 +369,32 @@ const result=await Tesseract.recognize(file,'eng');
 alert("OCR processado. Copie as taxas manualmente do texto detectado.");
 
 console.log(result.data.text);
+
+}
+
+function gerarGrafico(anual,cincoanos,cofrinho){
+
+let ctx=document.getElementById("graficoEconomia");
+
+if(window.grafico){
+window.grafico.destroy();
+}
+
+window.grafico=new Chart(ctx,{
+type:'bar',
+data:{
+labels:["Economia 1 ano","Economia 5 anos","Cofrinho 5 anos"],
+datasets:[{
+label:"Resultado em R$",
+data:[anual,cincoanos,cofrinho]
+}]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+}
+}
+});
 
 }
