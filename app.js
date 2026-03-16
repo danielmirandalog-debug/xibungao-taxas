@@ -319,15 +319,68 @@ Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 
 <hr>
 
-Rendimento do cofrinho em 1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br><br>
+<h4>Rendimento do Cofrinho</h4>
 
-Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
+1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br>
+
+5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
 
 </div>`;
 
-gerarGrafico(economiaAnual,economia5anos,rendimentoTotal);
+gerarGraficoEconomia(economiaAnual,economia5anos);
+gerarGraficoDistribuicao(shares);
 
 }
+
+function gerarGraficoEconomia(anual,cincoanos){
+
+let ctx=document.getElementById("graficoEconomia");
+
+if(window.graficoEconomia){
+window.graficoEconomia.destroy();
+}
+
+window.graficoEconomia=new Chart(ctx,{
+type:'line',
+data:{
+labels:["Hoje","1 ano","5 anos"],
+datasets:[{
+label:"Economia acumulada",
+data:[0,anual,cincoanos]
+}]
+}
+});
+
+}
+
+function gerarGraficoDistribuicao(shares){
+
+let ctx=document.getElementById("graficoDistribuicao");
+
+if(window.graficoDistribuicao){
+window.graficoDistribuicao.destroy();
+}
+
+window.graficoDistribuicao=new Chart(ctx,{
+type:'pie',
+data:{
+labels:["Pix","Débito","1x","2x","4x","6x","10x"],
+datasets:[{
+data:[
+shares.pix,
+shares.debito,
+shares.c1,
+shares.c2,
+shares.c4,
+shares.c6,
+shares.c10
+]
+}]
+}
+});
+
+}
+
 function exportar(){
 
 let area=document.getElementById("resultado");
@@ -352,11 +405,32 @@ async function processarOCR(event){
 
 const file=event.target.files[0];
 
-const result=await Tesseract.recognize(file,'eng');
+const result=await Tesseract.recognize(file,'por');
 
-alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+let texto=result.data.text;
 
-console.log(result.data.text);
+let numeros=texto.match(/\d+[.,]\d+/g);
+
+if(!numeros){
+alert("Não foi possível identificar taxas na imagem.");
+return;
+}
+
+numeros=numeros.map(n=>parseFloat(n.replace(",",".")).toFixed(2));
+
+let campos=["mp_pix","mp_debito","mp1"];
+
+for(let i=2;i<=21;i++){
+campos.push("mp"+i);
+}
+
+numeros.forEach((valor,index)=>{
+if(campos[index]){
+document.getElementById(campos[index]).value=valor;
+}
+});
+
+alert("Taxas do Mercado Pago preenchidas automaticamente.");
 
 }
 
@@ -364,37 +438,31 @@ async function processarOCRConc(event){
 
 const file=event.target.files[0];
 
-const result=await Tesseract.recognize(file,'eng');
+const result=await Tesseract.recognize(file,'por');
 
-alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+let texto=result.data.text;
 
-console.log(result.data.text);
+let numeros=texto.match(/\d+[.,]\d+/g);
 
+if(!numeros){
+alert("Não foi possível identificar taxas.");
+return;
 }
 
-function gerarGrafico(anual,cincoanos,cofrinho){
+numeros=numeros.map(n=>parseFloat(n.replace(",",".")).toFixed(2));
 
-let ctx=document.getElementById("graficoEconomia");
+let campos=["out_pix_manual","out_debito_manual","out1_manual"];
 
-if(window.grafico){
-window.grafico.destroy();
+for(let i=2;i<=21;i++){
+campos.push("out"+i+"_manual");
 }
 
-window.grafico=new Chart(ctx,{
-type:'bar',
-data:{
-labels:["Economia 1 ano","Economia 5 anos","Cofrinho 5 anos"],
-datasets:[{
-label:"Resultado em R$",
-data:[anual,cincoanos,cofrinho]
-}]
-},
-options:{
-responsive:true,
-plugins:{
-legend:{display:false}
-}
+numeros.forEach((valor,index)=>{
+if(campos[index]){
+document.getElementById(campos[index]).value=valor;
 }
 });
+
+alert("Taxas da concorrência preenchidas automaticamente.");
 
 }
