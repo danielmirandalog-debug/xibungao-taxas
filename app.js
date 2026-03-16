@@ -71,9 +71,9 @@ return;
 let mp={};
 let outras={};
 
-mp["pix"]=parseFloat(mp_pix.value);
-mp["debito"]=parseFloat(mp_debito.value);
-mp[1]=parseFloat(mp1.value);
+mp["pix"]=parseFloat(document.getElementById("mp_pix").value);
+mp["debito"]=parseFloat(document.getElementById("mp_debito").value);
+mp[1]=parseFloat(document.getElementById("mp1").value);
 
 for(let i=2;i<=21;i++){
 mp[i]=parseFloat(document.getElementById("mp"+i).value);
@@ -83,9 +83,9 @@ let modo=document.querySelector('input[name="modoOutras"]:checked').value;
 
 if(modo==="manual"){
 
-outras["pix"]=parseFloat(out_pix_manual.value);
-outras["debito"]=parseFloat(out_debito_manual.value);
-outras[1]=parseFloat(out1_manual.value);
+outras["pix"]=parseFloat(document.getElementById("out_pix_manual").value);
+outras["debito"]=parseFloat(document.getElementById("out_debito_manual").value);
+outras[1]=parseFloat(document.getElementById("out1_manual").value);
 
 for(let i=2;i<=21;i++){
 outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
@@ -93,9 +93,9 @@ outras[i]=parseFloat(document.getElementById("out"+i+"_manual").value);
 
 }else{
 
-outras["pix"]=parseFloat(out_pix.value);
-outras["debito"]=parseFloat(out_debito.value);
-outras[1]=parseFloat(out1.value);
+outras["pix"]=parseFloat(document.getElementById("out_pix").value);
+outras["debito"]=parseFloat(document.getElementById("out_debito").value);
+outras[1]=parseFloat(document.getElementById("out1").value);
 
 let mdrA=parseFloat(document.getElementById("mdr1").value);
 let mdrB=parseFloat(document.getElementById("mdr2").value);
@@ -109,9 +109,9 @@ for(let i=13;i<=21;i++) outras[i]=parseFloat((mdrC+(ant*(i-1))).toFixed(2));
 document.querySelector('input[value="manual"]').checked=true;
 trocarModoOutras();
 
-out_pix_manual.value=outras["pix"];
-out_debito_manual.value=outras["debito"];
-out1_manual.value=outras[1];
+document.getElementById("out_pix_manual").value=outras["pix"];
+document.getElementById("out_debito_manual").value=outras["debito"];
+document.getElementById("out1_manual").value=outras[1];
 
 for(let i=2;i<=21;i++){
 document.getElementById("out"+i+"_manual").value=outras[i];
@@ -120,60 +120,6 @@ document.getElementById("out"+i+"_manual").value=outras[i];
 }
 
 gerarTabela(valor,mp,outras);
-
-}
-
-function gerarTabela(valor,mp,outras){
-
-let parcelas=["pix","debito",1];
-
-for(let i=2;i<=21;i++) parcelas.push(i);
-
-let html=`<table>
-
-<tr>
-<th>Parcela</th>
-<th>Taxa MP</th>
-<th>R$ Mercado Pago</th>
-<th>Taxa Concorrência</th>
-<th>R$ Concorrência</th>
-</tr>`;
-
-parcelas.forEach(p=>{
-
-let nome=p==="pix"?"Pix":p==="debito"?"Débito":p+"x";
-
-let taxaMP=mp[p];
-let taxaOut=outras[p];
-
-let valorMP=liquido(valor,taxaMP);
-let valorOut=liquido(valor,taxaOut);
-
-let classeMP="";
-let classeOut="";
-
-if(taxaMP>taxaOut) classeMP="taxaRuim";
-if(taxaOut>taxaMP) classeOut="taxaRuim";
-
-html+=`<tr>
-
-<td>${nome}</td>
-
-<td class="${classeMP}">${formatarTaxa(taxaMP)}</td>
-
-<td>${valorMP!=null?"R$ "+valorMP.toFixed(2):"Não se aplica"}</td>
-
-<td class="${classeOut}">${formatarTaxa(taxaOut)}</td>
-
-<td>${valorOut!=null?"R$ "+valorOut.toFixed(2):"Não se aplica"}</td>
-
-</tr>`;
-
-});
-
-html+="</table>";
-
-document.getElementById("resultado").innerHTML=html;
 
 }
 
@@ -191,9 +137,9 @@ return encontrados.map(n=>parseFloat(n.replace(",",".")));
 
 function preencherTaxasMP(numeros){
 
-mp_pix.value=numeros[0]||"";
-mp_debito.value=numeros[1]||"";
-mp1.value=numeros[2]||"";
+document.getElementById("mp_pix").value=numeros[0]||"";
+document.getElementById("mp_debito").value=numeros[1]||"";
+document.getElementById("mp1").value=numeros[2]||"";
 
 let index=3;
 
@@ -213,9 +159,9 @@ index++;
 
 function preencherTaxasConc(numeros){
 
-out_pix_manual.value=numeros[0]||"";
-out_debito_manual.value=numeros[1]||"";
-out1_manual.value=numeros[2]||"";
+document.getElementById("out_pix_manual").value=numeros[0]||"";
+document.getElementById("out_debito_manual").value=numeros[1]||"";
+document.getElementById("out1_manual").value=numeros[2]||"";
 
 let index=3;
 
