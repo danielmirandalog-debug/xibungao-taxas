@@ -177,84 +177,157 @@ document.getElementById("resultado").innerHTML=html;
 
 }
 
-/* OCR INTELIGENTE */
+function atualizarBarra(){
 
-function extrairTaxas(texto){
+let ids=[
+"share_pix",
+"share_debito",
+"share_1x",
+"share_2x",
+"share_4x",
+"share_6x",
+"share_10x"
+];
 
-texto=texto.replace(/,/g,".");
+let total=0;
 
-let linhas=texto.split("\n");
+ids.forEach(function(id){
 
-let taxas={};
-let parcela=null;
+let campo=document.getElementById(id);
+let valor=parseFloat(campo.value);
 
-linhas.forEach(l=>{
-
-let linha=l.toLowerCase().trim();
-
-let p=linha.match(/(\d{1,2})\s*x/);
-
-if(p){
-parcela=parseInt(p[1]);
-}
-
-let t=linha.match(/(\d+\.\d+)/);
-
-if(t && parcela){
-taxas[parcela]=parseFloat(t[1]);
-parcela=null;
+if(!isNaN(valor)){
+total+=valor;
 }
 
 });
 
-return taxas;
+if(total>100){
+alert("A soma não pode ultrapassar 100%");
+document.activeElement.value="";
+return;
+}
+
+document.getElementById("contador").innerText = total + "%";
+document.getElementById("barra").style.width = total + "%";
 
 }
 
-async function processarOCR(event){
+function simularFaturamento(){
 
-const file=event.target.files[0];
+let faturamento=parseFloat(document.getElementById("faturamento").value);
 
-const result=await Tesseract.recognize(file,'eng');
+let shares={
+pix:parseFloat(share_pix.value)||0,
+debito:parseFloat(share_debito.value)||0,
+c1:parseFloat(share_1x.value)||0,
+c2:parseFloat(share_2x.value)||0,
+c4:parseFloat(share_4x.value)||0,
+c6:parseFloat(share_6x.value)||0,
+c10:parseFloat(share_10x.value)||0
+};
 
-let texto=result.data.text;
+let mp={
+pix:parseFloat(mp_pix.value)||0,
+debito:parseFloat(mp_debito.value)||0,
+c1:parseFloat(mp1.value)||0,
+c2:parseFloat(mp2.value)||0,
+c4:parseFloat(mp4.value)||0,
+c6:parseFloat(mp6.value)||0,
+c10:parseFloat(mp10.value)||0
+};
 
-let taxas=extrairTaxas(texto);
+let out={
+pix:parseFloat(out_pix_manual.value)||0,
+debito:parseFloat(out_debito_manual.value)||0,
+c1:parseFloat(out1_manual.value)||0,
+c2:parseFloat(out2_manual.value)||0,
+c4:parseFloat(out4_manual.value)||0,
+c6:parseFloat(out6_manual.value)||0,
+c10:parseFloat(out10_manual.value)||0
+};
 
-for(let p in taxas){
+let economiaTaxas=0;
 
-let campo=document.getElementById("mp"+p);
+function calcular(tipo,percent){
 
-if(campo){
-campo.value=taxas[p];
+let valor=faturamento*(percent/100);
+
+let custoMP=valor*(mp[tipo]/100);
+let custoOUT=valor*(out[tipo]/100);
+
+economiaTaxas+=custoOUT-custoMP;
+
+}
+
+calcular("pix",shares.pix);
+calcular("debito",shares.debito);
+calcular("c1",shares.c1);
+calcular("c2",shares.c2);
+calcular("c4",shares.c4);
+calcular("c6",shares.c6);
+calcular("c10",shares.c10);
+
+let custosFixos=
+(parseFloat(document.getElementById("custo_sistema").value)||0)+
+(parseFloat(document.getElementById("custo_maquina").value)||0)+
+(parseFloat(document.getElementById("custo_cesta").value)||0)+
+(parseFloat(document.getElementById("custo_manutencao").value)||0);
+
+let economiaMensal=economiaTaxas+custosFixos;
+
+let economiaAnual=economiaMensal*12;
+let economia5anos=economiaAnual*5;
+
+let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
+let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
+
+let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
+let taxaMensal=taxaAnual/12;
+
+let saldo=0;
+let rendimentoTotal=0;
+let rendimento1ano=0;
+
+for(let i=1;i<=60;i++){
+
+saldo+=reserva;
+
+let rendimento=saldo*taxaMensal;
+
+saldo+=rendimento;
+
+rendimentoTotal+=rendimento;
+
+if(i<=12){
+rendimento1ano+=rendimento;
 }
 
 }
 
+document.getElementById("resultadoFaturamento").innerHTML=
+
+`<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
+
+<h3>Resultado da simulação</h3>
+
+Economia mensal: <b>R$ ${economiaMensal.toFixed(2)}</b><br><br>
+
+Economia anual: <b>R$ ${economiaAnual.toFixed(2)}</b><br><br>
+
+Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
+
+<hr>
+
+Rendimento do cofrinho em 1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br><br>
+
+Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
+
+</div>`;
+
+gerarGrafico(economiaAnual,economia5anos,rendimentoTotal);
+
 }
-
-async function processarOCRConc(event){
-
-const file=event.target.files[0];
-
-const result=await Tesseract.recognize(file,'eng');
-
-let texto=result.data.text;
-
-let taxas=extrairTaxas(texto);
-
-for(let p in taxas){
-
-let campo=document.getElementById("out"+p+"_manual");
-
-if(campo){
-campo.value=taxas[p];
-}
-
-}
-
-}
-
 function exportar(){
 
 let area=document.getElementById("resultado");
@@ -274,3 +347,55 @@ link.click();
 });
 
 }
+
+async function processarOCR(event){
+
+const file=event.target.files[0];
+
+const result=await Tesseract.recognize(file,'eng');
+
+alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+
+console.log(result.data.text);
+
+}
+
+async function processarOCRConc(event){
+
+const file=event.target.files[0];
+
+const result=await Tesseract.recognize(file,'eng');
+
+alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+
+console.log(result.data.text);
+
+}
+
+function gerarGrafico(anual,cincoanos,cofrinho){
+
+let ctx=document.getElementById("graficoEconomia");
+
+if(window.grafico){
+window.grafico.destroy();
+}
+
+window.grafico=new Chart(ctx,{
+type:'bar',
+data:{
+labels:["Economia 1 ano","Economia 5 anos","Cofrinho 5 anos"],
+datasets:[{
+label:"Resultado em R$",
+data:[anual,cincoanos,cofrinho]
+}]
+},
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+}
+}
+});
+
+}
+
