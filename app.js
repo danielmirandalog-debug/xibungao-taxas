@@ -181,45 +181,54 @@ document.getElementById("resultado").innerHTML=html;
 
 function extrairTaxasPorTexto(texto){
 
-let taxas={};
+let taxas = {};
+texto = texto.replace(/,/g,".");
 
-texto=texto.replace(/,/g,".");
+let linhas = texto.split(/\n|\r/);
 
-let linhas=texto.split("\n");
+let parcelaAtual = null;
 
-linhas.forEach(l=>{
+linhas.forEach(l => {
 
-let linha=l.toLowerCase().trim();
+let linha = l.trim().toLowerCase();
 
-let parcela=linha.match(/(\d+)\s*[x]/i);
+if(!linha) return;
 
-let taxa=linha.match(/(\d+.\d+|\d+)/);
+/* Detecta parcela */
+let p = linha.match(/^(\d+)\s*[x]/i);
 
-if(parcela && taxa){
+if(p){
+let numero = parseInt(p[1]);
 
-let p=parseInt(parcela[1]);
-let t=parseFloat(taxa[1]);
-
-if(p>=1 && p<=21){
-taxas[p]=t;
+if(numero>=1 && numero<=21){
+parcelaAtual = numero;
+}
+return;
 }
 
+/* Detecta taxa */
+let t = linha.match(/(\d+\.\d+|\d+)/);
+
+if(t && parcelaAtual){
+
+let taxa = parseFloat(t[1]);
+
+taxas[parcelaAtual] = taxa;
+
+parcelaAtual = null;
+
 }
 
+/* Pix */
 if(linha.includes("pix")){
-
-let t=linha.match(/(\d+.\d+|\d+)/);
-
-if(t) taxas["pix"]=parseFloat(t[1]);
-
+let v = linha.match(/(\d+\.\d+|\d+)/);
+if(v) taxas["pix"] = parseFloat(v[1]);
 }
 
+/* Débito */
 if(linha.includes("deb")){
-
-let t=linha.match(/(\d+.\d+|\d+)/);
-
-if(t) taxas["debito"]=parseFloat(t[1]);
-
+let v = linha.match(/(\d+\.\d+|\d+)/);
+if(v) taxas["debito"] = parseFloat(v[1]);
 }
 
 });
