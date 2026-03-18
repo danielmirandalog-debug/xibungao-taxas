@@ -306,20 +306,33 @@ let rendimento1ano=0;
 
 for(let i=1;i<=60;i++){
 
-saldo+=reserva;
+saldo += reserva;
 
-let rendimento=saldo*taxaMensal;
+let rendimento = 0;
 
-saldo+=rendimento;
+// FAIXA 1: até 10.000 → rendimento configurado
+let faixa1 = Math.min(saldo, 10000);
+rendimento += faixa1 * taxaMensal;
 
-rendimentoTotal+=rendimento;
+// FAIXA 2: 10.000 até 100.000 → 100% CDI
+if(saldo > 10000){
+let faixa2 = Math.min(saldo - 10000, 90000);
+let taxa100 = (CDI_ANUAL / 100) / 12;
+rendimento += faixa2 * taxa100;
+}
 
-if(i<=12){
-rendimento1ano+=rendimento;
+// FAIXA 3: acima de 100.000 → não rende (ignora)
+
+// aplica rendimento
+saldo += rendimento;
+
+rendimentoTotal += rendimento;
+
+if(i <= 12){
+rendimento1ano += rendimento;
 }
 
 }
-
 document.getElementById("resultadoFaturamento").innerHTML=
 
 `<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
@@ -337,6 +350,16 @@ Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 Rendimento do cofrinho em 1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br><br>
 
 Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
+
+<br><br>
+
+<div style="font-size:12px;color:#555;line-height:1.4">
+
+<b>Regras de rendimento do cofrinho:</b><br>
+
+• Até R$ 10.000: rende conforme o percentual informado (ex: 110% do CDI)<br>
+• De R$ 10.000,01 até R$ 100.000: rendimento fixo de 100% do CDI<br>
+• Acima de R$ 100.000: não há rendimento sobre o valor excedente
 
 </div>`;
 
