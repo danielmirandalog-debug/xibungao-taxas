@@ -297,65 +297,29 @@ let economia5anos=economiaAnual*5;
 let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
 let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
 
-let selic = parseFloat(document.getElementById("selic").value) || 10.75;
+let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
+let taxaMensal=taxaAnual/12;
 
-// CDI ≈ 99% da Selic
-let cdiAnual = selic * 0.99;
-
-// percentual escolhido (ex: 115%)
-let percentualCDI = percentual;
-
-// taxas anuais
-let taxaFaixa1 = (cdiAnual * (percentualCDI/100)) / 100;
-let taxaFaixa2 = (cdiAnual * 1) / 100;
-
-// taxas mensais
-let taxa1Mensal = taxaFaixa1 / 12;
-let taxa2Mensal = taxaFaixa2 / 12;
-
-// IR (1 ano)
-let aliquotaIR = 0.175;
-
-let saldo = 0;
-let rendimentoBruto = 0;
-let rendimento1ano = 0;
+let saldo=0;
+let rendimentoTotal=0;
+let rendimento1ano=0;
 
 for(let i=1;i<=60;i++){
 
-saldo += reserva;
+saldo+=reserva;
 
-let rendimento = 0;
+let rendimento=saldo*taxaMensal;
 
-// faixa 1
-let faixa1 = Math.min(saldo, 10000);
-rendimento += faixa1 * taxa1Mensal;
+saldo+=rendimento;
 
-// faixa 2
-if(saldo > 10000){
-let faixa2 = Math.min(saldo - 10000, 90000);
-rendimento += faixa2 * taxa2Mensal;
-}
+rendimentoTotal+=rendimento;
 
-// acima de 100k não rende
-
-saldo += rendimento;
-
-rendimentoBruto += rendimento;
-
-if(i <= 12){
-rendimento1ano += rendimento;
+if(i<=12){
+rendimento1ano+=rendimento;
 }
 
 }
 
-// IR sobre lucro
-let ir = rendimentoBruto * aliquotaIR;
-
-let rendimentoLiquido = rendimentoBruto - ir;
-
-}
-
-}
 document.getElementById("resultadoFaturamento").innerHTML=
 
 `<div style="padding:20px;border:1px solid #ddd;border-radius:8px">
@@ -373,16 +337,6 @@ Economia em 5 anos: <b>R$ ${economia5anos.toFixed(2)}</b><br><br>
 Rendimento do cofrinho em 1 ano: <b>R$ ${rendimento1ano.toFixed(2)}</b><br><br>
 
 Rendimento do cofrinho em 5 anos: <b>R$ ${rendimentoTotal.toFixed(2)}</b>
-
-<br><br>
-
-<div style="font-size:12px;color:#555;line-height:1.4">
-
-<b>Regras de rendimento do cofrinho:</b><br>
-
-• Até R$ 10.000: rende conforme o percentual informado (ex: 110% do CDI)<br>
-• De R$ 10.000,01 até R$ 100.000: rendimento fixo de 100% do CDI<br>
-• Acima de R$ 100.000: não há rendimento sobre o valor excedente
 
 </div>`;
 
@@ -564,4 +518,3 @@ legend:{display:false}
 });
 
 }
-
