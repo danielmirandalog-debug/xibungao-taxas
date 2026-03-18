@@ -297,12 +297,28 @@ let economia5anos=economiaAnual*5;
 let reserva=parseFloat(document.getElementById("cofrinho_reserva").value)||0;
 let percentual=parseFloat(document.getElementById("cofrinho_percentual").value)||0;
 
-let taxaAnual=(CDI_ANUAL*(percentual/100))/100;
-let taxaMensal=taxaAnual/12;
+let selic = parseFloat(document.getElementById("selic").value) || 10.75;
 
-let saldo=0;
-let rendimentoTotal=0;
-let rendimento1ano=0;
+// CDI ≈ 99% da Selic
+let cdiAnual = selic * 0.99;
+
+// percentual escolhido (ex: 115%)
+let percentualCDI = percentual;
+
+// taxas anuais
+let taxaFaixa1 = (cdiAnual * (percentualCDI/100)) / 100;
+let taxaFaixa2 = (cdiAnual * 1) / 100;
+
+// taxas mensais
+let taxa1Mensal = taxaFaixa1 / 12;
+let taxa2Mensal = taxaFaixa2 / 12;
+
+// IR (1 ano)
+let aliquotaIR = 0.175;
+
+let saldo = 0;
+let rendimentoBruto = 0;
+let rendimento1ano = 0;
 
 for(let i=1;i<=60;i++){
 
@@ -310,26 +326,33 @@ saldo += reserva;
 
 let rendimento = 0;
 
-// FAIXA 1: até 10.000 → rendimento configurado
+// faixa 1
 let faixa1 = Math.min(saldo, 10000);
-rendimento += faixa1 * taxaMensal;
+rendimento += faixa1 * taxa1Mensal;
 
-// FAIXA 2: 10.000 até 100.000 → 100% CDI
+// faixa 2
 if(saldo > 10000){
 let faixa2 = Math.min(saldo - 10000, 90000);
-let taxa100 = (CDI_ANUAL / 100) / 12;
-rendimento += faixa2 * taxa100;
+rendimento += faixa2 * taxa2Mensal;
 }
 
-// FAIXA 3: acima de 100.000 → não rende (ignora)
+// acima de 100k não rende
 
-// aplica rendimento
 saldo += rendimento;
 
-rendimentoTotal += rendimento;
+rendimentoBruto += rendimento;
 
 if(i <= 12){
 rendimento1ano += rendimento;
+}
+
+}
+
+// IR sobre lucro
+let ir = rendimentoBruto * aliquotaIR;
+
+let rendimentoLiquido = rendimentoBruto - ir;
+
 }
 
 }
