@@ -360,18 +360,123 @@ console.log(result.data.text);
 
 }
 
-async function processarOCRConc(event){
+async function processarOCR(event){
 
-const file=event.target.files[0];
+const file = event.target.files[0];
 
-const result=await Tesseract.recognize(file,'eng');
+if(!file){
+alert("Selecione uma imagem.");
+return;
+}
 
-alert("OCR processado. Copie as taxas manualmente do texto detectado.");
+alert("Processando imagem... aguarde");
 
-console.log(result.data.text);
+const result = await Tesseract.recognize(file,'eng');
+
+let texto = result.data.text;
+
+console.log("TEXTO OCR:", texto);
+
+// Normaliza texto
+texto = texto.replace(/\n/g," ").replace(/,/g,".");
+
+// Regex poderosa:
+// pega: 1x 2x 3X etc + taxa (com % ou sem)
+let regex = /(\d{1,2})\s*[xX]\s*([\d\.]+)/g;
+
+let encontrados = {};
+let match;
+
+while((match = regex.exec(texto)) !== null){
+
+let parcela = parseInt(match[1]);
+let taxa = parseFloat(match[2]);
+
+if(parcela >=1 && parcela <=21){
+encontrados[parcela] = taxa;
+}
 
 }
 
+// Preenche os campos
+for(let i=1;i<=21;i++){
+
+if(encontrados[i] !== undefined){
+
+if(i === 1){
+mp1.value = encontrados[i];
+}else if(i >=2){
+let campo = document.getElementById("mp"+i);
+if(campo) campo.value = encontrados[i];
+}
+
+}
+
+}
+
+alert("Taxas preenchidas automaticamente!");
+
+}
+
+async function processarOCRConc(event){
+
+const file = event.target.files[0];
+
+if(!file){
+alert("Selecione uma imagem.");
+return;
+}
+
+alert("Processando imagem... aguarde");
+
+const result = await Tesseract.recognize(file,'eng');
+
+let texto = result.data.text;
+
+console.log("TEXTO OCR CONCORRÊNCIA:", texto);
+
+// Normaliza
+texto = texto.replace(/\n/g," ").replace(/,/g,".");
+
+let regex = /(\d{1,2})\s*[xX]\s*([\d\.]+)/g;
+
+let encontrados = {};
+let match;
+
+while((match = regex.exec(texto)) !== null){
+
+let parcela = parseInt(match[1]);
+let taxa = parseFloat(match[2]);
+
+if(parcela >=1 && parcela <=21){
+encontrados[parcela] = taxa;
+}
+
+}
+
+// Força modo manual (sem quebrar nada)
+document.querySelector('input[value="manual"]').checked = true;
+trocarModoOutras();
+
+// Preenche
+for(let i=1;i<=21;i++){
+
+if(encontrados[i] !== undefined){
+
+if(i === 1){
+out1_manual.value = encontrados[i];
+}else{
+let campo = document.getElementById("out"+i+"_manual");
+if(campo) campo.value = encontrados[i];
+}
+
+}
+
+}
+
+alert("Taxas da concorrência preenchidas!");
+
+}
 function gerarGrafico(anual,cincoanos,cofrinho){
 
 let ctx=document.getElementById("graficoEconomia");
