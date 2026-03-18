@@ -216,6 +216,21 @@ document.getElementById("barra").style.width = total + "%";
 function simularFaturamento(){
 
 let faturamento=parseFloat(document.getElementById("faturamento").value);
+// validação do total de percentuais
+let totalPercent =
+(parseFloat(share_pix.value)||0) +
+(parseFloat(share_debito.value)||0) +
+(parseFloat(share_1x.value)||0) +
+(parseFloat(share_2x.value)||0) +
+(parseFloat(share_4x.value)||0) +
+(parseFloat(share_6x.value)||0) +
+(parseFloat(share_10x.value)||0);
+
+if(totalPercent !== 100){
+alert("A soma atual está em " + totalPercent + "%. Complete até 100% para simular.");
+return;
+}
+
 
 let shares={
 pix:parseFloat(share_pix.value)||0,
