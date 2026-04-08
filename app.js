@@ -255,11 +255,13 @@ function exportarRelatorio(apenasTaxas) {
 
     const textoCompleto = `<b>Informações adicionais:</b>
 ➡️ Máquina sem aluguel
-➡️ TEF disponível
+➡️ TEF disponível (Consultar elegibilidade)
 ➡️ Mesma taxa para todas as bandeiras
 ➡️ Conta sem anuidade e sem taxas administrativas
-➡️ Link de pagamento com recebimento na hora
+➡️ Link de pagamento com recebimento na hora e mesmas taxas da point
+➡️ Parcelamento em até 18x
 ➡️ Rendimentos diários no cofrinho
+➡️ NOVIDADE: Software de Gestão completo (consulte condições)
 🗒️Simulação com validade de 07 dias.`;
 
     let checkboxAtivo = apenasTaxas ? document.getElementById("chk_info_simples") : document.getElementById("chk_info_completo");
