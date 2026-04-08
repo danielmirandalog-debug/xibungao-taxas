@@ -1,14 +1,14 @@
 /* PROJETO: Compara taxa - Simulador Premium
-   VERSÃO: Master V4 - Histórico Interno, Alta Resolução e Variáveis Detalhadas
+   VERSÃO: Master V5 - Recuperação de Dados e Custos Analíticos
 */
 
-// 1. PROTEÇÃO, BLINDAGEM E CONTADOR
+// 1. PROTEÇÃO E BLINDAGEM
 document.addEventListener('contextmenu', event => event.preventDefault());
 document.onkeydown = function(e) {
     if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false;
 };
 
-// 2. MODAL DE CONSENTIMENTO E CONTADOR
+// 2. MODAL E CONTADOR
 function confirmarTermos() {
     const checkbox = document.getElementById("chk_termos_uso");
     if (checkbox.checked) {
@@ -24,8 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
     gerarInputs();
     buscarCDI();
     document.getElementById("input_data").value = new Date().toLocaleDateString('pt-BR');
-    
-    // Contador de visitas simples (Local)
     let visitas = localStorage.getItem("contador_visitas") || 0;
     visitas++;
     localStorage.setItem("contador_visitas", visitas);
@@ -135,10 +133,17 @@ function simularFaturamento() {
         custoConc += valorFatia * (getTaxa(p, 'out') / 100);
     });
 
-    let fixosGerais = (parseFloat(fixo_sistema.value)||0) + (parseFloat(fixo_maquina.value)||0) + (parseFloat(fixo_cesta.value)||0) + (parseFloat(fixo_manutencao.value)||0);
+    // Custos Ocultos Individuais
+    let cSoftware = parseFloat(document.getElementById("fixo_sistema").value) || 0;
+    let cMaquina = parseFloat(document.getElementById("fixo_maquina").value) || 0;
+    let cCesta = parseFloat(document.getElementById("fixo_cesta").value) || 0;
+    let cManutencao = parseFloat(document.getElementById("fixo_manutencao").value) || 0;
     let volPixApp = parseFloat(document.getElementById("vol_pix_app").value) || 0;
     let taxaPixApp = parseFloat(document.getElementById("taxa_pix_app").value) || 0;
-    custoConc += (fixosGerais + (volPixApp * (taxaPixApp / 100)));
+    let cPixApp = volPixApp * (taxaPixApp / 100);
+
+    let totalFixos = cSoftware + cMaquina + cCesta + cManutencao + cPixApp;
+    custoConc += totalFixos;
 
     let ecoMes = custoConc - custoMP;
     let resMensal = parseFloat(cofrinho_reserva.value) || 0;
@@ -158,58 +163,61 @@ function simularFaturamento() {
         return saldoAtual - (lucroBrutoAcumulado * aliquotaIR);
     };
 
-    let result12 = calcInvestimento(12);
-    let result60 = calcInvestimento(60);
-
-    // Variáveis detalhadas para o Relatório
-    window.dadosSimulacao = {
+    window.dadosRelatorioAnalitico = {
         faturamento: f,
         aporte: resMensal,
         cdiAlvo: parseFloat(cofrinho_cdi_alvo.value) || 115,
-        custosOcultos: fixosGerais + (volPixApp * (taxaPixApp / 100))
+        itensOcultos: {
+            "Software": cSoftware,
+            "Aluguel": cMaquina,
+            "Cesta Bancária": cCesta,
+            "Manutenção": cManutencao,
+            "Pix App Bancário": cPixApp
+        }
     };
 
     document.getElementById("resultadoFaturamento").innerHTML = `
         <div class="resumo-financeiro">
             <h4 style="margin-top:0">💰 Rentabilidade Real Individualizada</h4>
-            <b>Faturamento Definido: R$ ${f.toLocaleString()}</b><br>
-            <b>Custo Operacional MP:</b> R$ ${custoMP.toFixed(2)}<br>
-            <b>Custo Operacional Conc.:</b> R$ ${custoConc.toFixed(2)}<br>
             <b>Economia Mensal:</b> <span style="color:${ecoMes > 0 ? '#007bff' : 'red'}; font-size:16px; font-weight:bold">R$ ${ecoMes.toFixed(2)}</span><br>
             <b>Economia em 1 Ano:</b> R$ ${(ecoMes * 12).toFixed(2)}<hr>
             <h4>📈 Projeção Cofrinho (Líquido)</h4>
-            <b>Aporte: R$ ${resMensal} | CDI: ${window.dadosSimulacao.cdiAlvo}%</b><br>
-            <b>Saldo 1 Ano:</b> R$ ${result12.toFixed(2)}<br>
-            <b>Saldo 5 Anos:</b> R$ ${result60.toFixed(2)}
+            <b>Aporte: R$ ${resMensal.toFixed(2)} / mês</b><br>
+            <b>Saldo 1 Ano:</b> R$ ${calcInvestimento(12).toFixed(2)}<br>
+            <b>Saldo 5 Anos:</b> R$ ${calcInvestimento(60).toFixed(2)}
         </div>`;
 
     if (window.g) window.g.destroy();
     window.g = new Chart(document.getElementById("graficoEconomia"), {
         type: 'bar',
-        data: { labels: ["Eco. 1 Ano", "Eco. 5 Anos", "Cofre 5 Anos"], datasets: [{ label: 'R$', data: [ecoMes*12, ecoMes*60, result60], backgroundColor: ['#FFE600','#FFD400','#3483FA'] }] },
+        data: { labels: ["Eco. 1 Ano", "Eco. 5 Anos", "Cofre 5 Anos"], datasets: [{ label: 'R$', data: [ecoMes*12, ecoMes*60, calcInvestimento(60)], backgroundColor: ['#FFE600','#FFD400','#3483FA'] }] },
         options: { animation: false }
     });
 }
 
-// 5. SISTEMA DE HISTÓRICO (indexedDB)
+// 5. SISTEMA DE HISTÓRICO COM RECUPERAÇÃO
 function salvarNoHistorico() {
+    const inputs = document.querySelectorAll("input");
+    const snapshot = {};
+    inputs.forEach(i => { if(i.id) snapshot[i.id] = i.value; });
+
     const dados = {
         id: Date.now(),
-        seller: document.getElementById("input_loja").value,
+        seller: document.getElementById("input_loja").value || "Sem Nome",
         responsavel: document.getElementById("input_cliente").value,
         executivo: document.getElementById("input_executivo").value,
         data: new Date().toLocaleString(),
-        faturamento: document.getElementById("faturamento").value,
-        taxas: document.getElementById("resultado").innerHTML
+        snapshot: snapshot
     };
     let historico = JSON.parse(localStorage.getItem("historico_simulacoes") || "[]");
     historico.push(dados);
     localStorage.setItem("historico_simulacoes", JSON.stringify(historico));
-    alert("Simulação salva no histórico do dispositivo!");
+    alert("Simulação arquivada com sucesso!");
 }
 
 function consultarHistorico() {
     const termo = prompt("Busque por Seller, Responsável ou Data:").toLowerCase();
+    if (termo === null) return;
     let historico = JSON.parse(localStorage.getItem("historico_simulacoes") || "[]");
     let filtrados = historico.filter(h => 
         h.seller.toLowerCase().includes(termo) || 
@@ -219,9 +227,19 @@ function consultarHistorico() {
     
     if (filtrados.length === 0) return alert("Nenhum registro encontrado.");
     
-    let msg = "Registros encontrados:\n\n";
-    filtrados.forEach((f, i) => msg += `${i+1}. ${f.seller} - ${f.data}\n`);
-    alert(msg + "\nNota: Versão Beta - A restauração automática está em processamento.");
+    let msg = "Registros encontrados (digite o número para recuperar):\n\n";
+    filtrados.forEach((f, i) => msg += `${i+1}. ${f.seller} (${f.data})\n`);
+    
+    const escolha = prompt(msg);
+    if (escolha > 0 && escolha <= filtrados.length) {
+        const item = filtrados[escolha-1].snapshot;
+        for (let id in item) {
+            let el = document.getElementById(id);
+            if (el) el.value = item[id];
+        }
+        atualizarBarra();
+        alert("Dados carregados com sucesso! Clique em simular para processar.");
+    }
 }
 
 function exportarRelatorio(apenasTaxas) {
@@ -237,14 +255,11 @@ function exportarRelatorio(apenasTaxas) {
 
     const textoCompleto = `<b>Informações adicionais:</b>
 ➡️ Máquina sem aluguel
-➡️ TEF
+➡️ TEF disponível
 ➡️ Mesma taxa para todas as bandeiras
-➡️ Conta sem anuidade e taxas administrativas
-➡️ Link de pagamento com recebimento na hora e mesmas taxas da point
-➡️ Parcelamento até 18x
+➡️ Conta sem anuidade e sem taxas administrativas
+➡️ Link de pagamento com recebimento na hora
 ➡️ Rendimentos diários no cofrinho
-➡️ NOVIDADE: Software de gestão completo (consulte condições)
-
 🗒️Simulação com validade de 07 dias.`;
 
     let checkboxAtivo = apenasTaxas ? document.getElementById("chk_info_simples") : document.getElementById("chk_info_completo");
@@ -253,12 +268,19 @@ function exportarRelatorio(apenasTaxas) {
 
     if (!apenasTaxas) {
         boxCorpo.style.display = "block"; boxGrafico.style.display = "block";
-        let vars = window.dadosSimulacao || {faturamento:0, aporte:0, cdiAlvo:115, custosOcultos:0};
+        let v = window.dadosRelatorioAnalitico;
+        let htmlCustos = "";
+        for (let label in v.itensOcultos) {
+            if(v.itensOcultos[label] > 0) htmlCustos += `• ${label}: R$ ${v.itensOcultos[label].toFixed(2)}<br>`;
+        }
+
         boxCorpo.innerHTML = `
-            <div style="background:#eee; padding:15px; border-radius:10px; margin-bottom:15px">
-                <b>DADOS DA SIMULAÇÃO:</b><br>
-                Faturamento: R$ ${vars.faturamento} | Aporte: R$ ${vars.aporte} | CDI: ${vars.cdiAlvo}%<br>
-                Custos Ocultos identificados: R$ ${vars.custosOcultos.toFixed(2)}
+            <div style="background:#f4f4f4; padding:20px; border-radius:15px; margin-bottom:20px; border:1px solid #ddd">
+                <b style="color:#333; font-size:16px">RESUMO DA ANÁLISE:</b><br>
+                Faturamento: R$ ${v.faturamento.toLocaleString()}<br>
+                Aporte Cofrinho: R$ ${v.aporte.toLocaleString()} / mês (CDI: ${v.cdiAlvo}%)<br><br>
+                <b style="color:#d32f2f">DETALHAMENTO DE CUSTOS CONCORRÊNCIA:</b><br>
+                ${htmlCustos || "• Nenhum custo fixo informado."}
             </div>
             <h3>Rentabilidade e Projeção</h3>` + document.getElementById("resultadoFaturamento").innerHTML;
         if (window.g) document.getElementById("img_grafico").src = document.getElementById("graficoEconomia").toDataURL();
@@ -266,12 +288,10 @@ function exportarRelatorio(apenasTaxas) {
         boxCorpo.style.display = "none"; boxGrafico.style.display = "none";
     }
 
-    // ALTA RESOLUÇÃO: Escala 3x para nitidez total
     setTimeout(() => {
         html2canvas(document.getElementById("areaRelatorio"), { 
             scale: 3, 
             useCORS: true,
-            logging: false,
             backgroundColor: "#ffffff"
         }).then(canvas => {
             let link = document.createElement("a");
@@ -294,22 +314,18 @@ function calcularDescobreTaxa(origem) {
     if (valorOp > 0) {
         if (origem === 'recebido' && valorRec > 0) {
             let taxa = ((valorRec / valorOp) - 1) * 100;
-            document.getElementById("calc_taxa_perc").value = taxa.toFixed(2);
             document.getElementById("res_taxa_percent").innerText = `${taxa.toFixed(2)}%`;
-            document.getElementById("res_valor_desc").innerText = `- $ ${(valorOp - valorRec).toFixed(2)}`;
             document.getElementById("res_valor_final").innerText = `$ ${valorRec.toFixed(2)}`;
-        } else if (origem === 'taxa' || (origem === 'valor' && taxaPercent !== 0)) {
+        } else {
             let taxaReal = taxaPercent > 0 ? taxaPercent * -1 : taxaPercent;
             let valorFinal = valorOp + (valorOp * (taxaReal / 100));
             document.getElementById("res_taxa_percent").innerText = `${taxaReal.toFixed(2)}%`;
-            document.getElementById("res_valor_desc").innerText = `- $ ${(valorOp - valorFinal).toFixed(2)}`;
             document.getElementById("res_valor_final").innerText = `$ ${valorFinal.toFixed(2)}`;
         }
     }
 }
 async function processarOCR(event, pref) {
     const file = event.target.files[0]; if(!file) return;
-    alert("Escaneando...");
     const reader = new FileReader();
     reader.onload = async (e) => {
         const worker = await Tesseract.createWorker('por');
@@ -319,7 +335,7 @@ async function processarOCR(event, pref) {
         let regex = /(\d{1,2})x\s*([\d.]+)/g; let match;
         while ((match = regex.exec(txt)) !== null) {
             let p = parseInt(match[1]), t = parseFloat(match[2]);
-            if (p >= 1 && p <= 18 && t < 99) {
+            if (p >= 1 && p <= 18) {
                 let id = (p === 1) ? (pref === "mp" ? "mp1" : "out1_manual") : (pref + p + (pref === "out" ? "_manual" : ""));
                 if(document.getElementById(id)) document.getElementById(id).value = t.toFixed(2);
             }
