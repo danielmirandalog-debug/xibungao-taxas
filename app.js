@@ -1,5 +1,5 @@
 /* PROJETO: Compara taxa - Simulador Premium
-   VERSÃO: Master V5 - Recuperação de Dados e Custos Analíticos
+   VERSÃO: Master V5.1 - Ajustes Visuais e Histórico Consolidado
 */
 
 // 1. PROTEÇÃO E BLINDAGEM
@@ -133,7 +133,6 @@ function simularFaturamento() {
         custoConc += valorFatia * (getTaxa(p, 'out') / 100);
     });
 
-    // Custos Ocultos Individuais
     let cSoftware = parseFloat(document.getElementById("fixo_sistema").value) || 0;
     let cMaquina = parseFloat(document.getElementById("fixo_maquina").value) || 0;
     let cCesta = parseFloat(document.getElementById("fixo_cesta").value) || 0;
@@ -195,7 +194,6 @@ function simularFaturamento() {
     });
 }
 
-// 5. SISTEMA DE HISTÓRICO COM RECUPERAÇÃO
 function salvarNoHistorico() {
     const inputs = document.querySelectorAll("input");
     const snapshot = {};
@@ -255,13 +253,11 @@ function exportarRelatorio(apenasTaxas) {
 
     const textoCompleto = `<b>Informações adicionais:</b>
 ➡️ Máquina sem aluguel
-➡️ TEF disponível (Consultar elegibilidade)
+➡️ TEF
 ➡️ Mesma taxa para todas as bandeiras
-➡️ Conta sem anuidade e sem taxas administrativas
-➡️ Link de pagamento com recebimento na hora e mesmas taxas da point
-➡️ Parcelamento em até 18x
+➡️ Conta sem anuidade e taxas administrativas
+➡️ Link de pagamento com recebimento na hora
 ➡️ Rendimentos diários no cofrinho
-➡️ NOVIDADE: Software de Gestão completo (consulte condições)
 🗒️Simulação com validade de 07 dias.`;
 
     let checkboxAtivo = apenasTaxas ? document.getElementById("chk_info_simples") : document.getElementById("chk_info_completo");
