@@ -30,7 +30,13 @@
         .taxa-destaque { font-size: 18px; font-weight: 800; }
         .taxaBoa { color: #007bff; }
         .taxaRuim { color: #d32f2f; }
-        .chk-container { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; }
+        
+        /* AJUSTE DOS CHECKBOXES - CENTRALIZAÇÃO */
+        .chk-container { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 0; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; }
+        .chk-container input { width: 20px; height: 20px; margin: 0; }
+
+        .box-calculadora { display: none; background: #fff; border: 2px solid #333; border-radius: 15px; padding: 20px; margin-top: 10px; position: relative; }
+        .display-calculadora { background: #f4f4f4; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 15px; border: 1px solid #ddd; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: white; padding: 30px; border-radius: 20px; max-width: 550px; width: 100%; border-top: 10px solid #FFE600; text-align: justify; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
         #areaRelatorio { position: absolute; left: -9999px; width: 750px; background: white; padding: 50px; color: #333; }
@@ -194,7 +200,7 @@
     <div id="rel_grafico_box" style="text-align:center; margin-top:25px"><img id="img_grafico" style="max-width:100%; border-radius:15px; border: 1px solid #eee"></div>
     <div id="rel_info_adicional" style="margin-top:25px; font-size:14px; white-space:pre-line; border-left:5px solid #FFE600; padding-left:15px; line-height:1.6"></div>
     <div style="font-size:12px; color:#777; margin-top:40px; border-top:1px solid #eee; padding-top:20px; text-align:justify">
-        <p><b>Sobre o Cofrinho:</b> Projeção baseada em aportes mensais fixos. Até R$ 10.000,00 rende o percentual alvo do CDI. De R$ 10.000,01 até R$ 100.000,00. , rende 100% do CDI. Acima desse valor, não tem rendimento. Valores líquidos de IRPF.</p>
+        <p><b>Sobre o Cofrinho:</b> Projeção baseada em aportes mensais fixos. Até R$ 10.000,00 rende o percentual alvo do CDI. Acima desse valor, rende 100% do CDI. Valores líquidos de IRPF.</p>
         <p><b>Desenvolvido por Marcos Daniel.</b></p>
     </div>
 </div>
