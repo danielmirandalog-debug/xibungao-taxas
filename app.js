@@ -1,5 +1,5 @@
 /* PROJETO: Compara taxa - Simulador Premium
-   VERSÃO: Master V5.1 - Ajustes Visuais e Histórico Consolidado
+   VERSÃO: Master V6 - Calculadora Reversa Completa (Bruto vs Líquido)
 */
 
 // 1. PROTEÇÃO E BLINDAGEM
@@ -163,16 +163,8 @@ function simularFaturamento() {
     };
 
     window.dadosRelatorioAnalitico = {
-        faturamento: f,
-        aporte: resMensal,
-        cdiAlvo: parseFloat(cofrinho_cdi_alvo.value) || 115,
-        itensOcultos: {
-            "Software": cSoftware,
-            "Aluguel": cMaquina,
-            "Cesta Bancária": cCesta,
-            "Manutenção": cManutencao,
-            "Pix App Bancário": cPixApp
-        }
+        faturamento: f, aporte: resMensal, cdiAlvo: parseFloat(cofrinho_cdi_alvo.value) || 115,
+        itensOcultos: { "Software": cSoftware, "Aluguel": cMaquina, "Cesta Bancária": cCesta, "Manutenção": cManutencao, "Pix App Bancário": cPixApp }
     };
 
     document.getElementById("resultadoFaturamento").innerHTML = `
@@ -194,19 +186,12 @@ function simularFaturamento() {
     });
 }
 
+// 5. SISTEMA DE HISTÓRICO
 function salvarNoHistorico() {
     const inputs = document.querySelectorAll("input");
     const snapshot = {};
     inputs.forEach(i => { if(i.id) snapshot[i.id] = i.value; });
-
-    const dados = {
-        id: Date.now(),
-        seller: document.getElementById("input_loja").value || "Sem Nome",
-        responsavel: document.getElementById("input_cliente").value,
-        executivo: document.getElementById("input_executivo").value,
-        data: new Date().toLocaleString(),
-        snapshot: snapshot
-    };
+    const dados = { id: Date.now(), seller: document.getElementById("input_loja").value || "Sem Nome", responsavel: document.getElementById("input_cliente").value, executivo: document.getElementById("input_executivo").value, data: new Date().toLocaleString(), snapshot: snapshot };
     let historico = JSON.parse(localStorage.getItem("historico_simulacoes") || "[]");
     historico.push(dados);
     localStorage.setItem("historico_simulacoes", JSON.stringify(historico));
@@ -217,26 +202,16 @@ function consultarHistorico() {
     const termo = prompt("Busque por Seller, Responsável ou Data:").toLowerCase();
     if (termo === null) return;
     let historico = JSON.parse(localStorage.getItem("historico_simulacoes") || "[]");
-    let filtrados = historico.filter(h => 
-        h.seller.toLowerCase().includes(termo) || 
-        h.responsavel.toLowerCase().includes(termo) || 
-        h.data.includes(termo)
-    );
-    
+    let filtrados = historico.filter(h => h.seller.toLowerCase().includes(termo) || h.responsavel.toLowerCase().includes(termo) || h.data.includes(termo));
     if (filtrados.length === 0) return alert("Nenhum registro encontrado.");
-    
     let msg = "Registros encontrados (digite o número para recuperar):\n\n";
     filtrados.forEach((f, i) => msg += `${i+1}. ${f.seller} (${f.data})\n`);
-    
     const escolha = prompt(msg);
     if (escolha > 0 && escolha <= filtrados.length) {
         const item = filtrados[escolha-1].snapshot;
-        for (let id in item) {
-            let el = document.getElementById(id);
-            if (el) el.value = item[id];
-        }
+        for (let id in item) { let el = document.getElementById(id); if (el) el.value = item[id]; }
         atualizarBarra();
-        alert("Dados carregados com sucesso! Clique em simular para processar.");
+        alert("Dados carregados!");
     }
 }
 
@@ -246,58 +221,22 @@ function exportarRelatorio(apenasTaxas) {
     document.getElementById("rel_executivo").innerText = document.getElementById("input_executivo").value || "---";
     document.getElementById("rel_data").innerText = document.getElementById("input_data").value;
     document.getElementById("rel_tabela_taxas").innerHTML = "<h3>Comparativo de Taxas</h3>" + document.getElementById("resultado").innerHTML;
-    
     let boxCorpo = document.getElementById("rel_share_cofrinho");
     let boxGrafico = document.getElementById("rel_grafico_box");
     let boxInfoAdicional = document.getElementById("rel_info_adicional");
-
-    const textoCompleto = `<b>Informações adicionais:</b>
-➡️ Máquina sem aluguel
-➡️ TEF
-➡️ Mesma taxa para todas as bandeiras
-➡️ Conta sem anuidade e taxas administrativas
-➡️ Link de pagamento com recebimento na hora
-➡️ Rendimentos diários no cofrinho
-🗒️Simulação com validade de 07 dias.`;
-
+    const textoCompleto = `<b>Informações adicionais:</b>\n➡️ Máquina sem aluguel\n➡️ TEF\n➡️ Mesma taxa para todas as bandeiras\n➡️ Conta sem anuidade e taxas administrativas\n➡️ Link de pagamento com recebimento na hora\n➡️ Rendimentos diários no cofrinho\n🗒️Simulação com validade de 07 dias.`;
     let checkboxAtivo = apenasTaxas ? document.getElementById("chk_info_simples") : document.getElementById("chk_info_completo");
     boxInfoAdicional.style.display = checkboxAtivo.checked ? "block" : "none";
     if (checkboxAtivo.checked) boxInfoAdicional.innerHTML = textoCompleto;
-
     if (!apenasTaxas) {
         boxCorpo.style.display = "block"; boxGrafico.style.display = "block";
         let v = window.dadosRelatorioAnalitico;
         let htmlCustos = "";
-        for (let label in v.itensOcultos) {
-            if(v.itensOcultos[label] > 0) htmlCustos += `• ${label}: R$ ${v.itensOcultos[label].toFixed(2)}<br>`;
-        }
-
-        boxCorpo.innerHTML = `
-            <div style="background:#f4f4f4; padding:20px; border-radius:15px; margin-bottom:20px; border:1px solid #ddd">
-                <b style="color:#333; font-size:16px">RESUMO DA ANÁLISE:</b><br>
-                Faturamento: R$ ${v.faturamento.toLocaleString()}<br>
-                Aporte Cofrinho: R$ ${v.aporte.toLocaleString()} / mês (CDI: ${v.cdiAlvo}%)<br><br>
-                <b style="color:#d32f2f">DETALHAMENTO DE CUSTOS CONCORRÊNCIA:</b><br>
-                ${htmlCustos || "• Nenhum custo fixo informado."}
-            </div>
-            <h3>Rentabilidade e Projeção</h3>` + document.getElementById("resultadoFaturamento").innerHTML;
+        for (let label in v.itensOcultos) { if(v.itensOcultos[label] > 0) htmlCustos += `• ${label}: R$ ${v.itensOcultos[label].toFixed(2)}<br>`; }
+        boxCorpo.innerHTML = `<div style="background:#f4f4f4; padding:20px; border-radius:15px; margin-bottom:20px; border:1px solid #ddd"><b>RESUMO DA ANÁLISE:</b><br>Faturamento: R$ ${v.faturamento.toLocaleString()}<br>Aporte Cofrinho: R$ ${v.aporte.toLocaleString()} / mês (CDI: ${v.cdiAlvo}%)<br><br><b style="color:#d32f2f">DETALHAMENTO DE CUSTOS CONCORRÊNCIA:</b><br>${htmlCustos || "• Nenhum custo fixo informado."}</div><h3>Rentabilidade e Projeção</h3>` + document.getElementById("resultadoFaturamento").innerHTML;
         if (window.g) document.getElementById("img_grafico").src = document.getElementById("graficoEconomia").toDataURL();
-    } else {
-        boxCorpo.style.display = "none"; boxGrafico.style.display = "none";
-    }
-
-    setTimeout(() => {
-        html2canvas(document.getElementById("areaRelatorio"), { 
-            scale: 3, 
-            useCORS: true,
-            backgroundColor: "#ffffff"
-        }).then(canvas => {
-            let link = document.createElement("a");
-            link.download = `BA21_PROPOSTA_${document.getElementById("input_loja").value}.png`;
-            link.href = canvas.toDataURL("image/png", 1.0);
-            link.click();
-        });
-    }, 800);
+    } else { boxCorpo.style.display = "none"; boxGrafico.style.display = "none"; }
+    setTimeout(() => { html2canvas(document.getElementById("areaRelatorio"), { scale: 3, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => { let link = document.createElement("a"); link.download = `BA21_PROPOSTA_${document.getElementById("input_loja").value}.png`; link.href = canvas.toDataURL("image/png", 1.0); link.click(); }); }, 800);
 }
 
 function toggleDescobreTaxa() {
@@ -305,23 +244,43 @@ function toggleDescobreTaxa() {
     box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
 }
 
+// 6. CALCULADORA REVERSA MELHORADA
 function calcularDescobreTaxa(origem) {
     let valorOp = parseFloat(document.getElementById("calc_valor_op").value) || 0;
     let valorRec = parseFloat(document.getElementById("calc_valor_rec").value) || 0;
     let taxaPercent = parseFloat(document.getElementById("calc_taxa_perc").value) || 0;
-    if (valorOp > 0) {
-        if (origem === 'recebido' && valorRec > 0) {
-            let taxa = ((valorRec / valorOp) - 1) * 100;
-            document.getElementById("res_taxa_percent").innerText = `${taxa.toFixed(2)}%`;
-            document.getElementById("res_valor_final").innerText = `$ ${valorRec.toFixed(2)}`;
-        } else {
-            let taxaReal = taxaPercent > 0 ? taxaPercent * -1 : taxaPercent;
-            let valorFinal = valorOp + (valorOp * (taxaReal / 100));
-            document.getElementById("res_taxa_percent").innerText = `${taxaReal.toFixed(2)}%`;
-            document.getElementById("res_valor_final").innerText = `$ ${valorFinal.toFixed(2)}`;
+    
+    // Elementos de exibição
+    const resTaxa = document.getElementById("res_taxa_percent");
+    const resFinal = document.getElementById("res_valor_final");
+
+    if (origem === 'valor' || origem === 'recebido') {
+        if (valorOp > 0 && valorRec > 0) {
+            // Descobre a taxa direto pelo que foi cobrado e o que caiu na conta
+            let taxa = ((valorOp - valorRec) / valorOp) * 100;
+            resTaxa.innerText = `${taxa.toFixed(2)}%`;
+            resFinal.innerText = `$ ${valorRec.toFixed(2)}`;
+            document.getElementById("calc_taxa_perc").value = taxa.toFixed(2);
+        }
+    } 
+    
+    if (origem === 'taxa') {
+        if (valorOp > 0 && taxaPercent > 0) {
+            // Modelo Cobrança: Eu passo R$ 100 e quero ver quanto sobra com X% de taxa
+            let liquido = valorOp - (valorOp * (taxaPercent / 100));
+            resFinal.innerText = `$ ${liquido.toFixed(2)}`;
+            resTaxa.innerText = `${taxaPercent.toFixed(2)}%`;
+            document.getElementById("calc_valor_rec").value = liquido.toFixed(2);
+        } else if (valorRec > 0 && taxaPercent > 0) {
+            // Modelo Recebimento: Eu quero que caia R$ 100 limpo. Quanto devo cobrar no Bruto?
+            let brutoNecessario = valorRec / (1 - (taxaPercent / 100));
+            resFinal.innerText = `$ ${valorRec.toFixed(2)} (Liq)`;
+            resTaxa.innerText = `Cobrar: $ ${brutoNecessario.toFixed(2)}`;
+            document.getElementById("calc_valor_op").value = brutoNecessario.toFixed(2);
         }
     }
 }
+
 async function processarOCR(event, pref) {
     const file = event.target.files[0]; if(!file) return;
     const reader = new FileReader();
