@@ -30,11 +30,8 @@
         .taxa-destaque { font-size: 18px; font-weight: 800; }
         .taxaBoa { color: #007bff; }
         .taxaRuim { color: #d32f2f; }
-        
-        /* AJUSTE DOS CHECKBOXES - CENTRALIZAÇÃO */
         .chk-container { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 0; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; }
         .chk-container input { width: 20px; height: 20px; margin: 0; }
-
         .box-calculadora { display: none; background: #fff; border: 2px solid #333; border-radius: 15px; padding: 20px; margin-top: 10px; position: relative; }
         .display-calculadora { background: #f4f4f4; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 15px; border: 1px solid #ddd; }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
@@ -144,23 +141,24 @@
     <label class="chk-container"><input type="checkbox" id="chk_info_completo"> Incluir Termos Adicionais</label>
     <button onclick="exportarRelatorio(false)" class="btn-exportar">Exportar Relatório Completo</button>
 
-    <button onclick="toggleDescobreTaxa()" style="background:#333; color:#FFE600; margin-top:15px">🔍 Abrir Descobre Taxa</button>
+    <button onclick="toggleDescobreTaxa()" style="background:#333; color:#FFE600; margin-top:15px">🔍 Calculadora Reversa (Bruto/Líquido)</button>
+    
     <div id="boxDescobreTaxa" class="box-calculadora">
-        <h3>Descobre Taxa <button type="button" class="btn-limpar" onclick="limparDescobreTaxa()" style="position:absolute; right:20px; top:18px">🗑️</button></h3>
+        <h3>Calculadora Reversa <button type="button" class="btn-limpar" onclick="location.reload()" style="position:absolute; right:20px; top:18px">🗑️</button></h3>
         <div class="display-calculadora">
             <div style="margin-bottom:10px">
-                <span style="font-size:12px; color:#666; font-weight:bold; text-transform:uppercase">Taxa Aplicada</span><br>
-                <span id="res_taxa_percent" style="font-size:24px; color:#d32f2f; font-weight:800">0.00%</span>
+                <span style="font-size:11px; color:#666; font-weight:bold; text-transform:uppercase">Resultado Principal</span><br>
+                <span id="res_valor_final" style="font-size:24px; color:#3483FA; font-weight:800">$ 0,00</span>
             </div>
             <div>
-                <span style="font-size:12px; color:#666; font-weight:bold; text-transform:uppercase">Valor Líquido</span><br>
-                <span id="res_valor_final" style="font-size:28px; color:#3483FA; font-weight:800">$ 0,00</span>
+                <span id="res_taxa_percent" style="font-size:18px; color:#d32f2f; font-weight:800">0.00%</span>
             </div>
         </div>
+        <p style="font-size:11px; color:#999; text-align:center; margin-bottom:15px">Preencha dois campos para calcular o terceiro.</p>
         <div class="grid-taxas" style="grid-template-columns: 1fr;">
-            <span>Bruto: <input id="calc_valor_op" type="number" oninput="calcularDescobreTaxa('valor')"></span>
-            <span>Recebido: <input id="calc_valor_rec" type="number" oninput="calcularDescobreTaxa('recebido')"></span>
-            <span>Taxa direta %: <input id="calc_taxa_perc" type="number" oninput="calcularDescobreTaxa('taxa')"></span>
+            <span><label>Valor Bruto (Passar no cartão)</label> <input id="calc_valor_op" type="number" oninput="calcularDescobreTaxa('valor')"></span>
+            <span><label>Valor Líquido (Receber na conta)</label> <input id="calc_valor_rec" type="number" oninput="calcularDescobreTaxa('recebido')"></span>
+            <span><label>Taxa Direta (%)</label> <input id="calc_taxa_perc" type="number" oninput="calcularDescobreTaxa('taxa')"></span>
         </div>
     </div>
     
@@ -200,7 +198,7 @@
     <div id="rel_grafico_box" style="text-align:center; margin-top:25px"><img id="img_grafico" style="max-width:100%; border-radius:15px; border: 1px solid #eee"></div>
     <div id="rel_info_adicional" style="margin-top:25px; font-size:14px; white-space:pre-line; border-left:5px solid #FFE600; padding-left:15px; line-height:1.6"></div>
     <div style="font-size:12px; color:#777; margin-top:40px; border-top:1px solid #eee; padding-top:20px; text-align:justify">
-        <p><b>Sobre o Cofrinho:</b> Projeção baseada em aportes mensais fixos. Até R$ 10.000,00 rende o percentual alvo do CDI. Acima desse valor, rende 100% do CDI. Valores líquidos de IRPF.</p>
+        <p><b>Sobre o Cofrinho:</b> Projeção baseada em aportes mensais fixos. Valores líquidos de IRPF.</p>
         <p><b>Desenvolvido por Marcos Daniel.</b></p>
     </div>
 </div>
